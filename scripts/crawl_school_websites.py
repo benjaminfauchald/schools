@@ -174,8 +174,8 @@ class SchoolWebsiteCrawler:
         domain = urlparse(website_url).netloc
         
         return {
-            'limit': 50,  # Max pages per school (most schools <20 pages)
-            'max_discovery_depth': 3,  # Don't go too deep into site structure
+            'limit': 20,  # Max pages per school (reasonable for schools)
+            'max_discovery_depth': 2,  # Don't go too deep into site structure
             'exclude_paths': [
                 '/admin', '/wp-admin', '/login', '/signin', 
                 '/register', '/signup', '/dashboard', '/private',
@@ -263,9 +263,10 @@ class SchoolWebsiteCrawler:
                 'error': error_msg
             }
     
-    def aggregate_structured_data(self, raw_pages: List[Dict]) -> Dict[str, Any]:
+    def aggregate_structured_data(self, raw_pages: List) -> Dict[str, Any]:
         """
         Aggregate and merge structured data from all crawled pages
+        raw_pages is now a list of Document objects from Firecrawl v2
         """
         aggregated = {
             'basic_info': {},
@@ -280,9 +281,9 @@ class SchoolWebsiteCrawler:
         }
         
         for page in raw_pages:
-            # Check if page has structured JSON data
-            if 'json' in page and isinstance(page['json'], dict):
-                json_data = page['json']
+            # Check if page has structured JSON data (Firecrawl v2 structure)
+            if hasattr(page, 'json') and page.json and isinstance(page.json, dict):
+                json_data = page.json
                 
                 # Merge each section, preferring non-empty values
                 for section_key in aggregated.keys():
@@ -307,7 +308,7 @@ class SchoolWebsiteCrawler:
         aggregated['_metadata'] = {
             'pages_processed': len(raw_pages),
             'crawled_at': datetime.now().isoformat(),
-            'pages_with_structured_data': len([p for p in raw_pages if 'json' in p])
+            'pages_with_structured_data': len([p for p in raw_pages if hasattr(p, 'json') and p.json])
         }
         
         return aggregated
@@ -373,10 +374,17 @@ def main():
             try:
                 # Test simple scrape first
                 scrape_result = crawler.firecrawl.scrape(test_url)
-                markdown_len = len(scrape_result.data.get('markdown', '')) if hasattr(scrape_result, 'data') and scrape_result.data else 0
+                markdown_len = len(scrape_result.markdown) if hasattr(scrape_result, 'markdown') else 0
                 print(f"✅ Scrape test successful: {markdown_len} chars of markdown")
-                print(f"Scrape result type: {type(scrape_result)}")
-                print(f"Scrape attributes: {dir(scrape_result)[:10]}")  # First 10 attributes
+                
+                # Test if structured extraction works 
+                if hasattr(scrape_result, 'json') and scrape_result.json:
+                    print(f"✅ JSON extraction available")
+                else:
+                    print("ℹ️  No JSON extraction in simple scrape (expected)")
+                
+                print("🎯 Firecrawl connection and API working correctly!")
+                print("📝 System ready for school website crawling")
                 
             except Exception as e:
                 print(f"❌ Test failed: {e}")

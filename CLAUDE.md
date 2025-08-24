@@ -6,6 +6,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Ruby on Rails 8.0.2 application for managing OpenStreetMap (OSM) geographic data, specifically focusing on points of interest in Bangkok including schools and amenities. The application integrates with Google Places API to enrich OSM data and uses PostGIS for spatial database operations.
 
+
+
+  Backup Usage Examples:
+
+  # Restore latest backup
+  rails data:backup
+
+  # Restore latest backup
+  rails data:restore
+
+  # Restore specific backup
+  rails data:restore_from[schools_development_20250824_150351.sql]
+
+  # List available backups
+  rails data:list_backups
+
+  # Create backup before restore
+  rails data:backup
+
+
+
+Now working:
+
+  - ✅ ViewComponent previews are accessible at
+  /rails/view_components
+  - ✅ ExampleComponent is loaded and available
+  - ✅ Preview shows Flowbite-styled card component
+  - ✅ Component generation works with bin/rails generate
+  view_component:component
+  - ✅ Preview generation works with bin/rails generate
+  view_component:preview
+
+
 ## Development Commands
 
 ### Setup

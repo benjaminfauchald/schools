@@ -43,3 +43,7 @@
 2025-08-24 22:06:35,254 - INFO - 🔍 Starting crawl for https://www.bis.ac.th
 2025-08-24 22:07:13,419 - ERROR - 💥 Exception during crawl: 'CrawlJob' object has no attribute 'success' for https://www.bis.ac.th
 2025-08-24 22:08:00,600 - INFO - 🔍 Starting crawl for https://www.bis.ac.th
+2025-08-24 22:18:56,042 - INFO - 🔍 Starting crawl for https://example.com
+2025-08-24 22:19:41,395 - INFO - 🔍 Starting crawl for https://example.com
+2025-08-24 22:21:14,496 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 22:34:13,330 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/

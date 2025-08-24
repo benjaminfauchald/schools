@@ -3,6 +3,13 @@ Rails.application.routes.draw do
   namespace :admin do
       resources :places
       resources :points
+      resources :schools
+      resources :media_items
+      resources :events
+      resources :travel_times
+      resources :school_claims
+      resources :school_fee_schedules
+      resources :school_grade_offerings
 
       root to: "places#index"
     end
