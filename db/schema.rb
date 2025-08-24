@@ -10,24 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_23_164856) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_24_064811) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "postgis"
-
-  create_table "active_admin_comments", force: :cascade do |t|
-    t.string "namespace"
-    t.text "body"
-    t.string "resource_type"
-    t.bigint "resource_id"
-    t.string "author_type"
-    t.bigint "author_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["author_type", "author_id"], name: "index_active_admin_comments_on_author"
-    t.index ["namespace"], name: "index_active_admin_comments_on_namespace"
-    t.index ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource"
-  end
 
   create_table "admin_users", force: :cascade do |t|
     t.string "email"
@@ -129,13 +115,48 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_23_164856) do
     t.boolean "wheelchair", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "shop"
+    t.string "tourism"
+    t.string "leisure"
+    t.string "office"
+    t.string "craft"
+    t.string "healthcare"
+    t.string "emergency"
+    t.string "public_transport"
+    t.string "name_en"
+    t.string "name_th"
+    t.string "alt_name"
+    t.string "official_name"
+    t.text "opening_hours"
+    t.string "highway"
+    t.string "railway"
+    t.string "aeroway"
+    t.string "waterway"
+    t.string "natural"
+    t.string "landuse"
+    t.string "building"
+    t.integer "building_levels"
+    t.string "cuisine"
+    t.string "brand"
+    t.string "network"
+    t.integer "ele"
     t.index ["addr_city"], name: "index_points_on_addr_city"
     t.index ["addr_district"], name: "index_points_on_addr_district"
     t.index ["amenity"], name: "index_points_on_amenity"
+    t.index ["brand"], name: "index_points_on_brand"
+    t.index ["building"], name: "index_points_on_building"
+    t.index ["cuisine"], name: "index_points_on_cuisine"
+    t.index ["highway"], name: "index_points_on_highway"
     t.index ["lat", "lon"], name: "index_points_on_lat_and_lon"
+    t.index ["leisure"], name: "index_points_on_leisure"
+    t.index ["name_en"], name: "index_points_on_name_en"
+    t.index ["name_th"], name: "index_points_on_name_th"
+    t.index ["natural"], name: "index_points_on_natural"
     t.index ["operator_type"], name: "index_points_on_operator_type"
     t.index ["osm_id"], name: "index_points_on_osm_id", unique: true
     t.index ["school_type"], name: "index_points_on_school_type"
+    t.index ["shop"], name: "index_points_on_shop"
+    t.index ["tourism"], name: "index_points_on_tourism"
     t.index ["way"], name: "index_points_on_way", using: :gist
   end
 
