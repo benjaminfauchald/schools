@@ -16,7 +16,45 @@ begin
   record_ids = cleanup_data['record_ids']
   created_at = cleanup_data['created_at']
   
-  puts "📅 Cleaning up test data created on: #{created_at}"
+  puts "📅 Test data created on: #{created_at}"
+  
+  # 🛡️ SAFETY CHECK: Follow CLAUDE.md protection rules
+  puts "⚠️  WARNING: About to delete test data"
+  
+  # Count records to be deleted
+  total_records = 0
+  record_ids.each do |model, ids|
+    total_records += ids&.size || 0
+  end
+  
+  puts "Records to delete: #{total_records} total"
+  puts "Breakdown:"
+  record_ids.each do |model, ids|
+    next unless ids&.any?
+    puts "  - #{model}: #{ids.size} records"
+  end
+  puts ""
+  
+  # Show sample records
+  puts "Sample records to be deleted:"
+  if record_ids['places']&.any?
+    Place.where(id: record_ids['places']).limit(3).each do |place|
+      puts "  - Place: #{place.name}"
+    end
+  end
+  if record_ids['schools']&.any?
+    School.where(id: record_ids['schools']).limit(3).each do |school|
+      puts "  - School: #{school.name}"
+    end
+  end
+  puts ""
+  
+  print "Continue? Type 'DELETE CONFIRMED' to proceed: "
+  confirmation = STDIN.gets.chomp
+  unless confirmation == 'DELETE CONFIRMED'
+    puts "❌ Operation cancelled - test data preserved"
+    exit
+  end
   
   # Clean up in reverse dependency order to avoid foreign key constraints
   

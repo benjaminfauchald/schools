@@ -83,7 +83,7 @@ bin/rails generate view_component:preview [ComponentName]   # Generate component
 ### Component Architecture
 - **ViewComponent**: Components stored in `app/components/` directory
 - Component previews available in development at `/rails/view_components`
-- Preview files located in `spec/components/previews/`
+- Preview files located in `test/components/previews/`
 - Components follow Rails conventions with `.rb` class and `.html.erb` template
 - ViewComponent engine mounted at `/rails/view_components` in development only
 
@@ -147,6 +147,117 @@ config/initializers/view_component.rb  # ViewComponent configuration
 - JavaScript initialization handled automatically via importmap
 - Custom Tailwind classes can extend Flowbite components
 - Charts and interactive components enabled in configuration
+
+## ⚠️ CRITICAL DATABASE PROTECTION RULES ⚠️
+
+### 🛡️ **NEVER DELETE CORE DATA MODELS**
+
+**ABSOLUTELY FORBIDDEN OPERATIONS:**
+- `Place.delete_all` or `Place.destroy_all` 
+- `Point.delete_all` or `Point.destroy_all`
+- `School.delete_all` or `School.destroy_all` (unless explicitly confirmed test data)
+- Any bulk deletion of Places, Points, or Schools without explicit user confirmation
+- Dropping or truncating places, points, or schools tables
+- Running destructive migrations without backups
+
+**BEFORE ANY DATA DELETION:**
+1. **ALWAYS create a database backup first**: `bin/rails data:backup` 
+2. **Ask the user explicitly** for confirmation before deleting ANY Places or Points data
+3. **Use targeted deletion only** - never delete all records from core models
+4. **Show exact count** of records that would be deleted before proceeding
+
+### 📋 **REQUIRED SAFETY CHECKS**
+
+**For any task involving data deletion:**
+```ruby
+# ✅ REQUIRED PATTERN - Always check first
+puts "⚠️  WARNING: About to delete data"
+puts "Records to delete: #{records_to_delete.count}"  
+puts "Sample records:"
+records_to_delete.limit(3).each { |r| puts "  - #{r.name || r.id}" }
+puts ""
+print "Continue? Type 'DELETE CONFIRMED' to proceed: "
+confirmation = STDIN.gets.chomp
+unless confirmation == 'DELETE CONFIRMED'
+  puts "❌ Operation cancelled"
+  exit
+end
+```
+
+**For cleanup tasks:**
+- Always implement `--dry-run` mode first
+- Show detailed preview of what would be deleted
+- Require explicit confirmation for actual deletion
+- Create backups before destructive operations
+
+### 🔒 **DATABASE BACKUP REQUIREMENTS**
+
+**Before ANY destructive operation:**
+```bash
+# Create timestamped backup
+bin/rails data:backup
+```
+
+**Backup should be created for:**
+- Any rake task that deletes data
+- Schema changes
+- Data migrations  
+- Bulk updates to core models
+
+### 🏷️ **TEST DATA IDENTIFICATION**
+
+**Safe test data deletion only when:**
+- Records have explicit `test_data: true` markers in JSON fields
+- Records have test-specific naming patterns (e.g., "Test School Campus YYYY_MM_DD")
+- Records are in dedicated test namespaces
+- User has confirmed these are test records
+
+**Never assume data is "test data" based on:**
+- Creation date alone
+- Similar naming patterns
+- Bulk creation patterns
+- Database seeding operations
+
+### 🚨 **EMERGENCY RECOVERY**
+
+**If data is accidentally deleted:**
+1. Immediately stop all operations
+2. Check `/tmp/backups/` for recent backups
+3. Restore from most recent backup before deletion:
+   ```bash
+   psql schools_development < /tmp/backups/latest_backup.sql
+   ```
+4. Notify user of recovery status
+
+### 🧪 **SAFE DEVELOPMENT PATTERNS**
+
+**For rake tasks that modify data:**
+```ruby
+# ✅ SAFE PATTERN
+task cleanup_test_data: :environment do
+  # 1. Create backup first
+  puts "📄 Creating backup before cleanup..."
+  system('bin/rails data:backup')
+  
+  # 2. Show what will be deleted
+  test_records = Model.where("test_condition")
+  puts "⚠️  Will delete #{test_records.count} test records"
+  test_records.limit(3).each { |r| puts "  - #{r.name}" }
+  
+  # 3. Require explicit confirmation
+  print "Type 'DELETE CONFIRMED' to proceed: "
+  confirmation = STDIN.gets.chomp
+  unless confirmation == 'DELETE CONFIRMED'
+    puts "❌ Operation cancelled"
+    exit
+  end
+  
+  # 4. Proceed with deletion
+  test_records.destroy_all
+end
+```
+
+---
 
 ## Important Notes
 

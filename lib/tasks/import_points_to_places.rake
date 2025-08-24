@@ -210,8 +210,8 @@ namespace :data do
       puts "   Total Places created: #{places_created}"
       puts "   Schools with Google data: #{schools_with_places}"
       puts "   Average rating: #{Place.where.not(rating: nil).average(:rating)&.round(2)}"
-      puts "   Places with reviews: #{Place.where.not(reviews: [nil, '[]']).count}"
-      puts "   Places with photos: #{Place.where.not(photos: [nil, '[]']).count}"
+      puts "   Places with reviews: #{Place.where("reviews IS NOT NULL AND reviews::text != '[]'").count}"
+      puts "   Places with photos: #{Place.where("photos IS NOT NULL AND photos::text != '[]'").count}"
       puts "🎉" * 20
     end
     

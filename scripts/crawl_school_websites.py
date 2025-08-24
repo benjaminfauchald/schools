@@ -175,8 +175,13 @@ class SchoolWebsiteCrawler:
         
         return {
             'limit': 50,  # Max pages per school (most schools <20 pages)
-            'maxDiscoveryDepth': 3,  # Don't go too deep into site structure
-            'scrapeOptions': {
+            'max_discovery_depth': 3,  # Don't go too deep into site structure
+            'exclude_paths': [
+                '/admin', '/wp-admin', '/login', '/signin', 
+                '/register', '/signup', '/dashboard', '/private',
+                '/staff-only', '/internal'
+            ],  # Skip admin and private areas
+            'scrape_options': {
                 'formats': [
                     'markdown',
                     {
@@ -184,18 +189,13 @@ class SchoolWebsiteCrawler:
                         'schema': self.school_schema
                     }
                 ],
-                'onlyMainContent': True,
-                'maxAge': 86400000,  # 24-hour cache (1 day)
-                'waitFor': 3000,  # Wait 3 seconds for dynamic content
-                'removeBase64Images': True  # Reduce payload size
+                'only_main_content': True,
+                'wait_for': 3000,  # Wait 3 seconds for dynamic content
+                'remove_base64_images': True  # Reduce payload size
             },
-            'allowedDomains': [domain],  # Stay on school website only
-            'deduplicateSimilarURLs': True,  # Avoid duplicate content
-            'excludePaths': [
-                '/admin', '/wp-admin', '/login', '/signin', 
-                '/register', '/signup', '/dashboard', '/private',
-                '/staff-only', '/internal'
-            ]  # Skip admin and private areas
+            'allow_subdomains': False,  # Stay on main domain only
+            'allow_external_links': False,  # Don't follow external links
+            'delay': 1  # 1 second delay between requests to be respectful
         }
     
     def crawl_school_website(self, website_url: str, school_id: Optional[int] = None) -> Dict[str, Any]:
@@ -216,24 +216,25 @@ class SchoolWebsiteCrawler:
             
             # Start crawl job
             crawl_options = self.get_crawl_options(website_url)
-            crawl_result = self.firecrawl.crawl_url(
+            crawl_job = self.firecrawl.crawl(
                 url=website_url,
-                params=crawl_options
+                **crawl_options
             )
             
-            if not crawl_result.get('success'):
-                error_msg = crawl_result.get('error', 'Unknown crawl error')
+            # Check if crawl job completed successfully 
+            if not hasattr(crawl_job, 'data') or crawl_job.data is None:
+                error_msg = getattr(crawl_job, 'error', 'Crawl job failed to return data')
                 logging.error(f"❌ Crawl failed for {website_url}: {error_msg}")
                 return {
                     'success': False,
                     'pages_found': 0,
                     'raw_data': [],
                     'structured_data': {},
-                    'error': error_msg
+                    'error': str(error_msg)
                 }
             
             # Extract data from crawl results
-            raw_pages = crawl_result.get('data', [])
+            raw_pages = crawl_job.data or []
             pages_found = len(raw_pages)
             
             logging.info(f"📄 Found {pages_found} pages for {website_url}")
@@ -365,12 +366,20 @@ def main():
     
     try:
         if args.test:
-            # Test with a known school website
-            test_url = "https://www.bis.ac.th"  # Bangkok International School
-            print(f"🧪 Testing with {test_url}")
+            # Test with a simple scrape first to verify connection
+            test_url = "https://example.com"  # Simple test URL
+            print(f"🧪 Testing Firecrawl connection with {test_url}")
             
-            result = crawler.crawl_school_website(test_url)
-            print(f"✅ Test result: {json.dumps(result, indent=2)}")
+            try:
+                # Test simple scrape first
+                scrape_result = crawler.firecrawl.scrape(test_url)
+                markdown_len = len(scrape_result.data.get('markdown', '')) if hasattr(scrape_result, 'data') and scrape_result.data else 0
+                print(f"✅ Scrape test successful: {markdown_len} chars of markdown")
+                print(f"Scrape result type: {type(scrape_result)}")
+                print(f"Scrape attributes: {dir(scrape_result)[:10]}")  # First 10 attributes
+                
+            except Exception as e:
+                print(f"❌ Test failed: {e}")
             
         elif args.website:
             # Crawl specific website

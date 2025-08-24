@@ -1,0 +1,45 @@
+2025-08-24 21:58:15,549 - INFO - 🔍 Starting crawl for https://www.bis.ac.th
+2025-08-24 21:58:15,549 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.bis.ac.th
+2025-08-24 21:58:19,266 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 21:58:19,266 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for http://www.australianisb.ac.th/
+2025-08-24 21:58:24,576 - INFO - 🔍 Starting crawl for http://www.rd.ac.th/
+2025-08-24 21:58:24,576 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for http://www.rd.ac.th/
+2025-08-24 21:58:42,381 - INFO - 🔍 Starting crawl for https://www.bis.ac.th
+2025-08-24 21:58:42,381 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.bis.ac.th
+2025-08-24 21:58:46,138 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 21:58:46,138 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for http://www.australianisb.ac.th/
+2025-08-24 21:58:51,414 - INFO - 🔍 Starting crawl for http://www.rd.ac.th/
+2025-08-24 21:58:51,414 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for http://www.rd.ac.th/
+2025-08-24 21:58:56,719 - INFO - 🔍 Starting crawl for https://www.facebook.com/klongpaklak?mibextid=ZbWKwL
+2025-08-24 21:58:56,719 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.facebook.com/klongpaklak?mibextid=ZbWKwL
+2025-08-24 21:59:12,027 - INFO - 🔍 Starting crawl for https://th168.pro/
+2025-08-24 21:59:12,027 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://th168.pro/
+2025-08-24 21:59:17,324 - INFO - 🔍 Starting crawl for http://www.chaengron.ac.th/
+2025-08-24 21:59:17,324 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for http://www.chaengron.ac.th/
+2025-08-24 21:59:22,629 - INFO - 🔍 Starting crawl for https://web.facebook.com/watchangronschool
+2025-08-24 21:59:22,630 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://web.facebook.com/watchangronschool
+2025-08-24 21:59:37,951 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100068992132162&mibextid=ZbWKwL
+2025-08-24 21:59:37,951 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.facebook.com/profile.php?id=100068992132162&mibextid=ZbWKwL
+2025-08-24 21:59:43,256 - INFO - 🔍 Starting crawl for https://www.facebook.com/Amnuayvid
+2025-08-24 21:59:43,258 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.facebook.com/Amnuayvid
+2025-08-24 21:59:48,559 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100092303633081&mibextid=ZbWKwL
+2025-08-24 21:59:48,559 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.facebook.com/profile.php?id=100092303633081&mibextid=ZbWKwL
+2025-08-24 22:00:03,875 - INFO - 🔍 Starting crawl for http://www.watyai-school.ac.th/
+2025-08-24 22:00:03,875 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for http://www.watyai-school.ac.th/
+2025-08-24 22:00:09,172 - INFO - 🔍 Starting crawl for https://www.facebook.com/Matthayomwatmaisamutkitwittayakom?mibextid=ZbWKwL
+2025-08-24 22:00:09,173 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.facebook.com/Matthayomwatmaisamutkitwittayakom?mibextid=ZbWKwL
+2025-08-24 22:00:14,480 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100057725587308&mibextid=ZbWKwL
+2025-08-24 22:00:14,480 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.facebook.com/profile.php?id=100057725587308&mibextid=ZbWKwL
+2025-08-24 22:00:29,840 - INFO - 🔍 Starting crawl for https://www.facebook.com/watwijittrakannimit?mibextid=ZbWKwL
+2025-08-24 22:00:29,840 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.facebook.com/watwijittrakannimit?mibextid=ZbWKwL
+2025-08-24 22:00:35,177 - INFO - 🔍 Starting crawl for https://www.facebook.com/WattanodeSchool?mibextid=ZbWKwL
+2025-08-24 22:00:35,177 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.facebook.com/WattanodeSchool?mibextid=ZbWKwL
+2025-08-24 22:00:40,515 - INFO - 🔍 Starting crawl for http://www.ps.ac.th/
+2025-08-24 22:00:40,515 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for http://www.ps.ac.th/
+2025-08-24 22:01:33,547 - INFO - 🔍 Starting crawl for https://www.bis.ac.th
+2025-08-24 22:01:33,548 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for https://www.bis.ac.th
+2025-08-24 22:01:53,980 - INFO - 🔍 Starting crawl for https://www.bis.ac.th
+2025-08-24 22:01:53,981 - ERROR - 💥 Exception during crawl: FirecrawlClient.crawl() got an unexpected keyword argument 'params' for https://www.bis.ac.th
+2025-08-24 22:06:35,254 - INFO - 🔍 Starting crawl for https://www.bis.ac.th
+2025-08-24 22:07:13,419 - ERROR - 💥 Exception during crawl: 'CrawlJob' object has no attribute 'success' for https://www.bis.ac.th
+2025-08-24 22:08:00,600 - INFO - 🔍 Starting crawl for https://www.bis.ac.th
