@@ -11,7 +11,26 @@ Rails.application.routes.draw do
   
   # Root route for landing page
   root 'application#index'
+  
+  # Onboarding flow
+  get 'onboarding', to: 'onboarding#index'
+  post 'onboarding/complete', to: 'onboarding#complete'
 
+  # Location management endpoints
+  namespace :api do
+    namespace :v1 do
+      post 'location/validate', to: 'location#validate'
+      post 'location/geocode', to: 'location#geocode'
+      get 'places/nearby', to: 'places#nearby'
+    end
+  end
+
+  # Public places routes
+  resources :places, only: [:show]
+
+  # Settings page for location management
+  get 'settings', to: 'settings#index'
+  patch 'settings/location', to: 'settings#update_location'
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

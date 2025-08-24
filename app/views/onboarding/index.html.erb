@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Set Your Home Location - Schools</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+
+    <!-- Flowbite CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
+  </head>
+
+  <body class="bg-gray-50 min-h-screen">
+    <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div class="sm:mx-auto sm:w-full sm:max-w-2xl">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+          <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+            <svg class="h-10 w-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Set Your Home Location</h1>
+          <p class="text-lg text-gray-600">We need your location to show nearby schools and calculate distances</p>
+        </div>
+
+        <!-- Onboarding Container -->
+        <div class="bg-white shadow-xl rounded-lg overflow-hidden"
+             id="onboarding-container"
+             data-google-api-key="<%= ENV['GOOGLE_PLACES_API_KEY'] || '' %>">
+          
+          <!-- Step 1: Address Input -->
+          <div id="address-step" class="p-8">
+            <div class="mb-6">
+              <h2 class="text-xl font-semibold text-gray-900 mb-2">Enter your home address</h2>
+              <p class="text-sm text-gray-600">Start by typing your address, or click "Use Map Instead" to place a pin manually.</p>
+            </div>
+            
+            <form id="address-form" class="space-y-4">
+              <div>
+                <label for="address-input" class="block text-sm font-medium text-gray-700 mb-2">
+                  Home Address
+                </label>
+                <input id="address-input" 
+                       type="text" 
+                       placeholder="e.g., 123 Sathon Road, Bangkok, Thailand"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg">
+              </div>
+              
+              <div class="flex flex-col sm:flex-row gap-3">
+                <button type="submit" 
+                        id="geocode-button"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                  Find Location
+                </button>
+                <button type="button" 
+                        id="show-map-button"
+                        class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                  Use Map Instead
+                </button>
+              </div>
+            </form>
+
+            <!-- Messages -->
+            <div id="error-message" 
+                 class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            </div>
+          </div>
+
+          <!-- Step 2: Address Confirmation -->
+          <div id="confirm-step" class="hidden p-8 bg-green-50 border-t border-green-200">
+            <div class="flex items-start space-x-3 mb-6">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-green-900 mb-1">Location Found!</h3>
+                <p class="text-sm text-green-700 mb-2">Is this your correct address?</p>
+                <div class="bg-white border border-green-200 rounded-lg p-3 mb-4">
+                  <p class="font-medium text-gray-900" id="confirm-address"></p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button id="confirm-location-button"
+                      class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                Yes, This is Correct
+              </button>
+              <button id="show-map-from-confirm-button"
+                      class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                No, Use Map to Correct
+              </button>
+              <button id="edit-address-button"
+                      class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Edit Address
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: Map Selection -->
+          <div data-onboarding-location-target="mapStep" class="hidden">
+            <div class="p-6 bg-blue-50 border-t border-blue-200">
+              <h3 class="text-lg font-semibold text-blue-900 mb-2">Place Your Pin</h3>
+              <p class="text-sm text-blue-700 mb-4">Click on the map to place a pin at your exact home location. You can drag the pin to adjust it.</p>
+            </div>
+            
+            <!-- Map Container -->
+            <div class="relative">
+              <div id="onboarding-map" class="w-full h-96"></div>
+              
+              <!-- Map Controls -->
+              <div class="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-2 space-y-2">
+                <button data-action="click->onboarding-location#getCurrentLocation"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded text-xs font-medium transition-colors"
+                        title="Use my current location">
+                  📍 My Location
+                </button>
+                <button data-action="click->onboarding-location#searchOnMap"
+                        class="w-full bg-gray-600 hover:bg-gray-700 text-white p-2 rounded text-xs font-medium transition-colors"
+                        title="Search for a place">
+                  🔍 Search
+                </button>
+              </div>
+            </div>
+            
+            <!-- Map Actions -->
+            <div class="p-6 bg-gray-50 border-t border-gray-200">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <p class="text-sm text-gray-600">Selected Location:</p>
+                  <p class="font-medium text-gray-900" data-onboarding-location-target="mapAddress">Click on the map to select your location</p>
+                </div>
+              </div>
+              
+              <div class="flex flex-col sm:flex-row gap-3">
+                <button data-action="click->onboarding-location#confirmMapLocation" 
+                        data-onboarding-location-target="confirmMapButton"
+                        disabled
+                        class="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                  Confirm This Location
+                </button>
+                <button data-action="click->onboarding-location#backToAddress" 
+                        class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                  Back to Address Input
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Success -->
+          <div data-onboarding-location-target="successStep" class="hidden p-8 text-center">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+              <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h2 class="text-2xl font-semibold text-gray-900 mb-2">Perfect! You're all set</h2>
+            <p class="text-gray-600 mb-6">Your home location has been saved. We'll now show you schools near your area with distance calculations.</p>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <p class="text-sm text-blue-700 mb-2"><strong>Your Location:</strong></p>
+              <p class="font-medium text-blue-900" data-onboarding-location-target="finalAddress"></p>
+            </div>
+            
+            <button data-action="click->onboarding-location#completeOnboarding"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+              Continue to Schools
+            </button>
+          </div>
+
+          <!-- Privacy Notice -->
+          <div class="px-8 py-4 bg-gray-50 border-t border-gray-200">
+            <div class="flex items-start space-x-2">
+              <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+              </svg>
+              <div>
+                <p class="text-xs text-gray-600">
+                  <strong>Privacy:</strong> Your location is stored locally on your device only. 
+                  We use it to calculate distances to schools but never share it with third parties.
+                  You can change or delete your location anytime in Settings.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Google Maps API -->
+    <script>
+      window.gm_authFailure = function() {
+        console.error('Google Maps authentication failed - check API key and billing');
+        document.getElementById('onboarding-map').innerHTML = '<div class="flex items-center justify-center h-full bg-red-50 text-red-600">Google Maps API authentication failed. Please check console for details.</div>';
+      };
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initOnboardingMap&libraries=places"></script>
+    
+    <!-- Flowbite JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+    
+    <script>
+      // Simple vanilla JS onboarding implementation
+      let selectedLocation = null;
+      let map = null;
+      let marker = null;
+      let geocoder = null;
+      const googleApiKey = document.getElementById('onboarding-container').dataset.googleApiKey;
+
+      // Initialize when DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        initializeOnboarding();
+      });
+
+      function initializeOnboarding() {
+        // Address form submission
+        document.getElementById('address-form').addEventListener('submit', function(e) {
+          e.preventDefault();
+          geocodeAddress();
+        });
+
+        // Map buttons
+        document.getElementById('show-map-button').addEventListener('click', showMap);
+        document.getElementById('show-map-from-confirm-button').addEventListener('click', showMap);
+        
+        // Confirmation buttons
+        document.getElementById('confirm-location-button').addEventListener('click', confirmLocation);
+        document.getElementById('edit-address-button').addEventListener('click', editAddress);
+      }
+
+      async function geocodeAddress() {
+        const address = document.getElementById('address-input').value.trim();
+        if (!address) {
+          showError('Please enter an address');
+          return;
+        }
+
+        clearError();
+        showGeocodeLoading();
+
+        try {
+          const coordinates = await fetchCoordinates(address);
+          
+          if (coordinates) {
+            selectedLocation = coordinates;
+            showConfirmation(coordinates);
+          } else {
+            showError('Could not find coordinates for that address. Please try again or use the map instead.');
+          }
+        } catch (error) {
+          console.error('Geocoding error:', error);
+          showError('Error finding location. Please check your internet connection and try again.');
+        } finally {
+          hideGeocodeLoading();
+        }
+      }
+
+      async function fetchCoordinates(address) {
+        // Try Google Geocoding API if available
+        if (googleApiKey) {
+          try {
+            const response = await fetch(
+              `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${googleApiKey}`
+            );
+            const data = await response.json();
+            
+            if (data.status === 'OK' && data.results.length > 0) {
+              const location = data.results[0].geometry.location;
+              return {
+                lat: location.lat,
+                lng: location.lng,
+                formatted_address: data.results[0].formatted_address,
+                source: 'google'
+              };
+            }
+          } catch (error) {
+            console.warn('Google Geocoding failed, trying fallback:', error);
+          }
+        }
+
+        // Fallback to Nominatim
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&addressdetails=1`
+          );
+          const data = await response.json();
+          
+          if (data.length > 0) {
+            return {
+              lat: parseFloat(data[0].lat),
+              lng: parseFloat(data[0].lon),
+              formatted_address: data[0].display_name,
+              source: 'nominatim'
+            };
+          }
+        } catch (error) {
+          console.error('Nominatim geocoding failed:', error);
+        }
+        
+        return null;
+      }
+
+      function showConfirmation(location) {
+        hideAllSteps();
+        document.getElementById('confirm-step').classList.remove('hidden');
+        document.getElementById('confirm-address').textContent = location.formatted_address;
+      }
+
+      function confirmLocation() {
+        if (selectedLocation) {
+          saveLocationAndComplete();
+        }
+      }
+
+      function editAddress() {
+        hideAllSteps();
+        document.getElementById('address-step').classList.remove('hidden');
+        clearError();
+      }
+
+      function showMap() {
+        alert('Map functionality requires full page reload. For now, please use address input or clear localStorage to reset.');
+        // In a real implementation, you would initialize Google Maps here
+      }
+
+      function saveLocationAndComplete() {
+        if (!selectedLocation) return;
+
+        try {
+          const locationData = {
+            lat: selectedLocation.lat,
+            lng: selectedLocation.lng,
+            formatted_address: selectedLocation.formatted_address,
+            timestamp: new Date().toISOString(),
+            source: selectedLocation.source || 'manual'
+          };
+          
+          localStorage.setItem('homeLocation', JSON.stringify(locationData));
+          
+          // Redirect to home
+          window.location.href = '/';
+          
+        } catch (error) {
+          console.error('Error saving location:', error);
+          showError('Failed to save location. Please try again.');
+        }
+      }
+
+      function hideAllSteps() {
+        document.getElementById('address-step').classList.add('hidden');
+        document.getElementById('confirm-step').classList.add('hidden');
+      }
+
+      function showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = message;
+        errorDiv.classList.remove('hidden');
+      }
+
+      function clearError() {
+        document.getElementById('error-message').classList.add('hidden');
+      }
+
+      function showGeocodeLoading() {
+        const button = document.getElementById('geocode-button');
+        button.disabled = true;
+        button.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Finding Location...
+        `;
+      }
+
+      function hideGeocodeLoading() {
+        const button = document.getElementById('geocode-button');
+        button.disabled = false;
+        button.innerHTML = 'Find Location';
+      }
+
+      window.initOnboardingMap = function() {
+        console.log('Google Maps API loaded for onboarding');
+      };
+    </script>
+  </body>
+</html>

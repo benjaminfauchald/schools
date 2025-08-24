@@ -1,0 +1,418 @@
+<!-- app/views/application/index.html.erb -->
+<div class="w-full">
+  
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">Welcome to Places</h1>
+    <p class="text-lg text-gray-600 dark:text-gray-400">Discover amazing locations around the world</p>
+  </div>
+  
+  <% if @places&.any? %>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Map Container -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div id="map" class="w-full h-96 lg:h-[500px]"></div>
+        </div>
+      </div>
+      
+      <!-- Place Info Card -->
+      <div class="lg:col-span-1">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 h-fit">
+          <div class="flex items-center mb-4">
+            <svg class="w-6 h-6 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+            </svg>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Places Overview</h2>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Places</span>
+                <span class="text-lg font-bold text-blue-600 dark:text-blue-400"><%= @places.count %></span>
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Showing top-rated locations with successful data
+              </div>
+            </div>
+            
+            <% if @first_place %>
+              <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Featured Place</h3>
+                
+                <div class="space-y-2">
+                  <% if @first_place.respond_to?(:name) && @first_place.name.present? %>
+                    <%= link_to place_path(@first_place), class: "block group" do %>
+                      <h4 class="text-lg font-bold text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 transition-colors cursor-pointer flex items-center">
+                        <%= @first_place.name %>
+                        <svg class="w-4 h-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                      </h4>
+                    <% end %>
+                  <% else %>
+                    <%= link_to place_path(@first_place), class: "block group" do %>
+                      <h4 class="text-lg font-bold text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 transition-colors cursor-pointer flex items-center">
+                        Place #<%= @first_place.id %>
+                        <svg class="w-4 h-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                      </h4>
+                    <% end %>
+                  <% end %>
+                  
+                  <% if @first_place.rating.present? %>
+                    <div class="flex items-center space-x-2">
+                      <div class="text-yellow-400">
+                        <% @first_place.rating.round.times do %>★<% end %>
+                        <% (5 - @first_place.rating.round).times do %>☆<% end %>
+                      </div>
+                      <span class="text-sm text-gray-600 dark:text-gray-400">
+                        <%= number_with_precision(@first_place.rating, precision: 1) %>
+                        <% if @first_place.user_ratings_total.present? %>
+                          (<%= @first_place.user_ratings_total %> reviews)
+                        <% end %>
+                      </span>
+                    </div>
+                  <% end %>
+                  
+                  <% if @first_place.formatted_address.present? %>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      <%= @first_place.formatted_address %>
+                    </p>
+                  <% end %>
+                  
+                  <!-- Distance display (will be populated by JavaScript) -->
+                  <div id="featured-distance" class="hidden mt-2">
+                    <div class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                      </svg>
+                      <span id="featured-distance-text"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+            
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400 italic">
+                Click the featured place title or any marker on the map to see full details
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-8 text-center">
+      <svg class="mx-auto h-12 w-12 text-blue-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      <h3 class="text-lg font-medium text-blue-900 dark:text-blue-100 mb-2">No places yet!</h3>
+      <p class="text-blue-700 dark:text-blue-200 mb-4">Add your first place through the admin panel to see it displayed here.</p>
+      <% if respond_to?(:admin_root_path) %>
+        <a href="<%= admin_root_path %>" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+          </svg>
+          Go to Admin Panel
+        </a>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<% if @places&.any? %>
+  <!-- Google Maps API -->
+  <script>
+    window.gm_authFailure = function() {
+      console.error('Google Maps authentication failed - check API key and billing');
+      document.getElementById('map').innerHTML = '<div class="flex items-center justify-center h-full bg-red-50 text-red-600">Google Maps API authentication failed. Check console for details.</div>';
+    };
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap"></script>
+  
+  <script>
+    let map;
+    let bounds;
+    let infoWindow;
+    let homeLocation = null;
+    
+    // Places data from Rails
+    const places = [
+      <% @places.each_with_index do |place, index| %>
+        {
+          id: <%= place.id %>,
+          lat: <%= place.lat %>,
+          lng: <%= place.lng %>,
+          name: <%= raw place.name.present? ? place.name.to_json : "\"Place ##{place.id}\"" %>,
+          rating: <%= place.rating || 'null' %>,
+          userRatingsTotal: <%= place.user_ratings_total || 'null' %>,
+          formattedAddress: <%= raw place.formatted_address.to_json || 'null' %>,
+          types: <%= raw place.types.to_json || '[]' %>,
+          icon: <%= raw place.icon.to_json || 'null' %>,
+          website: <%= raw place.website.to_json || 'null' %>,
+          phoneNumber: <%= raw place.formatted_phone_number.to_json || 'null' %>,
+          distance: null
+        }<%= index < @places.count - 1 ? ',' : '' %>
+      <% end %>
+    ];
+
+    // Load home location from localStorage
+    function loadHomeLocation() {
+      try {
+        const stored = localStorage.getItem('homeLocation');
+        if (stored) {
+          const location = JSON.parse(stored);
+          // Check if location is not too old (30 days)
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          
+          if (new Date(location.timestamp) > thirtyDaysAgo) {
+            homeLocation = location;
+            calculateDistances();
+            updateDistanceDisplays();
+          }
+        }
+      } catch (error) {
+        console.error("Error loading home location:", error);
+      }
+    }
+
+    // Calculate distances to all places
+    function calculateDistances() {
+      if (!homeLocation) return;
+      
+      places.forEach(place => {
+        place.distance = calculateDistance(
+          homeLocation.lat, homeLocation.lng,
+          place.lat, place.lng
+        );
+      });
+      
+      // Sort places by distance
+      places.sort((a, b) => {
+        if (a.distance === null && b.distance === null) return 0;
+        if (a.distance === null) return 1;
+        if (b.distance === null) return -1;
+        return a.distance - b.distance;
+      });
+    }
+
+    // Calculate distance between two points using Haversine formula
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Radius of the Earth in kilometers
+      const dLat = deg2rad(lat2 - lat1);
+      const dLon = deg2rad(lon2 - lon1);
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const d = R * c;
+      return d;
+    }
+
+    function deg2rad(deg) {
+      return deg * (Math.PI/180);
+    }
+
+    // Format distance for display
+    function formatDistance(distanceKm) {
+      if (distanceKm === null) return "";
+      if (distanceKm < 1) {
+        return `${Math.round(distanceKm * 1000)}m away`;
+      } else {
+        return `${distanceKm.toFixed(1)}km away`;
+      }
+    }
+
+    // Update distance displays in the UI
+    function updateDistanceDisplays() {
+      // Update featured place distance
+      const featuredDistance = document.getElementById('featured-distance');
+      const featuredDistanceText = document.getElementById('featured-distance-text');
+      if (featuredDistance && featuredDistanceText && places.length > 0 && places[0].distance !== null) {
+        featuredDistanceText.textContent = formatDistance(places[0].distance);
+        featuredDistance.classList.remove('hidden');
+      }
+    }
+
+    function initMap() {
+      console.log('initMap called, places count:', places.length);
+      
+      // Load home location and calculate distances
+      loadHomeLocation();
+      
+      // Initialize map
+      map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 10,
+        center: { lat: 0, lng: 0 }, // Will be updated by bounds
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        zoomControl: true,
+        mapTypeControl: true,
+        scaleControl: true,
+        streetViewControl: true,
+        rotateControl: false,
+        fullscreenControl: true
+      });
+
+      // Initialize bounds for auto-scaling
+      bounds = new google.maps.LatLngBounds();
+      infoWindow = new google.maps.InfoWindow();
+
+      // Add home marker if location is available
+      if (homeLocation) {
+        const homeMarker = new google.maps.Marker({
+          position: { lat: homeLocation.lat, lng: homeLocation.lng },
+          map: map,
+          title: 'Your Home',
+          icon: {
+            url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
+          }
+        });
+        
+        // Add home location to bounds
+        bounds.extend({ lat: homeLocation.lat, lng: homeLocation.lng });
+        
+        // Add home info window
+        homeMarker.addListener('click', function() {
+          infoWindow.setContent(`
+            <div class="p-3">
+              <h4 class="font-bold text-lg text-green-600 mb-2">🏠 Your Home</h4>
+              <p class="text-sm text-gray-700">${homeLocation.formatted_address || 'Home Location'}</p>
+            </div>
+          `);
+          infoWindow.open(map, homeMarker);
+        });
+      }
+
+      // Add markers for each place
+      places.forEach(function(place) {
+        const position = { lat: place.lat, lng: place.lng };
+        
+        // Create marker
+        const marker = new google.maps.Marker({
+          position: position,
+          map: map,
+          title: place.name,
+          animation: google.maps.Animation.DROP
+        });
+
+        // Extend bounds to include this marker
+        bounds.extend(position);
+
+        // Create info window content
+        const contentString = createInfoWindowContent(place);
+
+        // Add click listener to marker
+        marker.addListener('click', function() {
+          infoWindow.setContent(contentString);
+          infoWindow.open(map, marker);
+        });
+      });
+
+      // Auto-scale map to fit all markers
+      if (places.length === 1) {
+        // Single marker - center and set reasonable zoom
+        map.setCenter(bounds.getCenter());
+        map.setZoom(15);
+      } else if (places.length > 1) {
+        // Multiple markers - fit bounds with padding
+        map.fitBounds(bounds, {
+          padding: {
+            top: 50,
+            right: 50,
+            bottom: 50,
+            left: 50
+          }
+        });
+      }
+
+      // Optional: Add custom styling
+      const styles = [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'on' }]
+        },
+        {
+          featureType: 'transit.station',
+          elementType: 'labels',
+          stylers: [{ visibility: 'on' }]
+        }
+      ];
+      
+      map.setOptions({ styles: styles });
+    }
+
+    function createInfoWindowContent(place) {
+      let content = `
+        <div class="p-3 min-w-[250px] max-w-[300px]">
+          <h4 class="font-bold text-lg text-blue-600 mb-2">${place.name}</h4>
+      `;
+
+      // Add distance if available
+      if (place.distance !== null) {
+        content += `
+          <div class="bg-green-50 border border-green-200 rounded-md p-2 mb-2">
+            <div class="flex items-center text-green-700">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-sm font-medium">${formatDistance(place.distance)}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // Add rating if available
+      if (place.rating) {
+        const stars = '★'.repeat(Math.round(place.rating)) + '☆'.repeat(5 - Math.round(place.rating));
+        content += `
+          <div class="flex items-center space-x-2 mb-2">
+            <span class="text-yellow-400">${stars}</span>
+            <span class="text-sm text-gray-600">
+              ${place.rating.toFixed(1)}
+              ${place.userRatingsTotal ? `(${place.userRatingsTotal} reviews)` : ''}
+            </span>
+          </div>
+        `;
+      }
+
+      // Add address if available
+      if (place.formattedAddress) {
+        content += `<p class="text-sm text-gray-700 mb-2">${place.formattedAddress}</p>`;
+      }
+
+      // Add contact info if available
+      if (place.phoneNumber || place.website) {
+        content += `<div class="text-xs text-gray-600 border-t pt-2 space-y-1">`;
+        
+        if (place.phoneNumber) {
+          content += `<div><strong>Phone:</strong> ${place.phoneNumber}</div>`;
+        }
+        
+        if (place.website) {
+          content += `<div><strong>Website:</strong> <a href="${place.website}" target="_blank" class="text-blue-500 hover:underline">Visit</a></div>`;
+        }
+        
+        content += `</div>`;
+      }
+
+      content += `</div>`;
+      return content;
+    }
+
+    // Handle map resize
+    window.addEventListener('resize', function() {
+      if (map && bounds) {
+        setTimeout(function() {
+          map.fitBounds(bounds);
+        }, 100);
+      }
+    });
+  </script>
+<% end %>

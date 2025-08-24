@@ -1,0 +1,191 @@
+<!-- Settings Page for Home Location Management -->
+<div class="w-full max-w-2xl mx-auto" data-controller="location">
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    
+    <!-- Header -->
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+      <div class="flex items-center space-x-3">
+        <div class="flex-shrink-0">
+          <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
+          <p class="text-sm text-gray-600">Manage your home location and preferences</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Home Location Display -->
+    <div class="px-6 py-6">
+      <div class="space-y-6">
+        
+        <!-- Current Location Section -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <div class="flex items-start justify-between">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0">
+                <svg class="w-6 h-6 text-blue-600 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-medium text-blue-900 mb-2">Current Home Location</h3>
+                
+                <!-- Location Status (will be populated by JavaScript) -->
+                <div id="current-location-status">
+                  <div id="location-set" class="hidden">
+                    <p class="text-sm text-blue-700 mb-2">
+                      <span class="font-medium">Address:</span>
+                      <span id="current-address"></span>
+                    </p>
+                    <p class="text-xs text-blue-600">
+                      <span class="font-medium">Coordinates:</span>
+                      <span id="current-coordinates"></span>
+                    </p>
+                    <p class="text-xs text-blue-500 mt-2">
+                      Last updated: <span id="last-updated"></span>
+                    </p>
+                  </div>
+                  
+                  <div id="no-location" class="hidden">
+                    <p class="text-sm text-blue-700">
+                      No home location set. Click "Set Home Location" to get started.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4">
+          <button id="change-location-btn" 
+                  onclick="showLocationModal()" 
+                  class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            <div class="flex items-center justify-center space-x-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+              <span id="location-button-text">Set Home Location</span>
+            </div>
+          </button>
+          
+          <button id="clear-location-btn" 
+                  onclick="clearLocation()" 
+                  class="hidden flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+            <div class="flex items-center justify-center space-x-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              <span>Clear Location</span>
+            </div>
+          </button>
+        </div>
+
+        <!-- Information Section -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <h4 class="font-medium text-gray-900 mb-2">About Home Location</h4>
+          <ul class="text-sm text-gray-600 space-y-1">
+            <li>• Your location is stored locally on your device</li>
+            <li>• Used to calculate distances to nearby schools</li>
+            <li>• Location data expires automatically after 30 days</li>
+            <li>• No location data is sent to external servers</li>
+            <li>• You can change or clear your location anytime</li>
+          </ul>
+        </div>
+
+        <!-- Back to Home Link -->
+        <div class="text-center pt-4">
+          <%= link_to root_path, class: "inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span>Back to Home</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Settings Page -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    updateLocationDisplay();
+    
+    // Listen for location updates
+    window.addEventListener('homeLocationSet', updateLocationDisplay);
+    window.addEventListener('homeLocationCleared', updateLocationDisplay);
+  });
+
+  function updateLocationDisplay() {
+    const homeLocation = getStoredHomeLocation();
+    const locationSet = document.getElementById('location-set');
+    const noLocation = document.getElementById('no-location');
+    const changeBtn = document.getElementById('change-location-btn');
+    const clearBtn = document.getElementById('clear-location-btn');
+    const buttonText = document.getElementById('location-button-text');
+    
+    if (homeLocation) {
+      // Show current location
+      locationSet.classList.remove('hidden');
+      noLocation.classList.add('hidden');
+      clearBtn.classList.remove('hidden');
+      buttonText.textContent = 'Change Home Location';
+      
+      // Update location details
+      document.getElementById('current-address').textContent = 
+        homeLocation.formatted_address || 'Address not available';
+      document.getElementById('current-coordinates').textContent = 
+        `${homeLocation.lat.toFixed(6)}, ${homeLocation.lng.toFixed(6)}`;
+      document.getElementById('last-updated').textContent = 
+        new Date(homeLocation.timestamp).toLocaleString();
+    } else {
+      // Show no location state
+      locationSet.classList.add('hidden');
+      noLocation.classList.remove('hidden');
+      clearBtn.classList.add('hidden');
+      buttonText.textContent = 'Set Home Location';
+    }
+  }
+
+  function getStoredHomeLocation() {
+    try {
+      const stored = localStorage.getItem('homeLocation');
+      if (stored) {
+        const location = JSON.parse(stored);
+        // Check if location is not too old (30 days)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        if (new Date(location.timestamp) > thirtyDaysAgo) {
+          return location;
+        }
+      }
+    } catch (error) {
+      console.error("Error reading stored location:", error);
+    }
+    return null;
+  }
+
+  function showLocationModal() {
+    // Redirect to onboarding page for location setting
+    window.location.href = '/onboarding';
+  }
+
+  function clearLocation() {
+    if (confirm('Are you sure you want to clear your home location? You will need to set it again to see distance calculations.')) {
+      localStorage.removeItem('homeLocation');
+      window.dispatchEvent(new CustomEvent('homeLocationCleared'));
+      updateLocationDisplay();
+      
+      // Show success message
+      alert('Home location cleared successfully. You will be prompted to set it again when you return to the main page.');
+    }
+  }
+</script>
