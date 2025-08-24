@@ -1,5 +1,11 @@
+# Place model stores location data from Google Maps API for any type of establishment
+# Serves as the single source of truth for location, contact, and business information
 class Place < ApplicationRecord
   belongs_to :point, optional: true
+  has_one :school, dependent: :destroy
+  has_many :media_items, dependent: :destroy
+  has_many :events, dependent: :destroy
+  has_many :travel_times, dependent: :destroy
   
   # Validations
   validates :place_id, presence: true, uniqueness: true
@@ -10,10 +16,23 @@ class Place < ApplicationRecord
   scope :highly_rated, -> { where('rating >= ?', 4.0) }
   scope :open_now, -> { where("opening_hours->>'open_now' = 'true'") }
   scope :schools, -> { where("'school' = ANY(ARRAY(SELECT json_array_elements_text(types)))") }
+  # Google Maps API compliance scopes (30-day cache limit)
   scope :recently_fetched, -> { where('last_fetched_at > ?', 1.day.ago) }
-  scope :needs_refresh, -> { where('last_fetched_at IS NULL OR last_fetched_at < ?', 1.week.ago) }
+  scope :needs_refresh, -> { where('last_fetched_at IS NULL OR last_fetched_at < ?', 30.days.ago) }
+  scope :google_maps_compliant, -> { where('last_fetched_at IS NULL OR last_fetched_at >= ?', 30.days.ago) }
+  scope :google_maps_expired, -> { where('last_fetched_at < ?', 30.days.ago) }
   scope :successful_fetches, -> { where(api_status: 'OK') }
   scope :failed_fetches, -> { where.not(api_status: 'OK') }
+  
+  # Website crawling scopes
+  scope :with_websites, -> { where.not(website: [nil, '']) }
+  scope :needs_web_crawling, -> { where(website_crawled_at: nil).or(where('website_crawled_at < ?', 30.days.ago)).or(where(website_crawling_status: 'failed')) }
+  scope :web_scraping_expired, -> { where('website_crawled_at < ?', 30.days.ago) }
+  scope :recently_crawled, -> { where('website_crawled_at > ?', 7.days.ago) }
+  scope :successfully_crawled, -> { where(website_crawling_status: 'completed') }
+  scope :failed_crawls, -> { where(website_crawling_status: 'failed') }
+  scope :crawling_in_progress, -> { where(website_crawling_status: 'crawling') }
+  scope :with_structured_data, -> { where.not(website_structured_data: [nil, {}]) }
   
   # Class methods for API data processing
   def self.create_from_google_api(api_response, point = nil)
@@ -75,7 +94,93 @@ class Place < ApplicationRecord
   end
   
   def needs_refresh?
-    last_fetched_at.nil? || last_fetched_at < 1.week.ago
+    last_fetched_at.nil? || last_fetched_at < 30.days.ago
+  end
+
+  def google_maps_compliant?
+    last_fetched_at.nil? || last_fetched_at >= 30.days.ago
+  end
+
+  def days_since_last_fetch
+    return nil if last_fetched_at.nil?
+    (Time.current - last_fetched_at) / 1.day
+  end
+  
+  # Website crawling methods
+  def needs_web_scraping?
+    return false if website.blank?
+    website_crawled_at.nil? || website_crawled_at < 30.days.ago || website_crawling_status == 'failed'
+  end
+  
+  def has_structured_data?
+    website_structured_data.present? && !website_structured_data.empty?
+  end
+  
+  def web_crawl_successful?
+    website_crawling_status == 'completed' && website_crawled_at.present?
+  end
+  
+  def days_since_last_crawl
+    return nil if website_crawled_at.nil?
+    (Time.current - website_crawled_at) / 1.day
+  end
+  
+  def website_crawl_status_display
+    case website_crawling_status
+    when 'completed' then "✅ Completed (#{website_pages_found || 0} pages)"
+    when 'failed' then "❌ Failed: #{website_crawling_error&.truncate(50)}"
+    when 'crawling' then "🔄 In Progress"
+    else "⏳ Pending"
+    end
+  end
+  
+  def structured_data_summary
+    return "No data" unless has_structured_data?
+    
+    sections = website_structured_data.keys.count { |k| !k.start_with?('_') && website_structured_data[k].present? }
+    "#{sections} sections with data"
+  end
+  
+  # Distance calculation using PostGIS
+  def distance_from(origin_lat, origin_lng)
+    return nil unless lat.present? && lng.present?
+    
+    # Using PostGIS ST_Distance for geography calculations (returns meters)
+    result = self.class.connection.select_value(
+      "SELECT ST_Distance(ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography)",
+      lng, lat, origin_lng, origin_lat
+    )
+    result&.to_f
+  end
+  
+  # Class method to check Google Maps API compliance percentage
+  def self.google_maps_compliance_percentage
+    total = count
+    return 0 if total == 0
+    
+    compliant = google_maps_compliant.count
+    (compliant.to_f / total * 100).round(1)
+  end
+  
+  # Class method to check website crawling statistics
+  def self.website_crawling_stats
+    total_with_websites = with_websites.count
+    return { total: 0, crawled: 0, success_rate: 0, pages_avg: 0 } if total_with_websites == 0
+    
+    crawled = with_websites.where.not(website_crawled_at: nil).count
+    successful = with_websites.successfully_crawled.count
+    failed = with_websites.failed_crawls.count
+    avg_pages = with_websites.where.not(website_pages_found: nil).average(:website_pages_found)&.round(1) || 0
+    
+    {
+      total_with_websites: total_with_websites,
+      crawled: crawled,
+      successful: successful,
+      failed: failed,
+      success_rate: total_with_websites > 0 ? (successful.to_f / total_with_websites * 100).round(1) : 0,
+      pages_avg: avg_pages,
+      needs_crawling: with_websites.needs_web_crawling.count
+    }
   end
   
   def phone_display

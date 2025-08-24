@@ -1,0 +1,218 @@
+<!-- Schools Distance-Filtered Listing -->
+<div class="w-full" data-controller="schools" 
+     data-schools-home-lat-value="<%= @home_location[:lat] %>" 
+     data-schools-home-lng-value="<%= @home_location[:lng] %>"
+     data-schools-has-real-location-value="<%= params[:home_lat].present? %>">
+  
+  <!-- Header Section -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">Schools Near You</h1>
+    <p class="text-lg text-gray-600 dark:text-gray-400">Discover quality schools in your area</p>
+  </div>
+  
+  <!-- Controls Panel -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+      
+      <!-- Distance Slider -->
+      <div class="space-y-3">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Search Radius: <span data-schools-target="radiusDisplay" class="font-bold text-blue-600">50 km</span>
+        </label>
+        <div class="flex items-center space-x-4">
+          <span class="text-xs text-gray-500">1km</span>
+          <input type="range" 
+                 min="1" 
+                 max="100" 
+                 value="50" 
+                 step="1"
+                 data-schools-target="radiusSlider"
+                 data-action="input->schools#updateRadius"
+                 class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider">
+          <span class="text-xs text-gray-500">100km</span>
+        </div>
+      </div>
+      
+      <!-- Show All Checkbox -->
+      <div class="flex items-center justify-center lg:justify-end">
+        <label class="inline-flex items-center cursor-pointer">
+          <input type="checkbox" 
+                 data-schools-target="showAllCheckbox"
+                 data-action="change->schools#toggleShowAll"
+                 class="sr-only peer">
+          <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+          <span class="ms-3 text-sm font-medium text-gray-700 dark:text-gray-300">Show all schools</span>
+        </label>
+      </div>
+      
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div data-schools-target="loadingIndicator" class="hidden mt-4 flex items-center justify-center">
+      <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="text-sm text-gray-600">Updating results...</span>
+    </div>
+  </div>
+  
+  <!-- Results Summary -->
+  <div class="mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+      <div class="mb-2 sm:mb-0">
+        <h2 class="text-lg font-semibold text-blue-900 dark:text-blue-100" data-schools-target="resultsTitle">
+          <% if @filter_params[:show_all] %>
+            All Schools
+          <% else %>
+            Schools within <%= @filter_params[:radius] %>km
+          <% end %>
+        </h2>
+        <p class="text-sm text-blue-700 dark:text-blue-200" data-schools-target="resultsSummary">
+          Showing <%= @filtered_count %> of <%= @total_count %> schools
+        </p>
+      </div>
+      <div class="flex items-center text-sm text-blue-600 dark:text-blue-400">
+        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+        </svg>
+        <span>Page <%= @schools.current_page %> of <%= @schools.total_pages %></span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Schools Grid -->
+  <div data-schools-target="schoolsList">
+    <% if @schools.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+        <% @schools.each do |school| %>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <div class="p-6">
+              <div class="flex items-start justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+                  <%= link_to school.name, school_path(school), 
+                      class: "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors" %>
+                </h3>
+                <% unless @filter_params[:show_all] %>
+                  <% if school.respond_to?(:distance_km) && school.distance_km %>
+                    <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                      <%= number_with_precision(school.distance_km, precision: 1) %>km
+                    </span>
+                  <% end %>
+                <% end %>
+              </div>
+              
+              <% if school.respond_to?(:address) && school.address.present? %>
+                <div class="flex items-start mb-4">
+                  <svg class="w-4 h-4 text-gray-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                  </svg>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <%= school.address %>
+                  </p>
+                </div>
+              <% end %>
+              
+              <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+                <%= link_to school_path(school), 
+                    class: "inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors" do %>
+                  View Details
+                  <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                <% end %>
+                
+                <% unless @filter_params[:show_all] %>
+                  <% if school.respond_to?(:distance_km) && school.distance_km %>
+                    <span class="text-xs text-gray-500">
+                      <%= number_with_precision(school.distance_km, precision: 1) %> km away
+                    </span>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center text-sm text-gray-700 dark:text-gray-300">
+          <span>
+            Showing 
+            <span class="font-medium"><%= (@schools.current_page - 1) * @schools.limit_value + 1 %></span>
+            to 
+            <span class="font-medium"><%= [@schools.current_page * @schools.limit_value, @filtered_count].min %></span>
+            of 
+            <span class="font-medium"><%= @filtered_count %></span>
+            results
+          </span>
+        </div>
+        
+        <div data-schools-target="pagination">
+          <%= paginate @schools, theme: 'twitter_bootstrap_4' %>
+        </div>
+      </div>
+      
+    <% else %>
+      <!-- Empty State -->
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-8 text-center">
+        <svg class="mx-auto h-12 w-12 text-yellow-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <h3 class="text-lg font-medium text-yellow-900 dark:text-yellow-100 mb-2">
+          <% if @filter_params[:show_all] %>
+            No schools found
+          <% else %>
+            No schools match your filters
+          <% end %>
+        </h3>
+        <p class="text-yellow-700 dark:text-yellow-200 mb-4">
+          <% if @filter_params[:show_all] %>
+            There are currently no schools in our database.
+          <% else %>
+            Try increasing your search radius or check "Show all schools" to see all available options.
+          <% end %>
+        </p>
+        <% unless @filter_params[:show_all] %>
+          <button data-action="click->schools#showAll" 
+                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors">
+            Show All Schools
+          </button>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Custom CSS for slider styling -->
+<style>
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #2563eb;
+    cursor: pointer;
+    box-shadow: 0 0 2px 0 #555;
+    transition: background .15s ease-in-out;
+  }
+  
+  .slider::-webkit-slider-thumb:hover {
+    background: #1d4ed8;
+  }
+  
+  .slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #2563eb;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 2px 0 #555;
+  }
+  
+  .slider::-moz-range-thumb:hover {
+    background: #1d4ed8;
+  }
+</style>

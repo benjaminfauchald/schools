@@ -1,1 +1,4 @@
 @import "tailwindcss";
+
+/* Flowbite components */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css');
