@@ -1,0 +1,160 @@
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+  <%= render Schools::SectionHeaderComponent.new(
+        title: "Photo Gallery",
+        icon: "photo",
+        subtitle: "Campus photos and facilities"
+      ) %>
+
+  <div class="px-6 pb-6">
+    
+    <!-- Photo Count Summary -->
+    <div class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold text-purple-800 dark:text-purple-200">
+            Campus Photos
+          </h3>
+          <p class="text-sm text-purple-600 dark:text-purple-400 mt-1">
+            View detailed images of facilities and campus life
+          </p>
+        </div>
+        <div class="text-right">
+          <div class="text-2xl font-bold text-purple-700 dark:text-purple-300">
+            <%= photos.count %>
+          </div>
+          <div class="text-sm text-purple-600 dark:text-purple-400">
+            <%= photos.count == 1 ? 'photo' : 'photos' %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photo Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <% photos.each_with_index do |photo, index| %>
+        <div class="group relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700 cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200"
+             onclick="openPhotoModal(<%= index %>)">
+          <img src="<%= photo.url %>" 
+               alt="<%= photo.alt_text || 'Campus photo' %>"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+               loading="<%= index < 4 ? 'eager' : 'lazy' %>">
+          
+          <!-- Photo overlay -->
+          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-90 rounded-full p-2">
+              <%= helpers.heroicon('magnifying-glass-plus', css_class: 'w-5 h-5 text-gray-700') %>
+            </div>
+          </div>
+          
+          <!-- Photo number badge -->
+          <div class="absolute top-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+            <%= index + 1 %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- View All Button -->
+    <% if photos.count > 8 %>
+      <div class="mt-6 text-center">
+        <button onclick="openPhotoModal(0)" 
+                class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+          <%= helpers.heroicon('photo', css_class: 'w-4 h-4 mr-2') %>
+          View All <%= photos.count %> Photos
+        </button>
+      </div>
+    <% end %>
+
+  </div>
+</div>
+
+<!-- Photo Modal -->
+<div id="<%= modal_id %>" class="fixed inset-0 z-50 hidden">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black bg-opacity-90 transition-opacity" onclick="closePhotoModal()"></div>
+  
+  <!-- Modal Content -->
+  <div class="relative h-full flex items-center justify-center p-4">
+    <!-- Close Button -->
+    <button onclick="closePhotoModal()" 
+            class="absolute top-4 right-4 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 text-white transition-all duration-200">
+      <%= helpers.heroicon('x-mark', css_class: 'w-6 h-6') %>
+    </button>
+    
+    <!-- Photo Counter -->
+    <div class="absolute top-4 left-4 z-10 bg-black bg-opacity-60 text-white px-3 py-2 rounded-lg text-sm">
+      <span id="current-photo-number">1</span> / <%= photos.count %>
+    </div>
+    
+    <!-- Navigation Arrows -->
+    <% if photos.count > 1 %>
+      <button onclick="previousPhoto()" 
+              class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-3 text-white transition-all duration-200">
+        <%= helpers.heroicon('chevron-left', css_class: 'w-6 h-6') %>
+      </button>
+      
+      <button onclick="nextPhoto()" 
+              class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-3 text-white transition-all duration-200">
+        <%= helpers.heroicon('chevron-right', css_class: 'w-6 h-6') %>
+      </button>
+    <% end %>
+    
+    <!-- Main Photo Display -->
+    <div class="w-full max-w-5xl max-h-full flex items-center justify-center">
+      <img id="modal-photo" 
+           src="" 
+           alt="" 
+           class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+    </div>
+    
+    <!-- Photo Info -->
+    <div class="absolute bottom-4 left-4 right-4 z-10 bg-black bg-opacity-60 text-white p-4 rounded-lg">
+      <p id="modal-photo-alt" class="text-sm font-medium"></p>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Photo Modal -->
+<script>
+  const photos = <%= raw photos.map { |p| { url: p.url, alt: p.alt_text } }.to_json %>;
+  let currentPhotoIndex = 0;
+  
+  function openPhotoModal(index) {
+    currentPhotoIndex = index;
+    updateModalPhoto();
+    document.getElementById('<%= modal_id %>').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  }
+  
+  function closePhotoModal() {
+    document.getElementById('<%= modal_id %>').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+  
+  function nextPhoto() {
+    currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+    updateModalPhoto();
+  }
+  
+  function previousPhoto() {
+    currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+    updateModalPhoto();
+  }
+  
+  function updateModalPhoto() {
+    const photo = photos[currentPhotoIndex];
+    document.getElementById('modal-photo').src = photo.url;
+    document.getElementById('modal-photo').alt = photo.alt;
+    document.getElementById('modal-photo-alt').textContent = photo.alt || 'Campus photo';
+    document.getElementById('current-photo-number').textContent = currentPhotoIndex + 1;
+  }
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('<%= modal_id %>').classList.contains('hidden')) {
+      if (e.key === 'Escape') closePhotoModal();
+      else if (e.key === 'ArrowRight') nextPhoto();
+      else if (e.key === 'ArrowLeft') previousPhoto();
+    }
+  });
+</script>

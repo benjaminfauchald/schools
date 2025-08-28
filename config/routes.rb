@@ -3,14 +3,26 @@ Rails.application.routes.draw do
   namespace :admin do
       resources :places
       resources :points
+      resources :schools
+      resources :media_items
+      resources :events
+      resources :travel_times
+      resources :school_claims
+      resources :school_fee_schedules
+      resources :school_grade_offerings
+      resources :taggings
+      resources :terms
+      resources :audit_logs
+      resources :vocabularies
+      resources :school_fee_bands
 
       root to: "places#index"
     end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
   
-  # Root route for landing page
-  root 'application#index'
+  # Root route - main school listing with distance filtering
+  root 'schools#index'
   
   # Onboarding flow
   get 'onboarding', to: 'onboarding#index'
@@ -28,9 +40,21 @@ Rails.application.routes.draw do
   # Public places routes
   resources :places, only: [:show]
 
+  # Schools routes
+  resources :schools, only: [:show] do
+    collection do
+      get :filtered, to: 'schools#filtered'
+    end
+  end
+
   # Settings page for location management
   get 'settings', to: 'settings#index'
   patch 'settings/location', to: 'settings#update_location'
+
+  # ViewComponent previews (development only)
+  if Rails.env.development?
+    mount ViewComponent::Engine, at: "/rails/view_components"
+  end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

@@ -1,5 +1,7 @@
 source "https://rubygems.org"
 
+gem "ostruct", "0.6.3"
+
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.0.2", ">= 8.0.2.1"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
@@ -30,6 +32,8 @@ gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
 
+gem 'rake', '13.1.0'
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
@@ -49,7 +53,10 @@ gem 'rgeo-activerecord'
 
 gem 'administrate'
 gem 'devise'
+gem 'view_component'
 
+#gem 'iso3166'
+gem 'countries'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -60,6 +67,9 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+  
+  # Fake data generation for testing
+  gem "faker"
 end
 
 group :development do
@@ -68,3 +78,6 @@ group :development do
 end
 
 gem "activerecord-postgis-adapter", "~> 11.0"
+
+# Pagination
+gem 'kaminari'

@@ -1,0 +1,64 @@
+<!-- School Detail Page -->
+<div class="w-full">
+  
+  <!-- Navigation -->
+  <div class="mb-6">
+    <%= link_to root_path, class: "inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors" do %>
+      <%= heroicon('arrow-left', css_class: 'w-4 h-4 mr-2') %>
+      Back to Schools
+    <% end %>
+  </div>
+
+  <!-- School Information Sections -->
+  <div class="space-y-8">
+    
+    <!-- Hero Section -->
+    <%= render Schools::HeroComponent.new(
+          hero_data: @merged_data.hero_data,
+          contact_info: @merged_data.contact_info
+        ) %>
+
+    <!-- Contact & Location -->
+    <%= render Schools::ContactInfoComponent.new(
+          contact_info: @merged_data.contact_info,
+          location_data: @merged_data.location_data
+        ) %>
+
+    <!-- Interactive Map & Directions -->
+    <%= render Schools::InteractiveMapComponent.new(
+          school_data: @merged_data.hero_data,
+          contact_info: @merged_data.contact_info,
+          location_data: @merged_data.location_data
+        ) %>
+
+    <!-- Academic Programs -->
+    <%= render Schools::AcademicProgramsComponent.new(
+          academic_programs: @merged_data.academic_programs
+        ) %>
+
+    <!-- Facilities -->
+    <%= render Schools::FacilitiesGridComponent.new(
+          facilities: @merged_data.facilities || []
+        ) %>
+
+    <!-- Grade Levels & Age Groups -->
+    <% if @school.school_grade_offering %>
+      <%= render Schools::GradeOfferingsComponent.new(
+            grade_offerings: [@school.school_grade_offering]
+          ) %>
+    <% end %>
+
+    <!-- Tuition & Fees -->
+    <%= render Schools::FeesTableComponent.new(
+          fee_schedules: @merged_data.fee_schedules || [],
+          fee_bands: @merged_data.fee_bands || []
+        ) %>
+
+    <!-- Photo Gallery -->
+    <%= render Schools::PhotoGalleryComponent.new(
+          media_items: @merged_data.media_items_array || []
+        ) %>
+
+  </div>
+  
+</div>

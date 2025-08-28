@@ -1,0 +1,27 @@
+<div class="mb-6">
+  <div class="flex items-center justify-between mb-2">
+    <div class="flex items-center">
+      <%= icon_svg if icon %>
+      <h2 class="<%= icon ? 'ml-2' : '' %> text-xl font-semibold text-gray-900 dark:text-white">
+        <%= title %>
+      </h2>
+    </div>
+    <% if actions %>
+      <div class="flex items-center space-x-2">
+        <%= actions %>
+      </div>
+    <% end %>
+  </div>
+  
+  <% if subtitle %>
+    <p class="text-sm text-gray-600 dark:text-gray-400 <%= icon ? 'ml-7' : '' %>">
+      <%= subtitle %>
+    </p>
+  <% end %>
+  
+  <% if has_content? %>
+    <div class="<%= icon ? 'ml-7' : '' %> mt-3">
+      <%= content %>
+    </div>
+  <% end %>
+</div>

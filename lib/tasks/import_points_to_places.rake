@@ -21,6 +21,7 @@ namespace :data do
       success: 0,
       failed: 0,
       skipped: 0,
+      refreshed: 0,
       api_errors: 0,
       no_matches: 0,
       start_time: Time.current
@@ -89,11 +90,16 @@ namespace :data do
       begin
         @stats[:processed] += 1
         
-        # Check if school already has Place data
-        if school.places.exists?
-          puts "⏭️  Skipped: #{school.name.truncate(40)} (already has Place data)"
+        # Check if school already has Place data that's still valid
+        existing_place = school.places.first
+        if existing_place && !existing_place.needs_refresh?
+          days_old = existing_place.days_since_last_fetch&.round(1)
+          puts "⏭️  Skipped: #{school.name.truncate(40)} (Place data is #{days_old} days old, still valid)"
           @stats[:skipped] += 1
           return :skipped
+        elsif existing_place && existing_place.needs_refresh?
+          days_old = existing_place.days_since_last_fetch&.round(1)
+          puts "🔄 Refreshing: #{school.name.truncate(40)} (Place data is #{days_old} days old, expired)"
         end
         
         # Search for nearby schools
@@ -126,8 +132,12 @@ namespace :data do
           return :details_error
         end
         
-        # Create Place record
-        place = Place.create_from_google_api(details_response, school)
+        # Create or update Place record
+        if existing_place
+          place = Place.update_from_google_api(existing_place.place_id, details_response, school)
+        else
+          place = Place.create_from_google_api(details_response, school)
+        end
         
         # Calculate distance for logging
         distance = calculate_distance(
@@ -135,9 +145,15 @@ namespace :data do
           place.lat, place.lng
         ).round(1)
         
-        puts "✅ Success: #{school.name.truncate(40)} (#{distance}m away, rating: #{place.rating || 'N/A'})"
-        @stats[:success] += 1
-        return :success
+        if existing_place
+          puts "🔄 Refreshed: #{school.name.truncate(40)} (#{distance}m away, rating: #{place.rating || 'N/A'})"
+          @stats[:refreshed] += 1
+          return :refreshed
+        else
+          puts "✅ Created: #{school.name.truncate(40)} (#{distance}m away, rating: #{place.rating || 'N/A'})"
+          @stats[:success] += 1
+          return :success
+        end
         
       rescue => e
         puts "💥 Exception: #{school.name.truncate(40)} - #{e.message.truncate(50)}"
@@ -154,7 +170,8 @@ namespace :data do
         
         puts "\n📊 Progress Report:"
         puts "   Processed: #{@stats[:processed]}/#{@stats[:total_schools]}"
-        puts "   ✅ Success: #{@stats[:success]} (#{success_rate}%)"
+        puts "   ✅ Created: #{@stats[:success]} (#{success_rate}%)"
+        puts "   🔄 Refreshed: #{@stats[:refreshed]}"
         puts "   ⏭️  Skipped: #{@stats[:skipped]}"
         puts "   ❌ Failed: #{@stats[:failed]}"
         puts "   🚫 API Errors: #{@stats[:api_errors]}"
@@ -176,8 +193,9 @@ namespace :data do
       puts "🎉" * 20
       puts "📊 Final Statistics:"
       puts "   Total schools: #{@stats[:total_schools]}"
-      puts "   ✅ Successfully processed: #{@stats[:success]}"
-      puts "   ⏭️  Skipped (already had data): #{@stats[:skipped]}"
+      puts "   ✅ Successfully created: #{@stats[:success]}"
+      puts "   🔄 Refreshed (30-day expired): #{@stats[:refreshed]}"
+      puts "   ⏭️  Skipped (data still valid): #{@stats[:skipped]}"
       puts "   ❌ Failed: #{@stats[:failed]}"
       puts "   🚫 API Errors: #{@stats[:api_errors]}"
       puts "   🔍 No Matches Found: #{@stats[:no_matches]}"
@@ -192,8 +210,8 @@ namespace :data do
       puts "   Total Places created: #{places_created}"
       puts "   Schools with Google data: #{schools_with_places}"
       puts "   Average rating: #{Place.where.not(rating: nil).average(:rating)&.round(2)}"
-      puts "   Places with reviews: #{Place.where.not(reviews: [nil, '[]']).count}"
-      puts "   Places with photos: #{Place.where.not(photos: [nil, '[]']).count}"
+      puts "   Places with reviews: #{Place.where("reviews IS NOT NULL AND reviews::text != '[]'").count}"
+      puts "   Places with photos: #{Place.where("photos IS NOT NULL AND photos::text != '[]'").count}"
       puts "🎉" * 20
     end
     
@@ -210,18 +228,24 @@ namespace :data do
       schools = Point.schools.with_names.order(:id)
       @stats[:total_schools] = schools.count
       
-      # Check how many already have data
-      existing_places = Point.schools.joins(:places).count
+      # Check Google Maps compliance status
+      total_places = Point.schools.joins(:places).count
+      compliant_places = Point.schools.joins(:places).merge(Place.google_maps_compliant).count
+      expired_places = Point.schools.joins(:places).merge(Place.google_maps_expired).count
+      schools_without_places = @stats[:total_schools] - total_places
       
       puts "🚀 Starting Google Places import for #{@stats[:total_schools]} schools"
-      puts "📊 Schools already with Places data: #{existing_places}"
-      puts "🎯 Schools to process: #{@stats[:total_schools] - existing_places}"
+      puts "📊 Google Maps API Compliance Status:"
+      puts "   ✅ Schools with valid Places data (< 30 days): #{compliant_places}"
+      puts "   🔄 Schools with expired Places data (> 30 days): #{expired_places}"
+      puts "   ❌ Schools without Places data: #{schools_without_places}"
+      puts "🎯 Schools to process: #{expired_places + schools_without_places}"
       puts "⚙️  Batch size: #{BATCH_SIZE}"
       puts "⏱️  Delay between requests: #{DELAY_BETWEEN_REQUESTS}s"
       puts "⏱️  Delay between batches: #{DELAY_BETWEEN_BATCHES}s"
       
-      if @stats[:total_schools] - existing_places == 0
-        puts "✅ All schools already have Google Places data!"
+      if expired_places + schools_without_places == 0
+        puts "✅ All schools have valid Google Places data (compliant with 30-day policy)!"
         return
       end
       

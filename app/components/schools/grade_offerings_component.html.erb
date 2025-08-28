@@ -1,0 +1,142 @@
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+  <%= render Schools::SectionHeaderComponent.new(
+        title: "Grade Levels & Age Groups",
+        icon: "user-group",
+        subtitle: "Educational levels and age requirements offered"
+      ) %>
+
+  <div class="px-6 pb-6">
+    
+    <!-- Age Range Summary -->
+    <% if age_range_summary %>
+      <div class="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-indigo-800 dark:text-indigo-200">
+              Student Age Range
+            </h3>
+            <p class="text-sm text-indigo-600 dark:text-indigo-400 mt-1">
+              Ages served across all grade levels
+            </p>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
+              <%= format_age_range(age_range_summary[:min], age_range_summary[:max]) %>
+            </div>
+            <div class="text-sm text-indigo-600 dark:text-indigo-400">
+              <%= pluralize(total_grade_levels, 'grade level') %> offered
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Grade Systems -->
+    <div class="space-y-6">
+      <% organized_grades.each do |system_data| %>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          
+          <!-- System Header -->
+          <div class="bg-gray-50 dark:bg-gray-900 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <%= section_icon_svg(system_icon(system_data[:system])) %>
+                <div>
+                  <h4 class="font-semibold text-gray-900 dark:text-white">
+                    <%= system_data[:system] %>
+                  </h4>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    <%= pluralize(system_data[:levels].count, 'level') %>
+                    <% if system_data[:age_range][:min] && system_data[:age_range][:max] %>
+                      • Ages <%= system_data[:age_range][:min].to_i %>-<%= system_data[:age_range][:max].to_i %>
+                    <% end %>
+                  </p>
+                </div>
+              </div>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= system_badge_class(system_color(system_data[:system])) %>">
+                <%= system_data[:system] %>
+              </span>
+            </div>
+          </div>
+
+          <!-- Grade Levels -->
+          <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            <% system_data[:levels].each do |level| %>
+              <div class="px-4 py-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-4">
+                      <div class="flex-1">
+                        <h5 class="text-sm font-medium text-gray-900 dark:text-white">
+                          <%= level[:grade].to_s.humanize %>
+                        </h5>
+                        <% if level[:description].present? %>
+                          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <%= level[:description] %>
+                          </p>
+                        <% end %>
+                      </div>
+                      
+                      <% if level[:min_age] || level[:max_age] %>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                          <%= format_age_range(level[:min_age], level[:max_age]) %>
+                        </div>
+                      <% end %>
+                      
+                      <% if level[:capacity] %>
+                        <div class="text-right">
+                          <div class="text-sm font-medium text-gray-900 dark:text-white">
+                            <%= level[:capacity] %> students
+                          </div>
+                          <div class="text-xs text-gray-500 dark:text-gray-400">
+                            capacity
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Grade Level Stats -->
+    <% if organized_grades.any? %>
+      <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <% organized_grades.each do |system_data| %>
+          <div class="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+            <div class="text-lg font-bold text-<%= system_color(system_data[:system]) %>-600 dark:text-<%= system_color(system_data[:system]) %>-400">
+              <%= system_data[:levels].count %>
+            </div>
+            <div class="text-xs text-gray-600 dark:text-gray-400 font-medium">
+              <%= system_data[:system].split(' ').first %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Enrollment Information -->
+    <div class="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+      <div class="flex items-start space-x-3">
+        <%= section_icon_svg('information-circle') %>
+        <div class="flex-1">
+          <h4 class="text-sm font-semibold text-green-900 dark:text-green-100 mb-2">
+            Enrollment & Admissions
+          </h4>
+          <ul class="text-sm text-green-800 dark:text-green-200 space-y-1">
+            <li>• Grade placement may depend on academic assessment and language proficiency</li>
+            <li>• Age requirements may vary based on curriculum and individual readiness</li>
+            <li>• Mid-year enrollment may be available depending on capacity</li>
+            <li>• Contact admissions office for grade-specific requirements and availability</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
