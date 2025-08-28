@@ -5,7 +5,29 @@ class SchoolsController < ApplicationController
   before_action :find_school, only: [:show]
 
   def show
-    # School details page
+    # Eager load all related data to avoid N+1 queries
+    @school = School.includes(
+      :place,
+      :current_taggings,
+      :current_terms,
+      :school_fee_schedules,
+      :school_grade_offering,
+      :media_items,
+      current_taggings: { term: :vocabulary },
+      place: :media_items
+    ).find_by!(slug: params[:id])
+    
+    # Find related point data if available
+    @related_point = find_related_point(@school) if @school.place
+    
+    # Initialize data merger for intelligent data combination
+    @merged_data = SchoolDataMerger.new(@school, @school.place, @related_point).merged_data
+    
+    # Set page metadata
+    @page_title = @school.name
+    @page_description = @merged_data.additional_details[:about] || 
+                       "Learn about #{@school.name} - curriculum, facilities, fees, and more."
+    @page_keywords = generate_page_keywords(@school)
   end
 
   def index
@@ -147,5 +169,38 @@ class SchoolsController < ApplicationController
 
   def find_school
     @school = School.find_by!(slug: params[:id])
+  end
+  
+  # Find related point data by proximity
+  def find_related_point(school)
+    return nil unless school.place&.lat && school.place&.lng
+    
+    # Find the closest point within 500 meters, handling SRID mismatches
+    Point.where(
+      "ST_DWithin(ST_Transform(way, 4326), ST_SetSRID(ST_MakePoint(?, ?), 4326), ?)",
+      school.place.lng,
+      school.place.lat,
+      500
+    ).first
+  rescue ActiveRecord::StatementInvalid => e
+    # If there's still an SRID issue, log and return nil
+    Rails.logger.warn "PostGIS SRID error when finding related point: #{e.message}"
+    nil
+  end
+  
+  # Generate SEO keywords from school data
+  def generate_page_keywords(school)
+    keywords = [school.name]
+    keywords << school.district if school.district.present?
+    keywords << school.province if school.province.present?
+    
+    # Add curriculum keywords from taxonomy
+    curricula = school.current_terms.select { |term| term.vocabulary.code == 'curriculum' }
+    curricula.each { |curriculum| keywords << curriculum.label }
+    
+    # Add common education keywords
+    keywords += %w[school education bangkok thailand international curriculum]
+    
+    keywords.uniq.join(', ')
   end
 end

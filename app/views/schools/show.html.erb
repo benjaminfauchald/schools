@@ -1,140 +1,64 @@
 <!-- School Detail Page -->
 <div class="w-full">
   
-  <!-- Header Section -->
-  <div class="mb-8">
-    <div class="flex items-center mb-4">
-      <%= link_to root_path, class: "inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors mr-4" do %>
-        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0L2.586 11l3.707-3.707a1 1 0 011.414 1.414L5.414 11l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd"></path>
-        </svg>
-        Back to Schools
-      <% end %>
-    </div>
-    
-    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2"><%= @school.name %></h1>
-    
-    <% if @school.formatted_address.present? %>
-      <div class="flex items-center text-lg text-gray-600 dark:text-gray-400 mb-2">
-        <svg class="w-5 h-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-        </svg>
-        <%= @school.formatted_address %>
-      </div>
-    <% end %>
-    
-    <% if @school.founded_year.present? %>
-      <p class="text-gray-600 dark:text-gray-400">Founded: <%= @school.founded_year %></p>
+  <!-- Navigation -->
+  <div class="mb-6">
+    <%= link_to root_path, class: "inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors" do %>
+      <%= heroicon('arrow-left', css_class: 'w-4 h-4 mr-2') %>
+      Back to Schools
     <% end %>
   </div>
-  
-  <!-- School Details Card -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-8">
-    <div class="p-6">
-      
-      <% if @school.about.present? %>
-        <div class="mb-6">
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">About</h2>
-          <p class="text-gray-700 dark:text-gray-300 leading-relaxed"><%= @school.about %></p>
-        </div>
-      <% end %>
-      
-      <!-- Contact Information -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        
-        <!-- Contact Details -->
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Contact Information</h3>
-          <div class="space-y-2">
-            
-            <% if @school.phone.present? %>
-              <div class="flex items-center">
-                <svg class="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                </svg>
-                <%= @school.phone %>
-              </div>
-            <% end %>
-            
-            <% if @school.email.present? %>
-              <div class="flex items-center">
-                <svg class="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                </svg>
-                <%= mail_to @school.email, @school.email, class: "text-blue-600 hover:text-blue-800" %>
-              </div>
-            <% end %>
-            
-            <% if @school.website_url.present? %>
-              <div class="flex items-center">
-                <svg class="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M4.083 9h1.946c.089-1.546.383-2.97.837-4.118A6.004 6.004 0 004.083 9zM10 2a8 8 0 100 16 8 8 0 000-16zm0 2c-.076 0-.232.032-.465.262-.238.234-.497.623-.737 1.182-.389.907-.673 2.142-.766 3.556h3.936c-.093-1.414-.377-2.649-.766-3.556-.24-.56-.5-.948-.737-1.182C10.232 4.032 10.076 4 10 4zm3.971 5c-.089-1.546-.383-2.97-.837-4.118A6.004 6.004 0 0115.917 9h-1.946zm-2.003 2H8.032c.093 1.414.377 2.649.766 3.556.24.56.5.948.737 1.182.233.23.389.262.465.262.076 0 .232-.032.465-.262.238-.234.498-.623.737-1.182.389-.907.673-2.142.766-3.556zm1.166 4.118c.454-1.147.748-2.572.837-4.118h1.946a6.004 6.004 0 01-2.783 4.118zm-6.268 0C6.412 13.97 6.118 12.546 6.03 11H4.083a6.004 6.004 0 002.783 4.118z" clip-rule="evenodd"></path>
-                </svg>
-                <%= link_to @school.website_url, @school.website_url, target: "_blank", class: "text-blue-600 hover:text-blue-800" %>
-              </div>
-            <% end %>
-            
-          </div>
-        </div>
-        
-        <!-- School Details -->
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">School Details</h3>
-          <div class="space-y-2 text-sm">
-            
-            <% if @school.ownership.present? %>
-              <div>
-                <span class="font-medium text-gray-600 dark:text-gray-400">Type:</span>
-                <span class="text-gray-900 dark:text-white ml-1"><%= @school.ownership.humanize %></span>
-              </div>
-            <% end %>
-            
-            <% if @school.district.present? %>
-              <div>
-                <span class="font-medium text-gray-600 dark:text-gray-400">District:</span>
-                <span class="text-gray-900 dark:text-white ml-1"><%= @school.district %></span>
-              </div>
-            <% end %>
-            
-            <% if @school.province.present? %>
-              <div>
-                <span class="font-medium text-gray-600 dark:text-gray-400">Province:</span>
-                <span class="text-gray-900 dark:text-white ml-1"><%= @school.province %></span>
-              </div>
-            <% end %>
-            
-            <% if @school.boarding.present? %>
-              <div>
-                <span class="font-medium text-gray-600 dark:text-gray-400">Boarding:</span>
-                <span class="text-gray-900 dark:text-white ml-1"><%= @school.boarding? ? 'Available' : 'Not Available' %></span>
-              </div>
-            <% end %>
-            
-            <% if @school.school_bus.present? %>
-              <div>
-                <span class="font-medium text-gray-600 dark:text-gray-400">School Bus:</span>
-                <span class="text-gray-900 dark:text-white ml-1"><%= @school.school_bus? ? 'Available' : 'Not Available' %></span>
-              </div>
-            <% end %>
-            
-          </div>
-        </div>
-        
-      </div>
-      
-    </div>
-  </div>
-  
-  <!-- Placeholder for future enhancements -->
-  <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
-    <svg class="mx-auto h-8 w-8 text-blue-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    <h3 class="text-lg font-medium text-blue-900 dark:text-blue-100 mb-1">More Details Coming Soon</h3>
-    <p class="text-blue-700 dark:text-blue-200 text-sm">
-      Additional information about curricula, facilities, fees, and grade offerings will be displayed here.
-    </p>
+
+  <!-- School Information Sections -->
+  <div class="space-y-8">
+    
+    <!-- Hero Section -->
+    <%= render Schools::HeroComponent.new(
+          hero_data: @merged_data.hero_data,
+          contact_info: @merged_data.contact_info
+        ) %>
+
+    <!-- Contact & Location -->
+    <%= render Schools::ContactInfoComponent.new(
+          contact_info: @merged_data.contact_info,
+          location_data: @merged_data.location_data
+        ) %>
+
+    <!-- Interactive Map & Directions -->
+    <%= render Schools::InteractiveMapComponent.new(
+          school_data: @merged_data.hero_data,
+          contact_info: @merged_data.contact_info,
+          location_data: @merged_data.location_data
+        ) %>
+
+    <!-- Academic Programs -->
+    <%= render Schools::AcademicProgramsComponent.new(
+          academic_programs: @merged_data.academic_programs
+        ) %>
+
+    <!-- Facilities -->
+    <%= render Schools::FacilitiesGridComponent.new(
+          facilities: @merged_data.facilities || []
+        ) %>
+
+    <!-- Grade Levels & Age Groups -->
+    <% if @school.school_grade_offering %>
+      <%= render Schools::GradeOfferingsComponent.new(
+            grade_offerings: [@school.school_grade_offering]
+          ) %>
+    <% end %>
+
+    <!-- Tuition & Fees -->
+    <%= render Schools::FeesTableComponent.new(
+          fee_schedules: @merged_data.fee_schedules || [],
+          fee_bands: @merged_data.fee_bands || []
+        ) %>
+
+    <!-- Photo Gallery -->
+    <%= render Schools::PhotoGalleryComponent.new(
+          media_items: @merged_data.media_items_array || []
+        ) %>
+
   </div>
   
 </div>

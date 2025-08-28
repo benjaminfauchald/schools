@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_24_135720) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -302,6 +302,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_135720) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.geometry "geog", limit: {:srid=>4326, :type=>"st_point"}
+    t.datetime "website_crawled_at"
+    t.string "website_crawling_status"
+    t.integer "website_pages_found"
+    t.json "website_crawl_data"
+    t.json "website_structured_data"
+    t.text "website_crawling_error"
+    t.string "facebook_url"
+    t.string "line_id"
+    t.string "whatsapp_number"
     t.index ["district"], name: "index_schools_on_district"
     t.index ["geog"], name: "index_schools_on_geog", using: :gist
     t.index ["name"], name: "index_schools_on_name", opclass: :gin_trgm_ops, using: :gin

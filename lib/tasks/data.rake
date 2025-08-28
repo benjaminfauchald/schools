@@ -919,3 +919,584 @@ class SchoolPlacesSyncer
     ((schools_with_complete_address.to_f / School.count) * 100).round(1)
   end
 end
+
+# ========================================
+# TEST METADATA GENERATION TASKS
+# ========================================
+
+namespace :data do
+  desc "Generate comprehensive test metadata for all existing schools"
+  task generate_test_metadata: :environment do
+    require 'faker'
+    
+    puts "🧪 Starting comprehensive test metadata generation..."
+    puts "📅 Generation started at: #{Time.current}"
+    puts ""
+    
+    timestamp = Time.current.strftime('%Y%m%d_%H%M%S')
+    stats = { processed: 0, created: 0, errors: 0, skipped: 0 }
+    
+    # Preload all vocabularies and terms for efficiency
+    puts "📚 Loading vocabularies and terms..."
+    vocabs = {}
+    Vocabulary.includes(:terms).each do |vocab|
+      vocabs[vocab.code] = vocab.terms.active.to_a
+    end
+    
+    total_schools = School.count
+    puts "🏫 Processing #{total_schools} schools..."
+    puts ""
+    
+    School.find_in_batches(batch_size: 25).with_index do |schools_batch, batch_index|
+      puts "📍 Processing batch #{batch_index + 1} (schools #{batch_index * 25 + 1}-#{[total_schools, (batch_index + 1) * 25].min})..."
+      
+      schools_batch.each do |school|
+        begin
+          # Determine school tier and characteristics
+          tier = determine_school_tier(school.name)
+          school_type = determine_school_type(school.name)
+          
+          # Generate comprehensive metadata
+          generate_school_taggings(school, vocabs, tier, school_type, timestamp)
+          generate_fee_schedule(school, tier, timestamp)
+          generate_grade_offering(school, tier, school_type, timestamp)
+          generate_media_items(school, tier, timestamp)
+          
+          stats[:created] += 1
+          stats[:processed] += 1
+          
+          # Show progress every 10 schools
+          if stats[:processed] % 10 == 0
+            puts "  ✅ Processed #{stats[:processed]}/#{total_schools} schools"
+          end
+          
+        rescue => e
+          stats[:errors] += 1
+          stats[:processed] += 1
+          puts "  ❌ Error processing #{school.name}: #{e.message}"
+        end
+      end
+    end
+    
+    puts ""
+    puts "✅ Test metadata generation completed!"
+    puts "📊 Summary:"
+    puts "   Processed: #{stats[:processed]} schools"
+    puts "   Successfully generated: #{stats[:created]} complete profiles"
+    puts "   Errors: #{stats[:errors]}"
+    puts "   Duration: #{((Time.current - Time.parse("#{timestamp[0..7]} #{timestamp[9..10]}:#{timestamp[11..12]}:#{timestamp[13..14]}")) / 60).round(2)} minutes"
+    puts ""
+    
+    # Show sample of generated data
+    sample_school = School.joins(:taggings, :school_fee_schedules, :school_grade_offering).first
+    if sample_school
+      puts "📋 Sample Generated Profile: #{sample_school.name}"
+      puts "   📚 Curriculum: #{sample_school.terms_by_context('curriculum').pluck(:label).join(', ')}"
+      puts "   🏆 Accreditations: #{sample_school.terms_by_context('accreditation').pluck(:label).join(', ')}"
+      puts "   🏊 Facilities: #{sample_school.terms_by_context('facility').count} facilities"
+      puts "   💰 Fee Range: #{sample_school.current_fee_schedule&.tuition_range_display}"
+      puts "   🎂 Age Range: #{sample_school.age_range}"
+    end
+  end
+  
+  desc "Clean all test-generated metadata (preserves original school records)"
+  task clean_test_metadata: :environment do
+    puts "🧹 Starting test metadata cleanup..."
+    puts "📅 Cleanup started at: #{Time.current}"
+    puts ""
+    
+    # Find all test-generated records
+    test_taggings = Tagging.where("notes LIKE 'TEST_DATA_%'")
+    test_fee_schedules = SchoolFeeSchedule.where("notes LIKE 'TEST_DATA_%'")  
+    test_grade_offerings = SchoolGradeOffering.where("notes LIKE 'TEST_DATA_%'")
+    test_media_items = MediaItem.where("alt_text LIKE 'TEST_DATA%'")
+    
+    total_records = test_taggings.count + test_fee_schedules.count + 
+                   test_grade_offerings.count + test_media_items.count
+    
+    if total_records == 0
+      puts "📭 No test metadata found to clean up."
+      puts "💡 Run 'rails data:generate_test_metadata' first to create test data."
+      next
+    end
+    
+    puts "🔍 Found test metadata to remove:"
+    puts "   📚 Taggings: #{test_taggings.count}"
+    puts "   💰 Fee Schedules: #{test_fee_schedules.count}"
+    puts "   🎂 Grade Offerings: #{test_grade_offerings.count}"
+    puts "   📷 Media Items: #{test_media_items.count}"
+    puts "   📊 Total Records: #{total_records}"
+    puts ""
+    
+    # Safety check - show sample schools affected
+    affected_schools = School.joins(:taggings).where(taggings: { notes: test_taggings.select(:notes).distinct.limit(5) })
+    puts "📋 Sample schools that will lose test metadata:"
+    affected_schools.limit(3).each { |s| puts "   - #{s.name}" }
+    puts ""
+    
+    puts "⚠️  WARNING: This will permanently delete ALL test-generated metadata"
+    puts "Original school records will be preserved, only attached metadata will be removed"
+    puts ""
+    
+    print "Continue? Type 'CLEAN CONFIRMED' to proceed: "
+    confirmation = STDIN.gets.chomp
+    unless confirmation == 'CLEAN CONFIRMED'
+      puts "❌ Operation cancelled - test metadata preserved"
+      next
+    end
+    
+    puts ""
+    puts "🗑️  Removing test metadata..."
+    
+    ActiveRecord::Base.transaction do
+      deleted_counts = {}
+      
+      deleted_counts[:taggings] = test_taggings.delete_all
+      deleted_counts[:fee_schedules] = test_fee_schedules.delete_all
+      deleted_counts[:grade_offerings] = test_grade_offerings.delete_all
+      deleted_counts[:media_items] = test_media_items.delete_all
+      
+      puts "✅ Cleanup completed successfully!"
+      puts "📊 Removed:"
+      deleted_counts.each { |type, count| puts "   #{type.to_s.humanize}: #{count} records" }
+      puts "   Total: #{deleted_counts.values.sum} records"
+    end
+    
+    puts ""
+    puts "🏫 Original school records preserved: #{School.count} schools"
+  end
+  
+  desc "Regenerate test metadata (clean + generate)"
+  task regenerate_test_metadata: :environment do
+    puts "🔄 Regenerating all test metadata..."
+    puts ""
+    
+    Rake::Task['data:clean_test_metadata'].invoke
+    puts ""
+    Rake::Task['data:generate_test_metadata'].invoke
+  end
+  
+  # Helper methods for test metadata generation
+  
+  def determine_school_tier(name)
+    name_lower = name.downcase
+    
+    # Premium international schools
+    premium_keywords = %w[international british american australian singapore swiss german french 
+                         ruamrudee harrow regents wellington shrewsbury nist bangkok prep]
+    return :premium if premium_keywords.any? { |keyword| name_lower.include?(keyword) }
+    
+    # Standard schools (Christian, established local schools)
+    standard_keywords = %w[christian catholic assumption st saint college academy prep school satri]
+    return :standard if standard_keywords.any? { |keyword| name_lower.include?(keyword) }
+    
+    # Basic tier (local Thai schools)
+    :basic
+  end
+  
+  # Determine school type/focus
+  def determine_school_type(name)
+    name_lower = name.downcase
+    
+    return :international if name_lower.include?('international')
+    return :british if name_lower.include?('british') || name_lower.include?('uk')
+    return :american if name_lower.include?('american') || name_lower.include?('us')
+    return :christian if name_lower.include?('christian') || name_lower.include?('catholic') || name_lower.include?('assumption')
+    return :buddhist if name_lower.include?('wat ')
+    return :thai_traditional if name_lower.match?(/โรงเรียน|วิทยา|ศึกษา/)
+    
+    :general
+  end
+  
+  # Generate comprehensive taggings for a school
+  def generate_school_taggings(school, vocabs, tier, school_type, timestamp)
+    taggings_to_create = []
+    
+    # Generate curriculum taggings (2-5 programs)
+    curriculum_terms = select_curriculum_terms(vocabs['curriculum'], tier, school_type)
+    curriculum_terms.each do |term|
+      taggings_to_create << build_tagging_attrs(school, term, 'curriculum', timestamp)
+    end
+    
+    # Generate accreditation taggings (0-4 accreditations)  
+    accreditation_terms = select_accreditation_terms(vocabs['accreditation'], tier)
+    accreditation_terms.each do |term|
+      taggings_to_create << build_tagging_attrs(school, term, 'accreditation', timestamp)
+    end
+    
+    # Generate facility taggings (6-15 facilities)
+    facility_terms = select_facility_terms(vocabs['facility'], tier)
+    facility_terms.each do |term|
+      taggings_to_create << build_tagging_attrs(school, term, 'facility', timestamp)
+    end
+    
+    # Generate extracurricular taggings (3-8 activities)
+    extracurricular_terms = select_extracurricular_terms(vocabs['extracurricular'], tier)
+    extracurricular_terms.each do |term|
+      taggings_to_create << build_tagging_attrs(school, term, 'extracurricular', timestamp)
+    end
+    
+    # Generate language taggings (2-4 languages)
+    language_terms = select_language_terms(vocabs['language'], school_type)
+    language_terms.each do |term|
+      taggings_to_create << build_tagging_attrs(school, term, 'language', timestamp)
+    end
+    
+    # Generate program taggings (1-3 special programs)
+    program_terms = select_program_terms(vocabs['program'], tier)
+    program_terms.each do |term|
+      taggings_to_create << build_tagging_attrs(school, term, 'program', timestamp)
+    end
+    
+    # Bulk create all taggings
+    Tagging.insert_all(taggings_to_create) if taggings_to_create.any?
+  end
+  
+  # Helper to build tagging attributes
+  def build_tagging_attrs(school, term, context, timestamp)
+    {
+      taggable_type: 'School',
+      taggable_id: school.id,
+      term_id: term.id,
+      context: context,
+      notes: "TEST_DATA_#{timestamp}",
+      valid_from: Date.current,
+      created_at: Time.current,
+      updated_at: Time.current
+    }
+  end
+  
+  # Select curriculum terms based on tier and type
+  def select_curriculum_terms(curriculum_terms, tier, school_type)
+    return [] if curriculum_terms.blank?
+    
+    selected = []
+    
+    case tier
+    when :premium
+      # Premium schools: Full IB program or UK/US curricula
+      if school_type == :international || rand < 0.7
+        # IB pathway
+        selected += curriculum_terms.select { |t| t.slug.include?('ib_') }.sample(rand(2..4))
+      else
+        # UK/US pathway
+        uk_us_terms = curriculum_terms.select { |t| t.slug.match?(/uk_|us_/) }
+        selected += uk_us_terms.sample(rand(2..3))
+      end
+      
+    when :standard
+      # Standard schools: Mix of local and international
+      thai_curriculum = curriculum_terms.find { |t| t.slug == 'thai_national' }
+      selected << thai_curriculum if thai_curriculum
+      
+      # Add 1-2 international programs
+      int_terms = curriculum_terms.select { |t| !t.slug.include?('thai') }
+      selected += int_terms.sample(rand(1..2))
+      
+    when :basic
+      # Basic schools: Mainly Thai national with possible international option
+      thai_curriculum = curriculum_terms.find { |t| t.slug == 'thai_national' }
+      selected << thai_curriculum if thai_curriculum
+      
+      # 30% chance of one international program
+      if rand < 0.3
+        int_terms = curriculum_terms.select { |t| t.slug.match?(/uk_national|singapore/) }
+        selected += int_terms.sample(1) if int_terms.any?
+      end
+    end
+    
+    selected.uniq
+  end
+  
+  # Select accreditation terms based on tier
+  def select_accreditation_terms(accreditation_terms, tier)
+    return [] if accreditation_terms.blank?
+    
+    case tier
+    when :premium
+      # Premium schools get 2-4 accreditations
+      accreditation_terms.sample(rand(2..4))
+    when :standard
+      # Standard schools get 1-2 accreditations
+      accreditation_terms.sample(rand(1..2))
+    when :basic
+      # Basic schools get 0-1 accreditations
+      rand < 0.4 ? accreditation_terms.sample(1) : []
+    end
+  end
+  
+  # Select facility terms based on tier
+  def select_facility_terms(facility_terms, tier)
+    return [] if facility_terms.blank?
+    
+    # Basic facilities every school should have
+    basic_facilities = facility_terms.select { |t| %w[library cafeteria playground].include?(t.slug) }
+    selected = basic_facilities
+    
+    case tier
+    when :premium
+      # Premium facilities (12-15 total facilities)
+      premium_facilities = facility_terms.select { |t| 
+        %w[olympic_pool theatre science_labs computer_lab maker_space robotics_lab 
+           recording_studio sports_hall medical_center boarding_house].include?(t.slug) 
+      }
+      selected += premium_facilities.sample(rand(8..10))
+      
+    when :standard
+      # Standard facilities (8-12 total facilities)
+      standard_facilities = facility_terms.select { |t| 
+        %w[swimming_pool gymnasium basketball_court tennis_court science_labs 
+           computer_lab art_studio music_room].include?(t.slug) 
+      }
+      selected += standard_facilities.sample(rand(5..8))
+      
+    when :basic
+      # Basic facilities (6-8 total facilities)
+      basic_enhanced = facility_terms.select { |t| 
+        %w[gymnasium basketball_court computer_lab art_studio bus_service].include?(t.slug) 
+      }
+      selected += basic_enhanced.sample(rand(3..5))
+    end
+    
+    selected.uniq
+  end
+  
+  # Select extracurricular terms
+  def select_extracurricular_terms(extracurricular_terms, tier)
+    return [] if extracurricular_terms.blank?
+    
+    # Core activities most schools have
+    core_activities = extracurricular_terms.select { |t| 
+      %w[basketball volleyball arts_program team_sports].include?(t.slug) 
+    }
+    selected = core_activities.sample(rand(2..3))
+    
+    case tier
+    when :premium
+      # Advanced extracurriculars (6-8 total)
+      advanced = extracurricular_terms.select { |t| 
+        %w[model_un debate robotics coding math_olympiad drama music_band choir].include?(t.slug) 
+      }
+      selected += advanced.sample(rand(4..6))
+      
+    when :standard
+      # Standard extracurriculars (4-6 total)
+      standard = extracurricular_terms.select { |t| 
+        %w[student_council stem_club newspaper chess].include?(t.slug) 
+      }
+      selected += standard.sample(rand(2..4))
+      
+    when :basic
+      # Basic extracurriculars (3-5 total)
+      basic = extracurricular_terms.select { |t| 
+        %w[swimming martial_arts football badminton].include?(t.slug) 
+      }
+      selected += basic.sample(rand(1..3))
+    end
+    
+    selected.uniq
+  end
+  
+  # Select language terms based on school type
+  def select_language_terms(language_terms, school_type)
+    return [] if language_terms.blank?
+    
+    selected = []
+    
+    # English is common in most schools
+    english = language_terms.find { |t| t.slug == 'english' }
+    selected << english if english
+    
+    # Thai for local schools
+    thai = language_terms.find { |t| t.slug == 'thai' }
+    selected << thai if thai && school_type != :international
+    
+    case school_type
+    when :international
+      # International schools: English + 2-3 other languages
+      other_langs = language_terms.select { |t| !%w[english thai].include?(t.slug) }
+      selected += other_langs.sample(rand(2..3))
+      
+    when :christian, :general, :thai_traditional
+      # Add ESL and possibly one Asian language
+      esl = language_terms.find { |t| t.slug == 'esl' }
+      selected << esl if esl
+      
+      asian_langs = language_terms.select { |t| %w[mandarin japanese korean].include?(t.slug) }
+      selected += asian_langs.sample(rand(0..1))
+      
+    when :buddhist, :basic
+      # Mainly Thai with possible ESL
+      esl = language_terms.find { |t| t.slug == 'esl' }
+      selected << esl if esl && rand < 0.5
+    end
+    
+    selected.uniq
+  end
+  
+  # Select program terms
+  def select_program_terms(program_terms, tier)
+    return [] if program_terms.blank?
+    
+    # Common programs
+    common_programs = program_terms.select { |t| 
+      %w[learning_support counseling university_guidance].include?(t.slug) 
+    }
+    
+    case tier
+    when :premium
+      # Premium schools: 2-3 special programs
+      selected = common_programs.sample(2)
+      advanced = program_terms.select { |t| 
+        %w[gifted_talented leadership exchange_program summer_school].include?(t.slug) 
+      }
+      selected += advanced.sample(rand(1..2))
+      
+    when :standard
+      # Standard schools: 1-2 programs
+      selected = common_programs.sample(rand(1..2))
+      
+    when :basic
+      # Basic schools: 0-1 programs
+      rand < 0.6 ? common_programs.sample(1) : []
+    end
+  end
+  
+  # Generate realistic fee schedule
+  def generate_fee_schedule(school, tier, timestamp)
+    academic_year = "2024/25"
+    
+    # Fee ranges based on tier (in THB)
+    fee_ranges = {
+      premium: { min: 800_000, max: 1_200_000, app: (8_000..15_000), enroll: (50_000..100_000) },
+      standard: { min: 400_000, max: 800_000, app: (5_000..12_000), enroll: (25_000..60_000) },
+      basic: { min: 200_000, max: 450_000, app: (3_000..8_000), enroll: (10_000..30_000) }
+    }
+    
+    range = fee_ranges[tier]
+    min_tuition = rand(range[:min]..range[:max] * 0.8)
+    max_tuition = rand(min_tuition * 1.2..range[:max])
+    
+    fee_schedule = school.school_fee_schedules.create!(
+      academic_year: academic_year,
+      currency: 'THB',
+      min_tuition: min_tuition,
+      max_tuition: max_tuition,
+      application_fee: rand(range[:app]),
+      enrollment_fee: rand(range[:enroll]),
+      capital_levy: tier == :premium ? rand(20_000..50_000) : nil,
+      boarding_fee_annual: tier == :premium && rand < 0.3 ? rand(300_000..600_000) : nil,
+      transport_fee_annual: rand < 0.6 ? rand(25_000..80_000) : nil,
+      is_published: true,
+      notes: "TEST_DATA_#{timestamp}"
+    )
+  end
+  
+  # Generate grade offering
+  def generate_grade_offering(school, tier, school_type, timestamp)
+    # Determine age ranges based on school characteristics
+    age_ranges = case tier
+    when :premium
+      if school_type == :international
+        [[3, 18], [4, 16], [6, 18], [3, 12], [13, 18]].sample
+      else
+        [[6, 18], [6, 15], [7, 16]].sample
+      end
+    when :standard
+      [[6, 15], [6, 18], [7, 16], [4, 12]].sample
+    when :basic
+      [[6, 12], [6, 15], [7, 14]].sample
+    end
+    
+    min_age, max_age = age_ranges
+    grades = generate_grade_string(min_age, max_age)
+    
+    school.create_school_grade_offering!(
+      min_age: min_age,
+      max_age: max_age,
+      grades: grades,
+      notes: "TEST_DATA_#{timestamp}"
+    )
+  end
+  
+  # Generate realistic grade string
+  def generate_grade_string(min_age, max_age)
+    grades = []
+    
+    if min_age <= 4
+      grades << "Nursery/Pre-K"
+    end
+    
+    if min_age <= 5
+      grades << "Kindergarten"
+    end
+    
+    # Primary grades
+    primary_start = [1, [min_age - 5, 1].max].max
+    primary_end = [6, max_age - 5].min
+    
+    if primary_start <= primary_end && primary_end >= 1
+      if primary_start == primary_end
+        grades << "Grade #{primary_start}"
+      else
+        grades << "Grades #{primary_start}-#{primary_end}"
+      end
+    end
+    
+    # Secondary grades
+    if max_age >= 12
+      secondary_start = [7, [min_age - 5, 7].max].max
+      secondary_end = [12, max_age - 5].min
+      
+      if secondary_start <= secondary_end && secondary_end >= 7
+        if secondary_start == secondary_end
+          grades << "Grade #{secondary_start}"
+        else
+          grades << "Grades #{secondary_start}-#{secondary_end}"
+        end
+      end
+    end
+    
+    grades.join(', ')
+  end
+  
+  # Generate media items
+  def generate_media_items(school, tier, timestamp)
+    media_items = []
+    
+    # School logo (every school)
+    media_items << {
+      place_id: school.place_id,
+      kind: 'logo',
+      url: "https://via.placeholder.com/300x200/0066CC/FFFFFF?text=#{URI.encode_www_form_component(school.name.split.first)}",
+      alt_text: "TEST_DATA - Logo for #{school.name}",
+      sort_order: 1,
+      created_at: Time.current,
+      updated_at: Time.current
+    }
+    
+    # Additional photos based on tier
+    photo_count = case tier
+    when :premium then rand(4..8)
+    when :standard then rand(2..5) 
+    when :basic then rand(1..3)
+    end
+    
+    photo_types = ['campus', 'classroom', 'library', 'cafeteria', 'sports', 'lab', 'playground']
+    
+    photo_count.times do |i|
+      photo_type = photo_types.sample
+      media_items << {
+        place_id: school.place_id,
+        kind: 'photo',
+        url: "https://via.placeholder.com/800x600/#{['FF6B6B', '4ECDC4', '45B7D1', 'F7B731', 'A55EEA'].sample}/FFFFFF?text=#{photo_type.titleize}",
+        alt_text: "TEST_DATA - #{photo_type.titleize} at #{school.name}",
+        sort_order: i + 2,
+        created_at: Time.current,
+        updated_at: Time.current
+      }
+    end
+    
+    MediaItem.insert_all(media_items) if media_items.any?
+  end
+end

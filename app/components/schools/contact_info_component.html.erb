@@ -1,0 +1,54 @@
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+  <%= render Schools::SectionHeaderComponent.new(
+        title: "Contact & Location",
+        icon: "map-pin",
+        subtitle: "Get in touch and find directions"
+      ) %>
+
+  <div class="px-6 pb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Contact Information -->
+      <% if contact_items.any? %>
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            Contact Details
+          </h3>
+          <div class="space-y-3">
+            <% contact_items.each do |item| %>
+              <%= render Schools::DataRowComponent.new(
+                    label: item[:label],
+                    value: item[:value],
+                    icon: item[:icon],
+                    link: item[:link],
+                    format: item[:format]
+                  ) %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Location Information -->
+      <% if location_items.any? %>
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            Location Details
+          </h3>
+          <div class="space-y-3">
+            <% location_items.each do |item| %>
+              <%= render Schools::DataRowComponent.new(
+                    label: item[:label],
+                    value: item[:value],
+                    icon: item[:icon],
+                    link: item[:link],
+                    format: item[:format]
+                  ) %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+    </div>
+
+  </div>
+</div>

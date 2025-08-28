@@ -103,8 +103,24 @@ bin/rails generate view_component:preview [ComponentName]   # Generate component
 - Comprehensive OSM field mapping including multilingual names and Bangkok-specific address structure
 
 ### Admin Interface
-- **Administrate** gem provides admin panel at `/admin/`
-- Full CRUD operations for Points and Places with search and filtering capabilities
+- **Administrate** gem provides comprehensive admin panel at `/admin/`
+- Full CRUD operations for all models with search and filtering capabilities
+- **Terms model supports both numeric IDs and slugs** for URL routing (e.g., `/admin/terms/10` or `/admin/terms/thai_national`)
+- Available admin interfaces:
+  - `/admin/places` - Google Places API data management
+  - `/admin/points` - OpenStreetMap points of interest
+  - `/admin/schools` - Educational institutions with rich metadata
+  - `/admin/media_items` - Photos, videos, documents for places
+  - `/admin/events` - Scheduled events and programs
+  - `/admin/travel_times` - Transportation data and routes
+  - `/admin/school_claims` - Ownership and verification claims
+  - `/admin/school_fee_schedules` - Fee structures and pricing
+  - `/admin/school_grade_offerings` - Grade levels and curricula
+  - `/admin/taggings` - Taxonomy relationships and tagging system
+  - `/admin/terms` - Taxonomy terms and categories
+  - `/admin/audit_logs` - System activity and change tracking
+  - `/admin/vocabularies` - Taxonomy vocabularies and hierarchies
+  - `/admin/school_fee_bands` - Fee band structures and tiers
 
 ### Frontend Technologies
 - **Hotwire** (Turbo + Stimulus) for reactive frontend behavior
@@ -315,3 +331,14 @@ end
 - Check data import statistics with `data:osm_stats` task
 - View component previews at `/rails/view_components` in development
 - Flowbite components automatically initialized on page load
+- user has to have location in cookie in order for this solution to
+  work or else you get redirecte to onboarding. if you use pupeteer
+  this wontt work. so if you use pupeteer you have to bypass this
+  check and set something like lat lng 3.6923883,100.5171647 as a
+  placeholder and value for pupeteer so it dosent get stuck in
+  the onboarding
+
+## Styling Guidelines
+
+- Please use normal font black color everywhere on white background unless its a link
+- Style it with CSS so we can change it later if needed

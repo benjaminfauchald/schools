@@ -58,20 +58,20 @@ namespace :data do
     def get_schools_to_crawl
       puts "📊 Analyzing schools requiring website crawling..."
       
-      # Get all places with websites
-      all_with_websites = Place.where.not(website: [nil, ''])
+      # Get all schools with websites (via place association)
+      all_with_websites = School.joins(:place).where.not(places: {website: [nil, '']})
       
       # Categories for crawling status
-      never_crawled = all_with_websites.where(website_crawled_at: nil)
+      never_crawled = all_with_websites.where(schools: {website_crawled_at: nil})
       expired_crawls = all_with_websites.where(
-        'website_crawled_at < ?', 
+        'schools.website_crawled_at < ?', 
         MAX_CRAWL_AGE_DAYS.days.ago
       )
       recent_crawls = all_with_websites.where(
-        'website_crawled_at >= ?', 
+        'schools.website_crawled_at >= ?', 
         MAX_CRAWL_AGE_DAYS.days.ago
       )
-      failed_crawls = all_with_websites.where(website_crawling_status: 'failed')
+      failed_crawls = all_with_websites.where(schools: {website_crawling_status: 'failed'})
       
       puts "   📈 Website Crawling Status:"
       puts "   🆕 Never crawled: #{never_crawled.count}"
@@ -89,23 +89,23 @@ namespace :data do
         return []
       end
       
-      schools_to_process.includes(:point).order(:id)
+      schools_to_process.includes(:place).order(:id)
     end
 
-    def crawl_school_website(place)
-      puts "🔍 Crawling: #{place.name&.truncate(40) || "Place ##{place.id}"}"
-      puts "   🌐 URL: #{place.website}"
+    def crawl_school_website(school)
+      puts "🔍 Crawling: #{school.name&.truncate(40) || "School ##{school.id}"}"
+      puts "   🌐 URL: #{school.place.website}"
       
       # Update status to 'crawling'
       unless DRY_RUN
-        place.update!(
+        school.update!(
           website_crawling_status: 'crawling',
           website_crawling_error: nil
         )
       end
       
       # Call Python script to crawl the website
-      cmd = "python3 #{PYTHON_SCRIPT} --website \"#{place.website}\""
+      cmd = "python3 #{PYTHON_SCRIPT} --website \"#{school.place.website}\""
       stdout, stderr, status = Open3.capture3(cmd)
       
       if status.success?
@@ -115,8 +115,8 @@ namespace :data do
           
           if crawl_result['success']
             unless DRY_RUN
-              # Update place with crawl results
-              place.update!(
+              # Update school with crawl results
+              school.update!(
                 website_crawled_at: Time.current,
                 website_crawling_status: 'completed',
                 website_pages_found: crawl_result['pages_found'],
@@ -139,14 +139,14 @@ namespace :data do
             puts "   ❌ Crawl failed: #{error_msg.truncate(50)}"
             
             unless DRY_RUN
-              place.update!(
+              school.update!(
                 website_crawling_status: 'failed',
                 website_crawling_error: error_msg
               )
             end
             
             @stats[:failed_crawls] += 1
-            @stats[:errors] << "#{place.website}: #{error_msg}"
+            @stats[:errors] << "#{school.place.website}: #{error_msg}"
             return :failed
           end
           
@@ -155,14 +155,14 @@ namespace :data do
           puts "   💥 #{error_msg}"
           
           unless DRY_RUN
-            place.update!(
+            school.update!(
               website_crawling_status: 'failed', 
               website_crawling_error: error_msg
             )
           end
           
           @stats[:failed_crawls] += 1
-          @stats[:errors] << "#{place.website}: #{error_msg}"
+          @stats[:errors] << "#{school.place.website}: #{error_msg}"
           return :failed
         end
         
@@ -171,14 +171,14 @@ namespace :data do
         puts "   💥 #{error_msg}"
         
         unless DRY_RUN
-          place.update!(
+          school.update!(
             website_crawling_status: 'failed',
             website_crawling_error: error_msg
           )
         end
         
         @stats[:failed_crawls] += 1
-        @stats[:errors] << "#{place.website}: #{error_msg}"
+        @stats[:errors] << "#{school.place.website}: #{error_msg}"
         return :failed
       end
     end
@@ -225,14 +225,15 @@ namespace :data do
       end
       
       # Database statistics
-      total_crawled = Place.where.not(website_crawled_at: nil).count
-      successful_crawls = Place.where(website_crawling_status: 'completed').count
+      total_crawled = School.where.not(website_crawled_at: nil).count
+      successful_crawls = School.where(website_crawling_status: 'completed').count
+      schools_with_websites = School.joins(:place).where.not(places: {website: [nil, '']}).count
       
       puts "\n📈 Database Status:"
-      puts "   🌐 Total places with websites: #{Place.where.not(website: [nil, '']).count}"
-      puts "   📄 Places with crawl data: #{total_crawled}"
+      puts "   🌐 Total schools with websites: #{schools_with_websites}"
+      puts "   📄 Schools with crawl data: #{total_crawled}"
       puts "   ✅ Successful crawls: #{successful_crawls}"
-      puts "   📊 Average pages per school: #{Place.where.not(website_pages_found: nil).average(:website_pages_found)&.round(1)}"
+      puts "   📊 Average pages per school: #{School.where.not(website_pages_found: nil).average(:website_pages_found)&.round(1)}"
       
       # Error summary
       if @stats[:errors].any?
@@ -249,20 +250,20 @@ namespace :data do
       puts "🎉" * 25
     end
 
-    def should_skip_place?(place)
+    def should_skip_school?(school)
       # Skip if recently crawled and successful
-      if place.website_crawled_at&.> MAX_CRAWL_AGE_DAYS.days.ago
-        if place.website_crawling_status == 'completed'
-          days_old = ((Time.current - place.website_crawled_at) / 1.day).round(1)
-          puts "⏭️  Skipped: #{place.name&.truncate(40)} (crawled #{days_old} days ago)"
+      if school.website_crawled_at&.> MAX_CRAWL_AGE_DAYS.days.ago
+        if school.website_crawling_status == 'completed'
+          days_old = ((Time.current - school.website_crawled_at) / 1.day).round(1)
+          puts "⏭️  Skipped: #{school.name&.truncate(40)} (crawled #{days_old} days ago)"
           @stats[:skipped] += 1
           return true
         end
       end
       
       # Skip if website URL is invalid
-      unless place.website =~ URI::DEFAULT_PARSER.make_regexp(['http', 'https'])
-        puts "⚠️  Skipped: #{place.name&.truncate(40)} (invalid URL: #{place.website})"
+      unless school.place.website =~ URI::DEFAULT_PARSER.make_regexp(['http', 'https'])
+        puts "⚠️  Skipped: #{school.name&.truncate(40)} (invalid URL: #{school.place.website})"
         @stats[:skipped] += 1
         return true
       end
@@ -302,14 +303,14 @@ namespace :data do
         puts "\n📦 Processing batch #{batch_index}/#{total_batches}"
         puts "-" * 60
         
-        batch.each do |place|
+        batch.each do |school|
           @stats[:processed] += 1
           
           # Skip if not needed
-          next if should_skip_place?(place)
+          next if should_skip_school?(school)
           
           # Crawl the school website
-          crawl_school_website(place)
+          crawl_school_website(school)
           
           # Delay between crawls to respect rate limits
           if @stats[:processed] < @stats[:total_schools]

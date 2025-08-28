@@ -47,3 +47,82 @@
 2025-08-24 22:19:41,395 - INFO - 🔍 Starting crawl for https://example.com
 2025-08-24 22:21:14,496 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
 2025-08-24 22:34:13,330 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 22:50:20,788 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 22:50:20,789 - ERROR - 💥 Exception during crawl: 'Firecrawl' object has no attribute 'crawl_url' for http://www.australianisb.ac.th/
+2025-08-24 22:52:09,098 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 22:52:09,099 - ERROR - 💥 Exception during crawl: FirecrawlClient.crawl() takes 2 positional arguments but 3 were given for http://www.australianisb.ac.th/
+2025-08-24 22:54:01,236 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 22:54:50,896 - INFO - 📄 Found 32 pages for http://www.australianisb.ac.th/
+2025-08-24 22:54:50,896 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 32 pages
+2025-08-24 22:58:28,731 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 22:58:29,108 - ERROR - 💥 Exception during crawl: Payment Required: Failed to start crawl. Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value. - No additional error details provided. for http://www.australianisb.ac.th/
+2025-08-24 22:58:34,469 - INFO - 🔍 Starting crawl for http://www.rd.ac.th/
+2025-08-24 22:58:34,784 - ERROR - 💥 Exception during crawl: Payment Required: Failed to start crawl. Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value. - No additional error details provided. for http://www.rd.ac.th/
+2025-08-24 22:58:40,159 - INFO - 🔍 Starting crawl for https://www.facebook.com/klongpaklak?mibextid=ZbWKwL
+2025-08-24 22:58:40,476 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 3, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 49s, resets at Sun Aug 24 2025 15:59:28 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for https://www.facebook.com/klongpaklak?mibextid=ZbWKwL
+2025-08-24 22:58:55,804 - INFO - 🔍 Starting crawl for https://th168.pro/
+2025-08-24 22:58:56,123 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 4, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 33s, resets at Sun Aug 24 2025 15:59:28 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for https://th168.pro/
+2025-08-24 22:59:01,471 - INFO - 🔍 Starting crawl for http://www.chaengron.ac.th/
+2025-08-24 22:59:01,787 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 5, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 27s, resets at Sun Aug 24 2025 15:59:28 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for http://www.chaengron.ac.th/
+2025-08-24 22:59:07,130 - INFO - 🔍 Starting crawl for https://web.facebook.com/watchangronschool
+2025-08-24 22:59:07,450 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 6, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 22s, resets at Sun Aug 24 2025 15:59:28 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for https://web.facebook.com/watchangronschool
+2025-08-24 22:59:22,785 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100068992132162&mibextid=ZbWKwL
+2025-08-24 22:59:23,104 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 7, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 6s, resets at Sun Aug 24 2025 15:59:28 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for https://www.facebook.com/profile.php?id=100068992132162&mibextid=ZbWKwL
+2025-08-24 22:59:28,430 - INFO - 🔍 Starting crawl for https://www.facebook.com/Amnuayvid
+2025-08-24 22:59:28,747 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 8, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 1s, resets at Sun Aug 24 2025 15:59:28 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for https://www.facebook.com/Amnuayvid
+2025-08-24 22:59:34,079 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100092303633081&mibextid=ZbWKwL
+2025-08-24 22:59:34,389 - ERROR - 💥 Exception during crawl: Payment Required: Failed to start crawl. Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value. - No additional error details provided. for https://www.facebook.com/profile.php?id=100092303633081&mibextid=ZbWKwL
+2025-08-24 22:59:49,752 - INFO - 🔍 Starting crawl for http://www.watyai-school.ac.th/
+2025-08-24 22:59:50,073 - ERROR - 💥 Exception during crawl: Payment Required: Failed to start crawl. Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value. - No additional error details provided. for http://www.watyai-school.ac.th/
+2025-08-24 22:59:55,409 - INFO - 🔍 Starting crawl for https://www.facebook.com/Matthayomwatmaisamutkitwittayakom?mibextid=ZbWKwL
+2025-08-24 22:59:55,728 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 3, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 39s, resets at Sun Aug 24 2025 16:00:34 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for https://www.facebook.com/Matthayomwatmaisamutkitwittayakom?mibextid=ZbWKwL
+2025-08-24 23:00:01,039 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100057725587308&mibextid=ZbWKwL
+2025-08-24 23:00:01,364 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 4, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 33s, resets at Sun Aug 24 2025 16:00:34 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for https://www.facebook.com/profile.php?id=100057725587308&mibextid=ZbWKwL
+2025-08-24 23:00:16,715 - INFO - 🔍 Starting crawl for https://www.facebook.com/watwijittrakannimit?mibextid=ZbWKwL
+2025-08-24 23:00:17,026 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 5, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 17s, resets at Sun Aug 24 2025 16:00:34 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for https://www.facebook.com/watwijittrakannimit?mibextid=ZbWKwL
+2025-08-24 23:00:22,349 - INFO - 🔍 Starting crawl for https://www.facebook.com/WattanodeSchool?mibextid=ZbWKwL
+2025-08-24 23:00:22,666 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 6, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 12s, resets at Sun Aug 24 2025 16:00:34 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for https://www.facebook.com/WattanodeSchool?mibextid=ZbWKwL
+2025-08-24 23:00:27,989 - INFO - 🔍 Starting crawl for http://www.ps.ac.th/
+2025-08-24 23:00:28,305 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 7, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 6s, resets at Sun Aug 24 2025 16:00:34 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for http://www.ps.ac.th/
+2025-08-24 23:00:43,641 - INFO - 🔍 Starting crawl for http://www.peizhigongxue.com/
+2025-08-24 23:00:43,956 - ERROR - 💥 Exception during crawl: Payment Required: Failed to start crawl. Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value. - No additional error details provided. for http://www.peizhigongxue.com/
+2025-08-24 23:00:49,284 - INFO - 🔍 Starting crawl for http://www.bangkok.go.th/klongnongyai
+2025-08-24 23:00:49,603 - ERROR - 💥 Exception during crawl: Payment Required: Failed to start crawl. Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value. - No additional error details provided. for http://www.bangkok.go.th/klongnongyai
+2025-08-24 23:00:54,937 - INFO - 🔍 Starting crawl for https://www.facebook.com/ratnadda
+2025-08-24 23:00:55,259 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 3, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 49s, resets at Sun Aug 24 2025 16:01:43 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for https://www.facebook.com/ratnadda
+2025-08-24 23:01:10,659 - INFO - 🔍 Starting crawl for http://www.ssm.ac.th/
+2025-08-24 23:01:10,975 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 4, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 33s, resets at Sun Aug 24 2025 16:01:43 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for http://www.ssm.ac.th/
+2025-08-24 23:01:16,309 - INFO - 🔍 Starting crawl for http://www.kornpitack.ac.th/
+2025-08-24 23:01:16,622 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 5, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 27s, resets at Sun Aug 24 2025 16:01:43 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for http://www.kornpitack.ac.th/
+2025-08-24 23:01:21,932 - INFO - 🔍 Starting crawl for http://watmuangschool.blogspot.com/p/blog-page.html
+2025-08-24 23:01:22,244 - ERROR - 💥 Exception during crawl: Rate Limit Exceeded: Failed to start crawl. Rate limit exceeded. Consumed (req/min): 6, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 22s, resets at Sun Aug 24 2025 16:01:43 GMT+0000 (Coordinated Universal Time) - No additional error details provided. for http://watmuangschool.blogspot.com/p/blog-page.html
+2025-08-24 23:07:49,219 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:16:20,652 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:16:21,657 - ERROR - 💥 Exception during crawl: "Document" object has no field "data" for http://www.australianisb.ac.th/
+2025-08-24 23:17:01,977 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:17:02,862 - INFO - 📄 Found 1 pages for http://www.australianisb.ac.th/
+2025-08-24 23:17:02,862 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 1 pages
+2025-08-24 23:21:35,401 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:21:36,250 - INFO - 📄 Found 1 pages for http://www.australianisb.ac.th/
+2025-08-24 23:21:36,250 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 1 pages
+2025-08-24 23:22:04,961 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:22:05,934 - INFO - 📄 Found 1 pages for http://www.australianisb.ac.th/
+2025-08-24 23:22:05,934 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 1 pages
+2025-08-24 23:22:16,118 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:22:16,980 - INFO - 📄 Found 1 pages for http://www.australianisb.ac.th/
+2025-08-24 23:22:16,981 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 1 pages
+2025-08-24 23:23:53,276 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:23:54,497 - INFO - 📄 Found 1 pages for http://www.australianisb.ac.th/
+2025-08-24 23:23:54,498 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 1 pages
+2025-08-24 23:24:27,908 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:24:28,770 - INFO - 📄 Found 1 pages for http://www.australianisb.ac.th/
+2025-08-24 23:24:28,770 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 1 pages
+2025-08-24 23:27:43,286 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:28:43,926 - INFO - 📄 Found 5 pages for http://www.australianisb.ac.th/
+2025-08-24 23:28:43,928 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 5 pages
+2025-08-24 23:39:25,556 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:40:21,911 - INFO - 📄 Found 5 pages for http://www.australianisb.ac.th/
+2025-08-24 23:40:21,912 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 5 pages
+2025-08-24 23:56:55,074 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-24 23:59:01,345 - INFO - 📄 Found 5 pages for http://www.australianisb.ac.th/
+2025-08-24 23:59:01,345 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 5 pages

@@ -60,9 +60,9 @@ class PlaceDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-    id
     name
     formatted_address
+    rating
     business_status
   ].freeze
 
@@ -138,8 +138,7 @@ class PlaceDashboard < Administrate::BaseDashboard
 
   # Overwrite this method to customize how places are displayed
   # across all pages of the admin dashboard.
-  #
-  # def display_resource(place)
-  #   "Place ##{place.id}"
-  # end
+  def display_resource(place)
+    place.name || "Place ##{place.id}"
+  end
 end

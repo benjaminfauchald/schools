@@ -10,6 +10,11 @@ Rails.application.routes.draw do
       resources :school_claims
       resources :school_fee_schedules
       resources :school_grade_offerings
+      resources :taggings
+      resources :terms
+      resources :audit_logs
+      resources :vocabularies
+      resources :school_fee_bands
 
       root to: "places#index"
     end

@@ -174,8 +174,8 @@ class SchoolWebsiteCrawler:
         domain = urlparse(website_url).netloc
         
         return {
-            'limit': 20,  # Max pages per school (reasonable for schools)
-            'max_discovery_depth': 2,  # Don't go too deep into site structure
+            'limit': 5,  # Reduced limit to save credits
+            'max_discovery_depth': 1,  # Shallow crawl to save credits
             'exclude_paths': [
                 '/admin', '/wp-admin', '/login', '/signin', 
                 '/register', '/signup', '/dashboard', '/private',
@@ -214,15 +214,12 @@ class SchoolWebsiteCrawler:
         try:
             logging.info(f"🔍 Starting crawl for {website_url}")
             
-            # Start crawl job
+            # Use full crawl for structured data extraction
             crawl_options = self.get_crawl_options(website_url)
-            crawl_job = self.firecrawl.crawl(
-                url=website_url,
-                **crawl_options
-            )
+            crawl_job = self.firecrawl.crawl(url=website_url, **crawl_options)
             
             # Check if crawl job completed successfully 
-            if not hasattr(crawl_job, 'data') or crawl_job.data is None:
+            if not crawl_job or not hasattr(crawl_job, 'data') or not crawl_job.data:
                 error_msg = getattr(crawl_job, 'error', 'Crawl job failed to return data')
                 logging.error(f"❌ Crawl failed for {website_url}: {error_msg}")
                 return {
@@ -234,7 +231,7 @@ class SchoolWebsiteCrawler:
                 }
             
             # Extract data from crawl results
-            raw_pages = crawl_job.data or []
+            raw_pages = crawl_job.data
             pages_found = len(raw_pages)
             
             logging.info(f"📄 Found {pages_found} pages for {website_url}")
@@ -392,7 +389,15 @@ def main():
         elif args.website:
             # Crawl specific website
             result = crawler.crawl_school_website(args.website)
-            print(json.dumps(result, indent=2, ensure_ascii=False))
+            # Convert Document objects to dict for JSON serialization
+            if 'raw_data' in result:
+                result['raw_data'] = [{
+                    'url': getattr(doc, 'url', ''), 
+                    'title': getattr(doc, 'title', ''), 
+                    'markdown': getattr(doc, 'markdown', ''),
+                    'markdown_length': len(getattr(doc, 'markdown', ''))
+                } for doc in result['raw_data']]
+            print(json.dumps(result, ensure_ascii=False))
             
         elif args.school_id:
             # This would get the website from the Rails database
@@ -413,7 +418,9 @@ def main():
     except Exception as e:
         print(f"💥 Unexpected error: {e}")
     finally:
-        crawler.print_summary()
+        # Only print summary if not returning JSON data
+        if not (args.website or args.school_id):
+            crawler.print_summary()
 
 
 if __name__ == "__main__":

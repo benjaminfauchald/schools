@@ -47,6 +47,9 @@ class SchoolDashboard < Administrate::BaseDashboard
     travel_times: Field::HasMany,
     tsv: Field::String.with_options(searchable: false),
     website_url: Field::String,
+    facebook_url: Field::String,
+    line_id: Field::String,
+    whatsapp_number: Field::String,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
   }.freeze
@@ -105,6 +108,9 @@ class SchoolDashboard < Administrate::BaseDashboard
     travel_times
     tsv
     website_url
+    facebook_url
+    line_id
+    whatsapp_number
     created_at
     updated_at
   ].freeze
@@ -113,44 +119,31 @@ class SchoolDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+    name
+    slug
     about
+    place
+    ownership
+    status
     address_line_1
     address_line_2
-    admissions_url
-    audit_logs
-    avg_class_size
-    boarding
-    country_code
-    current_taggings
-    current_terms
     district
-    email
-    events
-    founded_year
-    geog
-    language_support_notes
-    last_verification_at
-    lat
-    lng
-    media_items
-    name
-    ownership
-    phone
-    place
-    postcode
     province
-    school_bus
-    school_claims
-    school_fee_schedules
-    school_grade_offering
-    slug
-    status
-    student_teacher_ratio
-    taggings
-    terms
-    travel_times
-    tsv
+    postcode
+    country_code
+    phone
+    email
     website_url
+    facebook_url
+    line_id
+    whatsapp_number
+    admissions_url
+    founded_year
+    avg_class_size
+    student_teacher_ratio
+    boarding
+    school_bus
+    language_support_notes
   ].freeze
 
   # COLLECTION_FILTERS
