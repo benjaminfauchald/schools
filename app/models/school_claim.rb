@@ -78,6 +78,11 @@ class SchoolClaim < ApplicationRecord
     pending? && days_pending > 30
   end
   
+  # Get user email for admin display
+  def user_email
+    user&.email
+  end
+  
   private
   
   def send_submission_notifications

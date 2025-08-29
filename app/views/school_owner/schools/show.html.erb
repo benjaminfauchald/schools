@@ -46,10 +46,10 @@
             <p class="mt-1 text-sm text-gray-900"><%= @school.name %></p>
           </div>
           
-          <% if @school.description.present? %>
+          <% if @school.about.present? %>
             <div>
-              <label class="block text-sm font-medium text-gray-700">Description</label>
-              <p class="mt-1 text-sm text-gray-900 whitespace-pre-wrap"><%= @school.description %></p>
+              <label class="block text-sm font-medium text-gray-700">About</label>
+              <p class="mt-1 text-sm text-gray-900 whitespace-pre-wrap"><%= @school.about %></p>
             </div>
           <% end %>
         </div>
@@ -93,38 +93,56 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700">Street Address</label>
-            <p class="mt-1 text-sm text-gray-900"><%= @school.address_street.presence || "Not provided" %></p>
+            <label class="block text-sm font-medium text-gray-700">Address Line 1</label>
+            <p class="mt-1 text-sm text-gray-900"><%= @school.address_line_1.presence || "Not provided" %></p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Address Line 2</label>
+            <p class="mt-1 text-sm text-gray-900"><%= @school.address_line_2.presence || "Not provided" %></p>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700">District</label>
-            <p class="mt-1 text-sm text-gray-900"><%= @school.address_district.presence || "Not provided" %></p>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Subdistrict</label>
-            <p class="mt-1 text-sm text-gray-900"><%= @school.address_subdistrict.presence || "Not provided" %></p>
+            <p class="mt-1 text-sm text-gray-900"><%= @school.district.presence || "Not provided" %></p>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Province</label>
-            <p class="mt-1 text-sm text-gray-900"><%= @school.address_province.presence || "Not provided" %></p>
+            <p class="mt-1 text-sm text-gray-900"><%= @school.province.presence || "Not provided" %></p>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700">Postal Code</label>
-            <p class="mt-1 text-sm text-gray-900"><%= @school.address_postal_code.presence || "Not provided" %></p>
+            <p class="mt-1 text-sm text-gray-900"><%= @school.postcode.presence || "Not provided" %></p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Country</label>
+            <p class="mt-1 text-sm text-gray-900"><%= @school.country_code.presence || "Not provided" %></p>
           </div>
         </div>
       </div>
 
-      <!-- Social Media -->
-      <% if @school.facebook_url.present? || @school.instagram_url.present? || @school.twitter_url.present? || @school.youtube_url.present? %>
+      <!-- Communication -->
+      <% if @school.facebook_url.present? || @school.line_id.present? || @school.whatsapp_number.present? || @school.admissions_url.present? %>
         <div class="bg-white border border-gray-200 rounded-lg p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">Social Media</h2>
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Communication & Social Media</h2>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <% if @school.admissions_url.present? %>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Admissions Page</label>
+                <a href="<%= @school.admissions_url %>" target="_blank" 
+                   class="mt-1 inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
+                  <%= @school.admissions_url %>
+                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                </a>
+              </div>
+            <% end %>
+            
             <% if @school.facebook_url.present? %>
               <div>
                 <label class="block text-sm font-medium text-gray-700">Facebook</label>
@@ -138,42 +156,17 @@
               </div>
             <% end %>
             
-            <% if @school.instagram_url.present? %>
+            <% if @school.line_id.present? %>
               <div>
-                <label class="block text-sm font-medium text-gray-700">Instagram</label>
-                <a href="<%= @school.instagram_url %>" target="_blank" 
-                   class="mt-1 inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
-                  <%= @school.instagram_url %>
-                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                </a>
+                <label class="block text-sm font-medium text-gray-700">LINE ID</label>
+                <p class="mt-1 text-sm text-gray-900"><%= @school.line_id %></p>
               </div>
             <% end %>
             
-            <% if @school.twitter_url.present? %>
+            <% if @school.whatsapp_number.present? %>
               <div>
-                <label class="block text-sm font-medium text-gray-700">Twitter</label>
-                <a href="<%= @school.twitter_url %>" target="_blank" 
-                   class="mt-1 inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
-                  <%= @school.twitter_url %>
-                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                </a>
-              </div>
-            <% end %>
-            
-            <% if @school.youtube_url.present? %>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">YouTube</label>
-                <a href="<%= @school.youtube_url %>" target="_blank" 
-                   class="mt-1 inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
-                  <%= @school.youtube_url %>
-                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                </a>
+                <label class="block text-sm font-medium text-gray-700">WhatsApp</label>
+                <p class="mt-1 text-sm text-gray-900"><%= @school.whatsapp_number %></p>
               </div>
             <% end %>
           </div>
@@ -189,11 +182,21 @@
         
         <div class="space-y-3">
           <% features = [] %>
-          <% features << "Boarding Available" if @school.boarding? %>
-          <% features << "School Bus Service" if @school.school_bus? %>
-          <% features << "International Curriculum" if @school.international? %>
-          <% features << "Bilingual Program" if @school.bilingual? %>
-          <% features << "Special Needs Support" if @school.special_needs? %>
+          <% features << "Boarding Available" if @school.boarding %>
+          <% features << "School Bus Service" if @school.school_bus %>
+          
+          <% # Check for additional features in text fields %>
+          <% if @school.about.present? %>
+            <% about_text = @school.about.downcase %>
+            <% features << "International Curriculum" if about_text.include?("international") %>
+            <% features << "Bilingual Program" if about_text.include?("bilingual") || about_text.include?("bi-lingual") %>
+            <% features << "Special Needs Support" if about_text.include?("special needs") || about_text.include?("inclusive") %>
+          <% end %>
+          
+          <% # Check language support notes %>
+          <% if @school.language_support_notes.present? %>
+            <% features << "Language Support Programs" %>
+          <% end %>
           
           <% if features.any? %>
             <% features.each do |feature| %>
@@ -207,40 +210,89 @@
           <% else %>
             <p class="text-sm text-gray-500">No special features listed</p>
           <% end %>
+          
+          <% if @school.language_support_notes.present? %>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+              <label class="block text-sm font-medium text-gray-700">Language Support & Programs</label>
+              <p class="mt-1 text-sm text-gray-600 whitespace-pre-wrap"><%= @school.language_support_notes %></p>
+            </div>
+          <% end %>
         </div>
       </div>
 
       <!-- Quick Stats -->
       <div class="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Stats</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">School Information</h3>
         
         <div class="space-y-3">
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-600">Created:</span>
-            <span class="text-sm text-gray-900"><%= @school.created_at.strftime("%B %d, %Y") %></span>
-          </div>
+          <% if @school.founded_year.present? %>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Founded:</span>
+              <span class="text-sm text-gray-900"><%= @school.founded_year %></span>
+            </div>
+          <% end %>
           
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-600">Last Updated:</span>
-            <span class="text-sm text-gray-900"><%= @school.updated_at.strftime("%B %d, %Y") %></span>
+          <% if @school.ownership.present? %>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Ownership:</span>
+              <span class="text-sm text-gray-900"><%= @school.ownership.titleize %></span>
+            </div>
+          <% end %>
+          
+          <% if @school.avg_class_size.present? %>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Avg Class Size:</span>
+              <span class="text-sm text-gray-900"><%= @school.avg_class_size %> students</span>
+            </div>
+          <% end %>
+          
+          <% if @school.student_teacher_ratio.present? %>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Student:Teacher:</span>
+              <span class="text-sm text-gray-900"><%= @school.student_teacher_ratio %>:1</span>
+            </div>
+          <% end %>
+          
+          <div class="pt-3 border-t border-gray-200">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Profile Created:</span>
+              <span class="text-sm text-gray-900"><%= @school.created_at.strftime("%B %d, %Y") %></span>
+            </div>
+            
+            <div class="flex justify-between mt-2">
+              <span class="text-sm text-gray-600">Last Updated:</span>
+              <span class="text-sm text-gray-900"><%= @school.updated_at.strftime("%B %d, %Y") %></span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Actions -->
       <div class="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Actions</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Manage School</h3>
         
         <div class="space-y-3">
           <%= link_to edit_school_owner_school_path(@school), 
-              class: "block w-full text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" do %>
+              class: "flex items-center justify-center w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
             Edit School Information
           <% end %>
           
-          <%= link_to school_path(@school), target: "_blank",
-              class: "block w-full text-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
-            View Public Page
-          <% end %>
+          <p class="text-xs text-gray-500 px-4">
+            Edit all school details including basic information, academic programs, and campus facilities in one comprehensive form.
+          </p>
+          
+          <div class="pt-3 border-t border-gray-200">
+            <%= link_to school_path(@school), target: "_blank",
+                class: "flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
+              View Public Page
+            <% end %>
+          </div>
         </div>
       </div>
     </div>

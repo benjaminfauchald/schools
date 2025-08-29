@@ -52,8 +52,8 @@
         </div>
         
         <div>
-          <%= form.label :description, "Description", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.text_area :description, rows: 4, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+          <%= form.label :about, "About the School", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_area :about, rows: 4, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
           <p class="mt-1 text-xs text-gray-500">Tell parents and students about your school's mission, values, and what makes you unique</p>
         </div>
       </div>
@@ -71,12 +71,18 @@
         </div>
         
         <div>
+          <%= form.label :admissions_url, "Admissions URL", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.url_field :admissions_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://www.yourschool.com/admissions" %>
+          <p class="mt-1 text-xs text-gray-500">Direct link to admissions page</p>
+        </div>
+        
+        <div>
           <%= form.label :phone, "Phone Number", class: "block text-sm font-medium text-gray-700" %>
           <%= form.telephone_field :phone, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "+66 2 123 4567" %>
           <p class="mt-1 text-xs text-gray-500">Main contact phone number</p>
         </div>
         
-        <div class="md:col-span-2">
+        <div>
           <%= form.label :email, "Email Address", class: "block text-sm font-medium text-gray-700" %>
           <%= form.email_field :email, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "info@yourschool.com" %>
           <p class="mt-1 text-xs text-gray-500">Main contact email address</p>
@@ -89,62 +95,66 @@
       <h2 class="text-lg font-medium text-gray-900 mb-4">Address</h2>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="md:col-span-2">
-          <%= form.label :address_street, "Street Address", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.text_field :address_street, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+        <div>
+          <%= form.label :address_line_1, "Address Line 1", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :address_line_1, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
           <p class="mt-1 text-xs text-gray-500">Street number, street name, building name</p>
         </div>
         
         <div>
-          <%= form.label :address_district, "District", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.text_field :address_district, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+          <%= form.label :address_line_2, "Address Line 2", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :address_line_2, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+          <p class="mt-1 text-xs text-gray-500">Additional address information (optional)</p>
+        </div>
+        
+        <div>
+          <%= form.label :district, "District", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :district, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
           <p class="mt-1 text-xs text-gray-500">District (เขต)</p>
         </div>
         
         <div>
-          <%= form.label :address_subdistrict, "Subdistrict", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.text_field :address_subdistrict, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
-          <p class="mt-1 text-xs text-gray-500">Subdistrict (แขวง)</p>
-        </div>
-        
-        <div>
-          <%= form.label :address_province, "Province", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.text_field :address_province, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+          <%= form.label :province, "Province", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :province, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
           <p class="mt-1 text-xs text-gray-500">Province (จังหวัด)</p>
         </div>
         
         <div>
-          <%= form.label :address_postal_code, "Postal Code", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.text_field :address_postal_code, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+          <%= form.label :postcode, "Postal Code", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :postcode, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
           <p class="mt-1 text-xs text-gray-500">5-digit postal code</p>
+        </div>
+        
+        <div>
+          <%= form.label :country_code, "Country", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :country_code, options_for_select([['Thailand', 'TH'], ['United States', 'US'], ['United Kingdom', 'GB'], ['Singapore', 'SG'], ['Malaysia', 'MY']], @school.country_code), { include_blank: "Select country" }, { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" } %>
+          <p class="mt-1 text-xs text-gray-500">Country location</p>
         </div>
       </div>
     </div>
 
-    <!-- Social Media -->
+    <!-- Social Media & Communication -->
     <div class="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 class="text-lg font-medium text-gray-900 mb-4">Social Media</h2>
-      <p class="text-sm text-gray-600 mb-6">Help parents connect with your school on social media</p>
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Social Media & Communication</h2>
+      <p class="text-sm text-gray-600 mb-6">Help parents connect with your school</p>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <%= form.label :facebook_url, "Facebook Page", class: "block text-sm font-medium text-gray-700" %>
           <%= form.url_field :facebook_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://www.facebook.com/yourschool" %>
+          <p class="mt-1 text-xs text-gray-500">Your school's Facebook page</p>
         </div>
         
         <div>
-          <%= form.label :instagram_url, "Instagram Account", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.url_field :instagram_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://www.instagram.com/yourschool" %>
+          <%= form.label :line_id, "LINE ID", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :line_id, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "@yourschool" %>
+          <p class="mt-1 text-xs text-gray-500">LINE Official Account ID</p>
         </div>
         
         <div>
-          <%= form.label :twitter_url, "Twitter/X Account", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.url_field :twitter_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://twitter.com/yourschool" %>
-        </div>
-        
-        <div>
-          <%= form.label :youtube_url, "YouTube Channel", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.url_field :youtube_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://www.youtube.com/c/yourschool" %>
+          <%= form.label :whatsapp_number, "WhatsApp Number", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.telephone_field :whatsapp_number, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "+66 91 234 5678" %>
+          <p class="mt-1 text-xs text-gray-500">WhatsApp contact number</p>
         </div>
       </div>
     </div>
@@ -152,7 +162,7 @@
     <!-- School Features -->
     <div class="bg-white border border-gray-200 rounded-lg p-6">
       <h2 class="text-lg font-medium text-gray-900 mb-4">School Features</h2>
-      <p class="text-sm text-gray-600 mb-6">Check all features that apply to your school</p>
+      <p class="text-sm text-gray-600 mb-6">Information about your school's facilities and programs</p>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="flex items-start">
@@ -175,35 +185,199 @@
           </div>
         </div>
         
-        <div class="flex items-start">
-          <div class="flex items-center h-5">
-            <%= form.check_box :international, class: "h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
-          </div>
-          <div class="ml-3">
-            <%= form.label :international, "International Curriculum", class: "text-sm font-medium text-gray-700" %>
-            <p class="text-xs text-gray-500">International programs available</p>
+        <div class="md:col-span-2">
+          <%= form.label :language_support_notes, "Language Support & Programs", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_area :language_support_notes, rows: 3, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+          <p class="mt-1 text-xs text-gray-500">Describe language programs, bilingual education, ESL support, or special needs programs available</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- School Details -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <h2 class="text-lg font-medium text-gray-900 mb-4">School Details</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <%= form.label :founded_year, "Founded Year", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.number_field :founded_year, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", min: 1800, max: Date.current.year %>
+          <p class="mt-1 text-xs text-gray-500">Year the school was established</p>
+        </div>
+        
+        <div>
+          <%= form.label :ownership, "Ownership Type", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :ownership, options_for_select([['Public', 'public'], ['Private', 'private'], ['International', 'international'], ['Religious', 'religious']], @school.ownership), { include_blank: "Select type" }, { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" } %>
+          <p class="mt-1 text-xs text-gray-500">Type of school ownership</p>
+        </div>
+        
+        <div>
+          <%= form.label :avg_class_size, "Average Class Size", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.number_field :avg_class_size, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", min: 1, max: 50 %>
+          <p class="mt-1 text-xs text-gray-500">Typical number of students per class</p>
+        </div>
+        
+        <div>
+          <%= form.label :student_teacher_ratio, "Student-Teacher Ratio", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.number_field :student_teacher_ratio, step: 0.1, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", min: 1, max: 50 %>
+          <p class="mt-1 text-xs text-gray-500">Number of students per teacher</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Academic Programs -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="flex items-center mb-6">
+        <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+        <div>
+          <h2 class="text-lg font-medium text-gray-900">Academic Programs</h2>
+          <p class="text-sm text-gray-600">Curriculum, accreditations, and educational offerings</p>
+        </div>
+      </div>
+      
+      <div class="space-y-6">
+        <!-- Curriculum Programs -->
+        <div>
+          <h3 class="text-md font-medium text-gray-900 mb-3">Curriculum Programs</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <% current_curriculum = @school.curricula.pluck(:slug) %>
+            <% @vocabularies[:curriculum].each do |term| %>
+              <div class="relative flex items-start">
+                <div class="flex items-center h-5">
+                  <%= check_box_tag "school[curriculum][]", term.slug, current_curriculum.include?(term.slug), 
+                      class: "h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <%= label_tag "school_curriculum_#{term.slug}", term.label, class: "font-medium text-gray-700" %>
+                  <% if term.description.present? %>
+                    <p class="text-gray-500"><%= truncate(term.description, length: 60) %></p>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
           </div>
         </div>
         
-        <div class="flex items-start">
-          <div class="flex items-center h-5">
-            <%= form.check_box :bilingual, class: "h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
-          </div>
-          <div class="ml-3">
-            <%= form.label :bilingual, "Bilingual Program", class: "text-sm font-medium text-gray-700" %>
-            <p class="text-xs text-gray-500">Multiple language instruction</p>
+        <!-- Accreditations -->
+        <div>
+          <h3 class="text-md font-medium text-gray-900 mb-3">Accreditations</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <% current_accreditations = @school.accreditations.pluck(:slug) %>
+            <% @vocabularies[:accreditation].each do |term| %>
+              <div class="relative flex items-start">
+                <div class="flex items-center h-5">
+                  <%= check_box_tag "school[accreditation][]", term.slug, current_accreditations.include?(term.slug), 
+                      class: "h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500" %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <%= label_tag "school_accreditation_#{term.slug}", term.label, class: "font-medium text-gray-700" %>
+                  <% if term.description.present? %>
+                    <p class="text-gray-500"><%= truncate(term.description, length: 60) %></p>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
           </div>
         </div>
         
-        <div class="flex items-start md:col-span-2">
-          <div class="flex items-center h-5">
-            <%= form.check_box :special_needs, class: "h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
-          </div>
-          <div class="ml-3">
-            <%= form.label :special_needs, "Special Needs Support", class: "text-sm font-medium text-gray-700" %>
-            <p class="text-xs text-gray-500">Programs for students with special learning needs</p>
+        <!-- Languages -->
+        <div>
+          <h3 class="text-md font-medium text-gray-900 mb-3">Languages</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <% current_languages = @school.languages.pluck(:slug) %>
+            <% @vocabularies[:language].each do |term| %>
+              <div class="relative flex items-start">
+                <div class="flex items-center h-5">
+                  <%= check_box_tag "school[language][]", term.slug, current_languages.include?(term.slug), 
+                      class: "h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <%= label_tag "school_language_#{term.slug}", term.label, class: "font-medium text-gray-700" %>
+                  <% if term.description.present? %>
+                    <p class="text-gray-500"><%= truncate(term.description, length: 60) %></p>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
           </div>
         </div>
+        
+        <!-- Special Programs -->
+        <div>
+          <h3 class="text-md font-medium text-gray-900 mb-3">Special Programs</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <% current_programs = @school.programs.pluck(:slug) %>
+            <% @vocabularies[:program].each do |term| %>
+              <div class="relative flex items-start">
+                <div class="flex items-center h-5">
+                  <%= check_box_tag "school[program][]", term.slug, current_programs.include?(term.slug), 
+                      class: "h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500" %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <%= label_tag "school_program_#{term.slug}", term.label, class: "font-medium text-gray-700" %>
+                  <% if term.description.present? %>
+                    <p class="text-gray-500"><%= truncate(term.description, length: 60) %></p>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campus Facilities -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="flex items-center mb-6">
+        <svg class="w-6 h-6 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+        <div>
+          <h2 class="text-lg font-medium text-gray-900">Campus Facilities</h2>
+          <p class="text-sm text-gray-600">Modern facilities supporting student learning and development</p>
+        </div>
+      </div>
+      
+      <!-- Group facilities by category -->
+      <% current_facilities = @school.facilities.pluck(:slug) %>
+      <% 
+        facility_categories = {
+          "Academic Facilities" => @facility_terms.select { |f| f.metadata&.dig('category') == 'Academic' },
+          "Sports & Recreation" => @facility_terms.select { |f| f.metadata&.dig('category') == 'Sports' },
+          "Arts & Culture" => @facility_terms.select { |f| f.metadata&.dig('category') == 'Arts' },
+          "Dining & Nutrition" => @facility_terms.select { |f| f.metadata&.dig('category') == 'Dining' },
+          "Technology" => @facility_terms.select { |f| f.metadata&.dig('category') == 'Technology' },
+          "Health & Wellness" => @facility_terms.select { |f| f.metadata&.dig('category') == 'Health' },
+          "Campus Services" => @facility_terms.select { |f| f.metadata&.dig('category') == 'Services' },
+          "Other Facilities" => @facility_terms.select { |f| f.metadata&.dig('category').nil? || !['Academic', 'Sports', 'Arts', 'Dining', 'Technology', 'Health', 'Services'].include?(f.metadata&.dig('category')) }
+        }
+      %>
+      
+      <div class="space-y-4">
+        <% facility_categories.each do |category_name, category_facilities| %>
+          <% next if category_facilities.empty? %>
+          
+          <div>
+            <h3 class="text-md font-medium text-gray-900 mb-3"><%= category_name %></h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <% category_facilities.each do |term| %>
+                <div class="relative flex items-start">
+                  <div class="flex items-center h-5">
+                    <%= check_box_tag "school[facility][]", term.slug, current_facilities.include?(term.slug), 
+                        class: "h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" %>
+                  </div>
+                  <div class="ml-3 text-sm">
+                    <%= label_tag "school_facility_#{term.slug}", term.label, class: "font-medium text-gray-700" %>
+                    <% if term.description.present? %>
+                      <p class="text-gray-500"><%= truncate(term.description, length: 60) %></p>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
       </div>
     </div>
 
@@ -214,6 +388,9 @@
           <p class="text-sm text-gray-600">
             Changes will be visible to parents and students on your school's public page immediately.
           </p>
+          <p class="text-xs text-gray-500 mt-1">
+            This includes basic information, academic programs, and campus facilities.
+          </p>
         </div>
         
         <div class="flex space-x-3">
@@ -222,7 +399,7 @@
             Cancel
           <% end %>
           
-          <%= form.submit "Save Changes", 
+          <%= form.submit "Save School Information", 
               class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
         </div>
       </div>

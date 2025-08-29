@@ -25,10 +25,22 @@ Rails.application.routes.draw do
   # School Owner Dashboard
   namespace :school_owner do
     resources :dashboard, only: [:index]
-    resources :schools, only: [:index, :show, :edit, :update]
+    resources :schools, only: [:index, :show, :edit, :update] do
+      member do
+        get :academic_programs
+        patch :update_academic_programs
+        get :facilities
+        patch :update_facilities
+      end
+    end
     resources :claims, only: [:index, :show, :new, :create] do
       member do
         get :evidence
+      end
+    end
+    resources :diagnostics, only: [] do
+      collection do
+        get :schema_info
       end
     end
   end

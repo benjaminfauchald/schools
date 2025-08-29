@@ -27,7 +27,7 @@
           <div class="p-6 pb-4">
             <h3 class="text-lg font-medium text-gray-900 mb-2"><%= school.name %></h3>
             <p class="text-sm text-gray-600 line-clamp-3">
-              <%= school.description.present? ? truncate(school.description, length: 120) : "No description provided" %>
+              <%= school.about.present? ? truncate(school.about, length: 120) : "No about information provided" %>
             </p>
           </div>
 
@@ -68,11 +68,22 @@
 
           <!-- School Features -->
           <% features = [] %>
-          <% features << "Boarding" if school.boarding? %>
-          <% features << "Bus Service" if school.school_bus? %>
-          <% features << "International" if school.international? %>
-          <% features << "Bilingual" if school.bilingual? %>
-          <% features << "Special Needs" if school.special_needs? %>
+          <% features << "Boarding" if school.boarding %>
+          <% features << "Bus Service" if school.school_bus %>
+          
+          <% # Check for additional features in text fields %>
+          <% if school.about.present? %>
+            <% about_text = school.about.downcase %>
+            <% features << "International" if about_text.include?("international") %>
+            <% features << "Bilingual" if about_text.include?("bilingual") || about_text.include?("bi-lingual") %>
+            <% features << "Special Needs" if about_text.include?("special needs") || about_text.include?("inclusive") %>
+          <% end %>
+          
+          <% # Check language support notes %>
+          <% if school.language_support_notes.present? %>
+            <% lang_notes = school.language_support_notes.downcase %>
+            <% features << "Language Support" if !features.include?("Language Support") %>
+          <% end %>
           
           <% if features.any? %>
             <div class="px-6 pb-4">

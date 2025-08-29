@@ -12,7 +12,8 @@ class SchoolClaimDashboard < Administrate::BaseDashboard
     admin_notes: Field::Text,
     evidence_url: Field::String,
     school: Field::BelongsTo,
-    user: Field::BelongsTo,
+    user: Field::BelongsTo.with_options(display_name: :email),
+    user_email: Field::String.with_options(searchable: true),
     status: Field::Select.with_options(searchable: false, collection: ->(field) { field.resource.class.send(field.attribute.to_s.pluralize).keys }),
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
@@ -26,7 +27,7 @@ class SchoolClaimDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
     id
     school
-    user
+    user_email
     status
     created_at
   ].freeze
