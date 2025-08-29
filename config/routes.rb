@@ -31,6 +31,7 @@ Rails.application.routes.draw do
         patch :update_academic_programs
         get :facilities
         patch :update_facilities
+        delete 'photos/:photo_id', action: :delete_photo, as: :delete_photo
       end
     end
     resources :claims, only: [:index, :show, :new, :create] do

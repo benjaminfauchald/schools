@@ -3,6 +3,9 @@
 class School < ApplicationRecord
   belongs_to :place, optional: true
   
+  # Active Storage attachments
+  has_many_attached :photos
+  
   # School-specific associations
   has_one :school_grade_offering, dependent: :destroy
   has_many :school_fee_schedules, dependent: :destroy

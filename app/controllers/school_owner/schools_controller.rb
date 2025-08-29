@@ -22,30 +22,36 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     @facility_vocabulary = Vocabulary.find_by(code: 'facility')
     @facility_terms = @facility_vocabulary&.terms&.includes(:parent) || []
     
-    # Extract taxonomy parameters separately
-    taxonomy_params = school_params.extract!(:curriculum, :accreditation, :language, :program, :facility)
+    # Extract taxonomy parameters separately from all params
+    all_params = all_school_params
+    taxonomy_params = all_params.extract!(:curriculum, :accreditation, :language, :program, :facility)
     
     # Update basic school attributes
     school_updated = @school.update(school_params)
     
     # Update taxonomy if basic school data updated successfully
     taxonomy_updated = true
-    if school_updated && taxonomy_params.any? { |_, v| v.present? }
+    if school_updated && taxonomy_params.to_h.any? { |_, v| v.present? }
       taxonomy_updated = update_school_taxonomy(taxonomy_params)
     end
     
     if school_updated && taxonomy_updated
       # Log the update
       changed_fields = school_params.keys
-      changed_fields << 'academic_programs' if taxonomy_params.slice(:curriculum, :accreditation, :language, :program).any? { |_, v| v.present? }
+      changed_fields << 'academic_programs' if taxonomy_params.slice(:curriculum, :accreditation, :language, :program).to_h.any? { |_, v| v.present? }
       changed_fields << 'facilities' if taxonomy_params[:facility].present?
       
       create_audit_log(@school, 'update', changed_fields)
       
-      redirect_to school_owner_school_path(@school), 
-                  notice: 'School information updated successfully.'
+      respond_to do |format|
+        format.html { redirect_to school_owner_school_path(@school), notice: 'School information updated successfully.' }
+        format.json { render json: { success: true, message: 'School information updated successfully.' } }
+      end
     else
-      render :edit, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: @school.errors.full_messages } }
+      end
     end
   end
   
@@ -60,10 +66,16 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     
     if update_school_taxonomy(academic_program_params)
       create_audit_log(@school, 'update', ['academic_programs'])
-      redirect_to academic_programs_school_owner_school_path(@school), 
-                  notice: 'Academic programs updated successfully.'
+      respond_to do |format|
+        format.html { redirect_to edit_school_owner_school_path(@school, anchor: 'academic-programs'), 
+                      notice: 'Academic programs updated successfully.' }
+        format.json { render json: { success: true, message: 'Academic programs updated successfully.' } }
+      end
     else
-      render :academic_programs, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :academic_programs, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: 'Failed to update academic programs' } }
+      end
     end
   end
   
@@ -80,10 +92,39 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     
     if update_school_taxonomy(facility_params)
       create_audit_log(@school, 'update', ['facilities'])
-      redirect_to facilities_school_owner_school_path(@school), 
-                  notice: 'Campus facilities updated successfully.'
+      respond_to do |format|
+        format.html { redirect_to edit_school_owner_school_path(@school, anchor: 'facilities'), 
+                      notice: 'Campus facilities updated successfully.' }
+        format.json { render json: { success: true, message: 'Campus facilities updated successfully.' } }
+      end
     else
-      render :facilities, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :facilities, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: 'Failed to update facilities' } }
+      end
+    end
+  end
+  
+  def delete_photo
+    @school = current_school
+    photo = @school.photos.find(params[:photo_id])
+    
+    if photo.purge
+      create_audit_log(@school, 'delete', ['photo'])
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school, anchor: 'photos'), notice: 'Photo deleted successfully.') }
+        format.json { render json: { success: true, message: 'Photo deleted successfully.' } }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school, anchor: 'photos'), alert: 'Failed to delete photo.') }
+        format.json { render json: { success: false, message: 'Failed to delete photo.' } }
+      end
+    end
+  rescue ActiveRecord::RecordNotFound
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school, anchor: 'photos'), alert: 'Photo not found.') }
+      format.json { render json: { success: false, message: 'Photo not found.' } }
     end
   end
   
@@ -100,7 +141,18 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       :facebook_url, :line_id, :whatsapp_number,
       :founded_year, :ownership, :avg_class_size, :student_teacher_ratio,
       :boarding, :school_bus, :language_support_notes,
-      curriculum: [], accreditation: [], language: [], program: [], facility: []
+      photos: []
+    )
+  end
+  
+  def all_school_params
+    params.require(:school).permit(
+      :name, :about, :website_url, :admissions_url, :phone, :email,
+      :address_line_1, :address_line_2, :district, :province, :postcode, :country_code,
+      :facebook_url, :line_id, :whatsapp_number,
+      :founded_year, :ownership, :avg_class_size, :student_teacher_ratio,
+      :boarding, :school_bus, :language_support_notes,
+      photos: [], curriculum: [], accreditation: [], language: [], program: [], facility: []
     )
   end
   

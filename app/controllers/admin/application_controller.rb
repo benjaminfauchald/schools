@@ -6,9 +6,6 @@
 # you're free to overwrite the RESTful controller actions.
 module Admin
   class ApplicationController < Administrate::ApplicationController
-    # Skip parent ApplicationController callbacks that might interfere
-    skip_before_action :check_home_location, if: :respond_to?
-    
     before_action :authenticate_admin
     before_action :ensure_admin_access
 

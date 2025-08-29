@@ -7,6 +7,25 @@ class Page < ApplicationRecord
   validates :page_type, presence: true
   validates :status, inclusion: { in: %w[draft published archived] }
   
+  # Define common page types
+  PAGE_TYPES = {
+    'about_us' => 'About Us',
+    'blog' => 'Blog Post', 
+    'academics' => 'Academics',
+    'sports' => 'Sports',
+    'activities' => 'Activities',
+    'news' => 'News',
+    'events' => 'Events',
+    'admissions' => 'Admissions',
+    'contact' => 'Contact',
+    'general' => 'General Page'
+  }.freeze
+  
+  # Class method to get page types for forms
+  def self.page_types
+    PAGE_TYPES
+  end
+  
   # Flexible page types - can be any string value
   scope :by_type, ->(type) { where(page_type: type) }
   

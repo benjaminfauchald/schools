@@ -1,0 +1,71 @@
+<div class="field-unit__label">
+  <%= f.label field.attribute, class: "field-unit__label" %>
+</div>
+
+<div class="field-unit__field">
+  <div data-controller="trix-editor">
+    <input type="hidden" 
+           name="<%= f.object_name %>[<%= field.attribute %>]" 
+           id="<%= "#{f.object_name}_#{field.attribute}_trix_input" %>"
+           value="<%= field.data %>">
+    
+    <trix-editor 
+      input="<%= "#{f.object_name}_#{field.attribute}_trix_input" %>"
+      data-trix-editor-target="editor"
+      class="trix-content"
+      placeholder="Write your content here..."
+      style="min-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
+    </trix-editor>
+  </div>
+</div>
+
+<style>
+  trix-editor {
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    min-height: 200px;
+    line-height: 1.5;
+  }
+  
+  trix-editor:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-color: #3b82f6;
+  }
+  
+  trix-toolbar {
+    border: 1px solid #d1d5db;
+    border-bottom: none;
+    border-radius: 0.375rem 0.375rem 0 0;
+    background: #f9fafb;
+    padding: 0.5rem;
+  }
+  
+  trix-editor + trix-toolbar {
+    border-radius: 0 0 0.375rem 0.375rem;
+    border-top: none;
+    border-bottom: 1px solid #d1d5db;
+  }
+  
+  .trix-button-group {
+    margin: 0 0.25rem;
+  }
+  
+  .trix-button {
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    margin: 0.125rem;
+  }
+  
+  .trix-button:hover {
+    background: #f3f4f6;
+  }
+  
+  .trix-button.trix-active {
+    background: #3b82f6;
+    color: white;
+  }
+</style>

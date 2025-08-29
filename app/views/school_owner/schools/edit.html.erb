@@ -1,47 +1,239 @@
 <% content_for :title, "Edit #{@school.name}" %>
 
-<div class="max-w-4xl mx-auto">
+<div class="min-h-screen bg-gray-50">
   <!-- Header -->
-  <div class="mb-6">
-    <%= link_to school_owner_school_path(@school), class: "inline-flex items-center text-blue-600 hover:text-blue-800 mb-4" do %>
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-      </svg>
-      Back to School
-    <% end %>
-    
-    <h1 class="text-2xl font-bold text-gray-900">Edit School Information</h1>
-    <p class="mt-1 text-sm text-gray-600">Update your school's information to help parents and students find you.</p>
-  </div>
-
-  <!-- Form -->
-  <%= form_with model: [@school], url: school_owner_school_path(@school), method: :patch, local: true, class: "space-y-6" do |form| %>
-    
-    <!-- Error Messages -->
-    <% if @school.errors.any? %>
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            </svg>
+  <div class="bg-white border-b border-gray-200">
+    <div class="flex">
+      <!-- Left area with Back link -->
+      <div class="hidden lg:block w-64 px-6 py-4">
+        <%= link_to school_owner_school_path(@school), class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Back to School
+        <% end %>
+      </div>
+      
+      <!-- Header content aligned with main content -->
+      <div class="flex-1 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-xl font-semibold text-gray-900">Edit School Information</h1>
+            <p class="text-sm text-gray-500">Update your school's information to help parents and students find you.</p>
           </div>
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
-            <div class="mt-2 text-sm text-red-700">
-              <ul class="list-disc space-y-1 pl-5">
-                <% @school.errors.full_messages.each do |message| %>
-                  <li><%= message %></li>
-                <% end %>
-              </ul>
-            </div>
+          
+          
+          <!-- Mobile menu button and mobile back link -->
+          <div class="lg:hidden flex items-center space-x-4">
+            <%= link_to school_owner_school_path(@school), class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+              Back
+            <% end %>
+            
+            <button type="button" 
+                    data-action="click->school-form-navigation#toggleMobileMenu"
+                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
-    <% end %>
+    </div>
+  </div>
 
-    <!-- Basic Information -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
+  <!-- Main Layout -->
+  <div class="flex flex-1" 
+       data-controller="school-form-navigation"
+       data-school-form-navigation-current-section-value="basic-information"
+       data-school-form-navigation-completed-sections-value="[]">
+    
+    <!-- Sidebar Navigation -->
+    <div class="hidden lg:flex lg:flex-shrink-0">
+      <div class="flex flex-col w-64">
+        <div class="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto bg-white border-r border-gray-200">
+          <nav class="mt-5 flex-1 px-2 space-y-1">
+            <!-- Basic Information -->
+            <a href="#basic-information" 
+               data-section="basic-information"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="bg-blue-50 border-blue-500 text-blue-700 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-blue-500 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Basic Information
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+
+            <!-- Contact Information -->
+            <a href="#contact-information" 
+               data-section="contact-information"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              Contact Information
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+
+            <!-- Address -->
+            <a href="#address" 
+               data-section="address"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              Address
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+
+            <!-- Social Media & Communication -->
+            <a href="#social-media" 
+               data-section="social-media"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+              </svg>
+              Social Media
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+
+            <!-- School Features -->
+            <a href="#school-features" 
+               data-section="school-features"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+              </svg>
+              School Features
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+
+            <!-- School Details -->
+            <a href="#school-details" 
+               data-section="school-details"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              School Details
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+
+            <!-- Academic Programs -->
+            <a href="#academic-programs" 
+               data-section="academic-programs"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+              </svg>
+              Academic Programs
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+
+            <!-- Campus Facilities -->
+            <a href="#campus-facilities" 
+               data-section="campus-facilities"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              Campus Facilities
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+
+            <!-- Photos -->
+            <a href="#photos" 
+               data-section="photos"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              Photos
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+          </nav>
+                </div>
+                </div>
+              </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div data-school-form-navigation-target="mobileMenu" 
+         class="lg:hidden hidden fixed inset-0 flex z-40">
+      <div class="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
+      <div class="relative flex-1 flex flex-col max-w-xs w-full bg-white">
+        <div class="absolute top-0 right-0 -mr-12 pt-2">
+          <button type="button" 
+                  data-action="click->school-form-navigation#closeMobileMenu"
+                  class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+          <nav class="mt-5 px-2 space-y-1">
+            <!-- Mobile navigation items (same as desktop) -->
+          </nav>
+                </div>
+                </div>
+              </div>
+
+    <!-- Main Content Area -->
+    <div class="flex flex-col flex-1 min-w-0">
+      <div class="form-content flex-1 relative z-0 overflow-y-auto focus:outline-none">
+          <!-- Form -->
+          <%= form_with model: [@school], url: school_owner_school_path(@school), method: :patch, local: false, class: "h-full", data: { controller: "school-form", action: "submit->school-form#handleSubmit" } do |form| %>
+            <div class="p-6 space-y-8">
+              
+              <!-- Global Error Messages -->
+              <% if @school.errors.any? %>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div class="ml-3">
+                      <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                      <div class="mt-2 text-sm text-red-700">
+                        <ul class="list-disc space-y-1 pl-5">
+                          <% @school.errors.full_messages.each do |message| %>
+                            <li><%= message %></li>
+                          <% end %>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- Basic Information Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="basic-information" 
+                   class="bg-white border border-gray-200 rounded-lg p-6">
       <h2 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
       
       <div class="grid grid-cols-1 gap-6">
@@ -57,13 +249,15 @@
           <p class="mt-1 text-xs text-gray-500">Tell parents and students about your school's mission, values, and what makes you unique</p>
         </div>
       </div>
-    </div>
+              </div>
 
-    <!-- Contact Information -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Contact Information Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="contact-information" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <%= form.label :website_url, "Website URL", class: "block text-sm font-medium text-gray-700" %>
           <%= form.url_field :website_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://www.yourschool.com" %>
@@ -86,15 +280,17 @@
           <%= form.label :email, "Email Address", class: "block text-sm font-medium text-gray-700" %>
           <%= form.email_field :email, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "info@yourschool.com" %>
           <p class="mt-1 text-xs text-gray-500">Main contact email address</p>
-        </div>
-      </div>
-    </div>
+                </div>
+                </div>
+              </div>
 
-    <!-- Address -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 class="text-lg font-medium text-gray-900 mb-4">Address</h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Address Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="address" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Address</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <%= form.label :address_line_1, "Address Line 1", class: "block text-sm font-medium text-gray-700" %>
           <%= form.text_field :address_line_1, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
@@ -129,16 +325,18 @@
           <%= form.label :country_code, "Country", class: "block text-sm font-medium text-gray-700" %>
           <%= form.select :country_code, options_for_select([['Thailand', 'TH'], ['United States', 'US'], ['United Kingdom', 'GB'], ['Singapore', 'SG'], ['Malaysia', 'MY']], @school.country_code), { include_blank: "Select country" }, { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" } %>
           <p class="mt-1 text-xs text-gray-500">Country location</p>
-        </div>
-      </div>
-    </div>
+                </div>
+                </div>
+              </div>
 
-    <!-- Social Media & Communication -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 class="text-lg font-medium text-gray-900 mb-4">Social Media & Communication</h2>
-      <p class="text-sm text-gray-600 mb-6">Help parents connect with your school</p>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Social Media Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="social-media" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Social Media & Communication</h2>
+                <p class="text-sm text-gray-600 mb-6">Help parents connect with your school</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <%= form.label :facebook_url, "Facebook Page", class: "block text-sm font-medium text-gray-700" %>
           <%= form.url_field :facebook_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://www.facebook.com/yourschool" %>
@@ -155,16 +353,18 @@
           <%= form.label :whatsapp_number, "WhatsApp Number", class: "block text-sm font-medium text-gray-700" %>
           <%= form.telephone_field :whatsapp_number, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "+66 91 234 5678" %>
           <p class="mt-1 text-xs text-gray-500">WhatsApp contact number</p>
-        </div>
-      </div>
-    </div>
+                </div>
+                </div>
+              </div>
 
-    <!-- School Features -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 class="text-lg font-medium text-gray-900 mb-4">School Features</h2>
-      <p class="text-sm text-gray-600 mb-6">Information about your school's facilities and programs</p>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- School Features Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="school-features" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">School Features</h2>
+                <p class="text-sm text-gray-600 mb-6">Information about your school's facilities and programs</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="flex items-start">
           <div class="flex items-center h-5">
             <%= form.check_box :boarding, class: "h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
@@ -189,15 +389,17 @@
           <%= form.label :language_support_notes, "Language Support & Programs", class: "block text-sm font-medium text-gray-700" %>
           <%= form.text_area :language_support_notes, rows: 3, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
           <p class="mt-1 text-xs text-gray-500">Describe language programs, bilingual education, ESL support, or special needs programs available</p>
-        </div>
-      </div>
-    </div>
+                </div>
+                </div>
+              </div>
 
-    <!-- School Details -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 class="text-lg font-medium text-gray-900 mb-4">School Details</h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- School Details Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="school-details" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">School Details</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <%= form.label :founded_year, "Founded Year", class: "block text-sm font-medium text-gray-700" %>
           <%= form.number_field :founded_year, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", min: 1800, max: Date.current.year %>
@@ -220,13 +422,15 @@
           <%= form.label :student_teacher_ratio, "Student-Teacher Ratio", class: "block text-sm font-medium text-gray-700" %>
           <%= form.number_field :student_teacher_ratio, step: 0.1, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", min: 1, max: 50 %>
           <p class="mt-1 text-xs text-gray-500">Number of students per teacher</p>
-        </div>
-      </div>
-    </div>
+                </div>
+                </div>
+              </div>
 
-    <!-- Academic Programs -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
-      <div class="flex items-center mb-6">
+              <!-- Academic Programs Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="academic-programs" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center mb-6">
         <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
         </svg>
@@ -236,7 +440,7 @@
         </div>
       </div>
       
-      <div class="space-y-6">
+                <div class="space-y-6">
         <!-- Curriculum Programs -->
         <div>
           <h3 class="text-md font-medium text-gray-900 mb-3">Curriculum Programs</h3>
@@ -323,13 +527,15 @@
               </div>
             <% end %>
           </div>
-        </div>
-      </div>
-    </div>
+                </div>
+                </div>
+              </div>
 
-    <!-- Campus Facilities -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
-      <div class="flex items-center mb-6">
+              <!-- Campus Facilities Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="campus-facilities" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center mb-6">
         <svg class="w-6 h-6 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
         </svg>
@@ -354,7 +560,7 @@
         }
       %>
       
-      <div class="space-y-4">
+                <div class="space-y-4">
         <% facility_categories.each do |category_name, category_facilities| %>
           <% next if category_facilities.empty? %>
           
@@ -379,17 +585,143 @@
           </div>
         <% end %>
       </div>
-    </div>
+              </div>
 
-    <!-- Form Actions -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
+              <!-- Photos Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="photos" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center mb-6">
+                  <svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <div>
+                    <h2 class="text-lg font-medium text-gray-900">School Photos</h2>
+                    <p class="text-sm text-gray-600">Showcase your school's facilities, activities, and campus life</p>
+                  </div>
+                </div>
+                
+                <!-- Photos from Google Places -->
+                <% if @school.place&.photos&.any? %>
+                  <div class="mb-8">
+                    <h3 class="text-md font-medium text-gray-900 mb-4">Current Photos from Google Places</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      <% @school.place.photos.each do |photo| %>
+                        <div class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                          <% if photo.is_a?(Hash) && photo['photo_reference'] %>
+                            <%= image_tag "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=#{photo['photo_reference']}&key=#{ENV['GOOGLE_PLACES_API_KEY']}", 
+                                alt: "#{@school.name} photo",
+                                class: "w-full h-full object-cover hover:scale-105 transition-transform duration-200",
+                                loading: "lazy" %>
+                          <% elsif photo.respond_to?(:url) %>
+                            <%= image_tag photo.url, 
+                                alt: "#{@school.name} photo",
+                                class: "w-full h-full object-cover hover:scale-105 transition-transform duration-200",
+                                loading: "lazy" %>
+                          <% else %>
+                            <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                              <span class="text-gray-400 text-sm">Photo unavailable</span>
+                            </div>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+                
+                <!-- Upload New Photos Section -->
+                <div class="border-t border-gray-200 pt-6">
+                  <h3 class="text-md font-medium text-gray-900 mb-4">Upload Additional Photos</h3>
+                  <p class="text-sm text-gray-600 mb-6">Add high-quality photos of your facilities, classrooms, activities, and campus. These will be displayed alongside Google Places photos.</p>
+                  
+                  <!-- Upload Area -->
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gray-400 transition-colors"
+                       data-controller="photo-upload"
+                       data-photo-upload-max-files-value="10"
+                       data-photo-upload-max-size-value="5242880">
+                    
+                    <div class="text-center">
+                      <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      
+                      <div class="mt-4">
+                        <label for="photos" class="cursor-pointer">
+                          <span class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Choose Photos
+                          </span>
+                          <%= file_field_tag "school[photos][]", 
+                              multiple: true, 
+                              accept: "image/*",
+                              class: "sr-only",
+                              id: "photos",
+                              data: { 
+                                "photo-upload-target" => "input",
+                                "action" => "change->photo-upload#handleFiles"
+                              } %>
+                        </label>
+                        <p class="mt-2 text-xs text-gray-500">
+                          or drag and drop photos here
+                        </p>
+                      </div>
+                      
+                      <p class="text-xs text-gray-500 mt-2">
+                        PNG, JPG, WEBP up to 5MB each. Maximum 10 photos.
+                      </p>
+                    </div>
+                    
+                    <!-- Preview Area -->
+                    <div data-photo-upload-target="preview" class="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 hidden">
+                      <!-- Previews will be inserted here by JavaScript -->
+                    </div>
+                  </div>
+                  
+                  <!-- Uploaded Photos Display -->
+                  <% if false && @school.respond_to?(:photos) && @school.photos.any? %>
+                    <div class="mt-8">
+                      <h4 class="text-md font-medium text-gray-900 mb-4">Your Uploaded Photos</h4>
+                      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <% @school.photos.each do |photo| %>
+                          <div class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group">
+                            <% if photo.respond_to?(:variant) %>
+                              <%= image_tag photo.variant(resize_to_limit: [300, 300]), 
+                                  alt: "#{@school.name} uploaded photo",
+                                  class: "w-full h-full object-cover" %>
+                            <% else %>
+                              <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                <span class="text-gray-400 text-sm">Photo format not supported</span>
+                              </div>
+                            <% end %>
+                            
+                            <!-- Delete button -->
+                            <%= button_to "×", 
+                                delete_photo_school_owner_school_path(@school, photo_id: photo.id), 
+                                method: :delete,
+                                class: "absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-sm font-bold hover:bg-red-600",
+                                title: "Delete photo",
+                                data: { 
+                                  confirm: "Are you sure you want to delete this photo?"
+                                } %>
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+
+                        <!-- Form Actions (visible in all sections) -->
+              <div class="bg-white border border-gray-200 rounded-lg p-6">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm text-gray-600">
             Changes will be visible to parents and students on your school's public page immediately.
           </p>
           <p class="text-xs text-gray-500 mt-1">
-            This includes basic information, academic programs, and campus facilities.
+            This includes basic information, academic programs, campus facilities, and photos.
           </p>
         </div>
         
@@ -400,10 +732,16 @@
           <% end %>
           
           <%= form.submit "Save School Information", 
-              class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-        </div>
-      </div>
-    </div>
+              data: { "school-form-target" => "submitButton" },
+              class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" %>
+                </div>
+                </div>
+              </div>
 
-  <% end %>
+            <% end %>
+          </div>
+                </div>
+                </div>
+              </div>
+  </div>
 </div>

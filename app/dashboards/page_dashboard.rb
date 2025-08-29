@@ -1,4 +1,5 @@
 require "administrate/base_dashboard"
+require_relative "../fields/rich_text_field"
 
 class PageDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
@@ -10,10 +11,10 @@ class PageDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     author: Field::String,
-    content: Field::Text,
+    content: RichTextField,
     featured_image_url: Field::String,
     meta_description: Field::Text,
-    page_type: Field::Select.with_options(searchable: false, collection: ->(field) { field.resource.class.send(field.attribute.to_s.pluralize).keys }),
+    page_type: Field::Select.with_options(searchable: false, collection: ->(field) { field.resource.class.page_types }),
     published_at: Field::DateTime,
     school: Field::BelongsTo,
     slug: Field::String,

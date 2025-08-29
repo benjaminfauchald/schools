@@ -1,0 +1,35 @@
+/* Toast notification styles */
+.toast-notification {
+  z-index: 99999 !important;
+  position: fixed !important;
+}
+
+.toast-notification.slide-in {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.toast-notification.slide-out {
+  animation: slideOutRight 0.3s ease-in;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
