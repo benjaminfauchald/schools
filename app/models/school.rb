@@ -163,6 +163,16 @@ class School < ApplicationRecord
     school_grade_offering&.educational_level || 'Level not specified'
   end
   
+  # Check if school has any claims (approved or pending)
+  def claimed?
+    school_claims.exists?
+  end
+  
+  # Check if school has approved claims
+  def approved_claims?
+    school_claims.where(status: 'approved').exists?
+  end
+  
   private
   
   def sync_geography_from_coordinates
@@ -280,6 +290,31 @@ class School < ApplicationRecord
   
   def verified?
     last_verification_at.present? && last_verification_at > 6.months.ago
+  end
+  
+  # Facebook data helpers
+  def has_facebook_data?
+    facebook_content.present?
+  end
+  
+  def facebook_logo_url
+    facebook_profile_picture_url || facebook_content&.dig('visual_assets', 'profile_picture', 'url')
+  end
+  
+  def facebook_hero_image_url
+    facebook_cover_photo_url || facebook_content&.dig('visual_assets', 'cover_photo', 'url')
+  end
+  
+  def facebook_data_age_in_days
+    return nil unless facebook_last_fetched
+    (Time.current - facebook_last_fetched) / 1.day
+  end
+  
+  def needs_facebook_refresh?
+    facebook_url.present? && (
+      facebook_last_fetched.nil? || 
+      facebook_data_age_in_days > 30
+    )
   end
   
   private

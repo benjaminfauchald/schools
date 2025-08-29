@@ -77,6 +77,50 @@ class SchoolsController < ApplicationController
     render json: schools_json_response
   end
 
+  def search
+    @home_location = get_home_location_from_client
+    
+    unless @home_location
+      render json: { error: "Home location required" }, status: :bad_request
+      return
+    end
+
+    query = params[:q]&.strip
+    
+    unless query.present?
+      render json: { schools: [] }
+      return
+    end
+
+    # Search all published schools by name (no distance limit)
+    @schools = School.published
+                    .joins(:place)
+                    .where("schools.name ILIKE ?", "%#{query}%")
+                    .select(search_select_fields)
+                    .limit(20) # Limit to 20 results for dropdown
+
+    # Calculate distance for each school and sort by distance
+    schools_with_distance = @schools.map do |school|
+      distance = School.calculate_haversine_distance(
+        @home_location[:lat], 
+        @home_location[:lng], 
+        school.place_lat, 
+        school.place_lng
+      )
+      
+      {
+        id: school.id,
+        name: school.name,
+        slug: school.slug,
+        address: school.address,
+        distance_km: distance.round(1),
+        url: school_path(school)
+      }
+    end.sort_by { |school| school[:distance_km] }
+
+    render json: { schools: schools_with_distance }
+  end
+
   private
 
   def filter_params
@@ -111,6 +155,10 @@ class SchoolsController < ApplicationController
       'schools.id, schools.name, schools.slug, places.formatted_address as address, 
        ST_Distance(ST_SetSRID(ST_MakePoint(places.lng, places.lat), 4326), ST_SetSRID(ST_MakePoint(?, ?), 4326)) / 1000.0 as distance_km'
     end
+  end
+
+  def search_select_fields
+    'schools.id, schools.name, schools.slug, places.formatted_address as address, places.lat as place_lat, places.lng as place_lng'
   end
 
   def schools_json_response

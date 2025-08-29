@@ -1,0 +1,129 @@
+<% content_for :title, "Claim School - #{@school.name}" %>
+
+<div class="max-w-2xl mx-auto">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Claim School Ownership</h1>
+    <p class="mt-2 text-gray-600">
+      Submit a claim to manage <strong><%= @school.name %></strong>
+    </p>
+  </div>
+
+  <!-- School Info Card -->
+  <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+    <div class="flex items-start space-x-4">
+      <div class="flex-shrink-0">
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-lg font-medium text-gray-900"><%= @school.name %></h3>
+        <p class="text-sm text-gray-600"><%= @school.display_address %></p>
+        <% if @school.display_phone.present? %>
+          <p class="text-sm text-gray-600">Phone: <%= @school.display_phone %></p>
+        <% end %>
+        <% if @school.display_website.present? %>
+          <p class="text-sm text-gray-600">Website: <%= @school.display_website %></p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Claim Form -->
+  <%= form_with model: [@school, @claim], url: school_owner_claims_path(school_id: @school.id), 
+      local: true, class: "space-y-6" do |form| %>
+    
+    <% if @claim.errors.any? %>
+      <div class="bg-red-50 border border-red-200 rounded-md p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+            <div class="mt-2 text-sm text-red-700">
+              <ul class="list-disc list-inside space-y-1">
+                <% @claim.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Evidence URL -->
+    <div>
+      <%= form.label :evidence_url, class: "block text-sm font-medium text-gray-700" do %>
+        Evidence URL
+        <span class="text-red-500">*</span>
+      <% end %>
+      <%= form.url_field :evidence_url, 
+          class: "mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+          placeholder: "https://example.com/evidence.pdf",
+          required: true %>
+      <p class="mt-2 text-sm text-gray-500">
+        Please provide a link to documentation proving your ownership or authorization to manage this school.
+        This could be:
+      </p>
+      <ul class="mt-1 text-sm text-gray-500 list-disc list-inside space-y-1">
+        <li>Official school business registration</li>
+        <li>Letter of authorization from school administration</li>
+        <li>School website admin access screenshot</li>
+        <li>Official school letterhead document</li>
+        <li>Educational authority documentation</li>
+      </ul>
+    </div>
+
+    <!-- Notes -->
+    <div>
+      <%= form.label :notes, class: "block text-sm font-medium text-gray-700" do %>
+        Additional Notes
+        <span class="text-gray-400">(Optional)</span>
+      <% end %>
+      <%= form.text_area :notes, 
+          rows: 4,
+          class: "mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+          placeholder: "Please provide any additional information that helps verify your claim..." %>
+      <p class="mt-2 text-sm text-gray-500">
+        Any additional context about your relationship to the school or verification details.
+      </p>
+    </div>
+
+    <!-- Terms Agreement -->
+    <div class="bg-gray-50 rounded-lg p-4">
+      <div class="flex items-start">
+        <div class="flex items-center h-5">
+          <input id="agree_terms" name="agree_terms" type="checkbox" 
+                 class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded" required>
+        </div>
+        <div class="ml-3 text-sm">
+          <label for="agree_terms" class="font-medium text-gray-700">
+            I agree to the terms and conditions
+          </label>
+          <p class="text-gray-500">
+            By claiming this school, you confirm that you have the authority to manage this listing 
+            and will keep the information accurate and up-to-date.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+      <%= link_to school_path(@school), 
+          class: "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+        Cancel
+      <% end %>
+      
+      <%= form.submit "Submit Claim", 
+          class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+    </div>
+  <% end %>
+</div>

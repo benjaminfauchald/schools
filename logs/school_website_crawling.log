@@ -460,3 +460,79 @@
 2025-08-29 13:38:23,926 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
 2025-08-29 13:40:04,443 - INFO - 📄 Found 5 pages for http://www.australianisb.ac.th/
 2025-08-29 13:40:04,443 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.australianisb.ac.th/
+2025-08-29 14:18:21,741 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-29 14:20:02,976 - INFO - 📄 Found 5 pages for http://www.australianisb.ac.th/
+2025-08-29 14:20:02,976 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.australianisb.ac.th/
+2025-08-29 14:20:38,424 - INFO - 🔍 Starting crawl for http://www.wsc.ac.th/
+2025-08-29 14:23:15,221 - INFO - 📄 Found 5 pages for http://www.wsc.ac.th/
+2025-08-29 14:23:15,222 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.wsc.ac.th/
+2025-08-29 14:23:30,636 - INFO - 🔍 Starting crawl for http://www.kasetgrooming.com/index.php
+2025-08-29 14:23:54,462 - ERROR - ❌ Crawl failed for http://www.kasetgrooming.com/index.php: Crawl job failed to return data
+2025-08-29 14:24:09,843 - INFO - 🔍 Starting crawl for http://www.sis.edu/bangkok
+2025-08-29 14:30:11,940 - INFO - 📄 Found 5 pages for http://www.sis.edu/bangkok
+2025-08-29 14:30:11,941 - INFO - ✅ Successfully crawled http://www.sis.edu/bangkok - 5 pages
+2025-08-29 14:30:27,553 - INFO - 🔍 Starting crawl for http://www.webythebrain.com/contact-us-map/
+2025-08-29 14:30:54,570 - ERROR - ❌ Crawl failed for http://www.webythebrain.com/contact-us-map/: Crawl job failed to return data
+2025-08-29 14:31:09,932 - INFO - 🔍 Starting crawl for https://www.kbu.ac.th/
+2025-08-29 14:33:11,489 - INFO - 📄 Found 5 pages for https://www.kbu.ac.th/
+2025-08-29 14:33:11,490 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://www.kbu.ac.th/
+2025-08-29 14:33:26,849 - INFO - 🔍 Starting crawl for https://www.thammislam.ac.th/thammislam/view/Layout/selection.php
+2025-08-29 14:33:52,965 - ERROR - ❌ Crawl failed for https://www.thammislam.ac.th/thammislam/view/Layout/selection.php: Crawl job failed to return data
+2025-08-29 14:33:58,451 - INFO - 🔍 Starting crawl for http://www.thanyarat.ac.th/
+2025-08-29 14:43:20,928 - INFO - 📄 Found 5 pages for http://www.thanyarat.ac.th/
+2025-08-29 14:43:20,928 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.thanyarat.ac.th/
+2025-08-29 14:43:46,625 - INFO - 🔍 Starting crawl for https://dvpschool.ac.th/
+2025-08-29 14:46:16,351 - INFO - 📄 Found 5 pages for https://dvpschool.ac.th/
+2025-08-29 14:46:16,352 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://dvpschool.ac.th/
+2025-08-29 14:46:51,937 - INFO - 🔍 Starting crawl for http://plearnpattana.ac.th/
+2025-08-29 14:48:39,191 - INFO - 📄 Found 5 pages for http://plearnpattana.ac.th/
+2025-08-29 14:48:39,192 - INFO - ✅ Successfully crawled http://plearnpattana.ac.th/ - 5 pages
+2025-08-29 14:48:54,683 - INFO - 🔍 Starting crawl for https://kpis.ac.th/
+2025-08-29 14:51:54,110 - INFO - 📄 Found 5 pages for https://kpis.ac.th/
+2025-08-29 14:51:54,110 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://kpis.ac.th/
+2025-08-29 14:52:09,597 - INFO - 🔍 Starting crawl for http://www.rockademyworld.com/
+2025-08-29 14:57:16,500 - INFO - 📄 Found 5 pages for http://www.rockademyworld.com/
+2025-08-29 14:57:16,501 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.rockademyworld.com/
+2025-08-29 14:57:21,975 - INFO - 🔍 Starting crawl for https://www.lfib.ac.th/
+2025-08-29 14:59:36,008 - INFO - 📄 Found 5 pages for https://www.lfib.ac.th/
+2025-08-29 14:59:36,009 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://www.lfib.ac.th/
+2025-08-29 14:59:51,470 - INFO - 🔍 Starting crawl for https://www.standrews-samakee.com/
+2025-08-29 15:02:00,949 - INFO - 📄 Found 5 pages for https://www.standrews-samakee.com/
+2025-08-29 15:02:00,950 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://www.standrews-samakee.com/
+2025-08-29 15:02:06,412 - INFO - 🔍 Starting crawl for http://www.watchaimongkol.ac.th/
+2025-08-29 15:04:03,218 - INFO - 📄 Found 5 pages for http://www.watchaimongkol.ac.th/
+2025-08-29 15:04:03,218 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.watchaimongkol.ac.th/
+2025-08-29 15:04:18,785 - INFO - 🔍 Starting crawl for https://www.shrewsbury.ac.th/city
+2025-08-29 15:06:15,758 - INFO - 📄 Found 4 pages for https://www.shrewsbury.ac.th/city
+2025-08-29 15:06:15,759 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://www.shrewsbury.ac.th/city
+2025-08-29 15:06:21,236 - INFO - 🔍 Starting crawl for http://www.kma.ac.th/
+2025-08-29 15:08:16,071 - INFO - 📄 Found 5 pages for http://www.kma.ac.th/
+2025-08-29 15:08:16,071 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.kma.ac.th/
+2025-08-29 15:08:31,506 - INFO - 🔍 Starting crawl for http://www.ras.ac.th/
+2025-08-29 15:10:51,052 - INFO - 📄 Found 5 pages for http://www.ras.ac.th/
+2025-08-29 15:10:51,053 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.ras.ac.th/
+2025-08-29 15:10:56,547 - INFO - 🔍 Starting crawl for http://www.tsn.ac.th/
+2025-08-29 15:12:44,573 - INFO - 📄 Found 5 pages for http://www.tsn.ac.th/
+2025-08-29 15:12:44,573 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.tsn.ac.th/
+2025-08-29 15:13:00,036 - INFO - 🔍 Starting crawl for https://theprotutor.net/
+2025-08-29 15:14:36,270 - INFO - 📄 Found 5 pages for https://theprotutor.net/
+2025-08-29 15:14:36,271 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://theprotutor.net/
+2025-08-29 15:14:51,720 - INFO - 🔍 Starting crawl for http://www.sangkeet.ac.th/
+2025-08-29 15:16:58,953 - INFO - 📄 Found 5 pages for http://www.sangkeet.ac.th/
+2025-08-29 15:16:58,953 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.sangkeet.ac.th/
+2025-08-29 15:17:04,430 - INFO - 🔍 Starting crawl for http://www.wlpschool.ac.th/
+2025-08-29 15:19:07,535 - INFO - 📄 Found 5 pages for http://www.wlpschool.ac.th/
+2025-08-29 15:19:07,535 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.wlpschool.ac.th/
+2025-08-29 15:19:22,979 - INFO - 🔍 Starting crawl for https://www.utsschool.com/home.php
+2025-08-29 15:21:16,951 - INFO - 📄 Found 5 pages for https://www.utsschool.com/home.php
+2025-08-29 15:21:16,951 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://www.utsschool.com/home.php
+2025-08-29 15:21:22,413 - INFO - 🔍 Starting crawl for http://www.schoolweb.in.th/watbangkhlonok/
+2025-08-29 15:21:47,922 - ERROR - ❌ Crawl failed for http://www.schoolweb.in.th/watbangkhlonok/: Crawl job failed to return data
+2025-08-29 15:22:03,390 - INFO - 🔍 Starting crawl for http://www.nmk.ac.th/
+2025-08-29 15:23:48,412 - INFO - 📄 Found 5 pages for http://www.nmk.ac.th/
+2025-08-29 15:23:48,413 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.nmk.ac.th/
+2025-08-29 15:23:53,750 - INFO - 🔍 Starting crawl for http://10220020.thaischool.in.th/
+2025-08-29 15:26:20,130 - ERROR - ❌ Crawl failed for http://10220020.thaischool.in.th/: Crawl job failed to return data
+2025-08-29 15:26:35,581 - INFO - 🔍 Starting crawl for http://www.watchaomool.ac.th/
+2025-08-29 15:29:05,038 - INFO - 📄 Found 5 pages for http://www.watchaomool.ac.th/
+2025-08-29 15:29:05,038 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.watchaomool.ac.th/

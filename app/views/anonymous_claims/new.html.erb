@@ -1,0 +1,178 @@
+<% content_for :title, "Claim #{@school.name}" %>
+
+<div class="max-w-2xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <%= link_to school_path(@school), class: "inline-flex items-center text-blue-600 hover:text-blue-800 mb-4" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back to School
+    <% end %>
+    
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Claim Your School</h1>
+    <p class="text-lg text-gray-600">
+      Submit a claim to manage and update information for <strong><%= @school.name %></strong>
+    </p>
+  </div>
+
+  <!-- Info Alert -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <h3 class="text-sm font-medium text-blue-800">How it works</h3>
+        <div class="mt-2 text-sm text-blue-700">
+          <ol class="list-decimal list-inside space-y-1">
+            <li>Submit your claim with evidence that you represent this school</li>
+            <li>Create an account to complete your registration</li>
+            <li>Wait for admin approval (typically 3-5 business days)</li>
+            <li>Start managing your school's information once approved</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- School Info Card -->
+  <div class="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">School Information</h3>
+    
+    <div class="space-y-3">
+      <div>
+        <h4 class="text-sm font-medium text-gray-700"><%= @school.name %></h4>
+        <% if @school.display_address.present? %>
+          <p class="text-sm text-gray-600"><%= @school.display_address %></p>
+        <% end %>
+      </div>
+      
+      <% if @school.display_phone.present? %>
+        <div>
+          <span class="text-sm text-gray-500">Phone: </span>
+          <span class="text-sm text-gray-900"><%= @school.display_phone %></span>
+        </div>
+      <% end %>
+      
+      <% if @school.display_website.present? %>
+        <div>
+          <span class="text-sm text-gray-500">Website: </span>
+          <a href="<%= @school.display_website %>" target="_blank" 
+             class="text-sm text-blue-600 hover:text-blue-800">
+            <%= @school.display_website %>
+          </a>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Claim Form -->
+  <%= form_with model: @temp_claim, url: create_for_school_anonymous_claims_path(@school.id), local: true, class: "space-y-6" do |form| %>
+    
+    <!-- Error Messages -->
+    <% if @temp_claim.errors.any? %>
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+            <div class="mt-2 text-sm text-red-700">
+              <ul class="list-disc space-y-1 pl-5">
+                <% @temp_claim.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-6">Claim Details</h3>
+      
+      <div class="space-y-6">
+        <!-- Email -->
+        <div>
+          <%= form.label :email, "Email Address", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.email_field :email, 
+              class: "block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+              placeholder: "your@email.com",
+              required: true %>
+          <p class="mt-1 text-xs text-gray-500">We'll use this email to create your account and send updates</p>
+        </div>
+
+        <!-- Evidence URL -->
+        <div>
+          <%= form.label :evidence_url, "Evidence URL", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.url_field :evidence_url, 
+              class: "block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+              placeholder: "https://example.com/evidence" %>
+          <p class="mt-1 text-xs text-gray-500">
+            Link to documentation proving you represent this school (e.g., staff directory, official documents, LinkedIn profile)
+          </p>
+        </div>
+
+        <!-- Additional Notes -->
+        <div>
+          <%= form.label :notes, "Additional Information", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_area :notes, 
+              rows: 4,
+              class: "block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+              placeholder: "Tell us about your role at the school and why you should be able to manage this listing..." %>
+          <p class="mt-1 text-xs text-gray-500">Describe your role at the school and provide any additional context</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terms and Submit -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="space-y-4">
+        <div class="flex items-start">
+          <div class="flex items-center h-5">
+            <input type="checkbox" id="agree_terms" name="agree_terms" required
+                   class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          </div>
+          <div class="ml-3">
+            <label for="agree_terms" class="text-sm text-gray-700">
+              I confirm that I have the authority to represent this school and that all information provided is accurate.
+            </label>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-yellow-800">
+                <strong>Important:</strong> Your claim will be reviewed by our team. You'll need to complete account registration after submitting this claim.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-4">
+          <%= link_to school_path(@school), 
+              class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+            Cancel
+          <% end %>
+          
+          <%= form.submit "Submit Claim", 
+              class: "inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
+      </div>
+    </div>
+
+  <% end %>
+</div>

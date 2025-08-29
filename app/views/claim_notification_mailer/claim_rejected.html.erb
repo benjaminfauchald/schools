@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background-color: #f8d7da; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f5c6cb; }
+      .content { background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; }
+      .button { background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 0; }
+      .school-info { background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0; }
+      .admin-notes { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 15px 0; }
+      .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 style="margin: 0; color: #721c24;">School Claim Update</h1>
+        <p style="margin: 10px 0 0 0;">We need additional information for your claim.</p>
+      </div>
+
+      <div class="content">
+        <p>Dear <%= @user.display_name %>,</p>
+
+        <p>Thank you for your interest in managing the listing for <strong><%= @school.name %></strong>. After reviewing your claim, we need additional information before we can approve it.</p>
+
+        <div class="school-info">
+          <h3 style="margin-top: 0;">School Information</h3>
+          <p><strong>Name:</strong> <%= @school.name %></p>
+          <% if @school.display_address.present? %>
+            <p><strong>Address:</strong> <%= @school.display_address %></p>
+          <% end %>
+          <p><strong>Claim Reviewed:</strong> <%= @school_claim.updated_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+        </div>
+
+        <% if @school_claim.admin_notes.present? %>
+          <div class="admin-notes">
+            <h3 style="margin-top: 0; color: #856404;">Review Notes</h3>
+            <p style="margin-bottom: 0;"><%= simple_format(@school_claim.admin_notes) %></p>
+          </div>
+        <% end %>
+
+        <h3>Next Steps:</h3>
+        <ol>
+          <li><strong>Review the feedback:</strong> Please read the notes from our review team above.</li>
+          <li><strong>Gather additional evidence:</strong> Provide the requested documentation or information.</li>
+          <li><strong>Submit a new claim:</strong> You can submit a new claim with the additional information.</li>
+          <li><strong>Contact support:</strong> If you have questions, our support team is here to help.</li>
+        </ol>
+
+        <p>Don't worry - this is a common part of the verification process. We want to ensure that school information is managed by the right people.</p>
+
+        <h3>Common Types of Additional Evidence:</h3>
+        <ul>
+          <li>Staff directory or contact page showing your role</li>
+          <li>Official school documents with your name</li>
+          <li>LinkedIn profile showing your connection to the school</li>
+          <li>Employment verification letter</li>
+          <li>School website showing your contact information</li>
+        </ul>
+
+        <p>Ready to submit additional information?</p>
+
+        <a href="<%= new_for_school_anonymous_claims_url(@school.id) %>" class="button">Submit New Claim</a>
+      </div>
+
+      <div class="footer">
+        <p>If you have any questions about the review process or need help with your claim, please don't hesitate to contact our support team.</p>
+        <p>We appreciate your patience and look forward to helping you manage your school's information.</p>
+      </div>
+    </div>
+  </body>
+</html>

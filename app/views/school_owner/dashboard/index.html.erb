@@ -1,0 +1,160 @@
+<% content_for :title, "Dashboard" %>
+
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h1 class="text-2xl font-bold text-gray-900">Welcome, <%= current_user.display_name %></h1>
+      <p class="mt-1 text-sm text-gray-600">
+        Manage your school listings and claims from this dashboard.
+      </p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <!-- Owned Schools -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Owned Schools</dt>
+              <dd class="text-lg font-medium text-gray-900"><%= @owned_schools.count %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-5 py-3">
+        <%= link_to "Manage Schools", school_owner_schools_path, 
+            class: "text-sm text-blue-600 hover:text-blue-500" %>
+      </div>
+    </div>
+
+    <!-- Pending Claims -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Pending Claims</dt>
+              <dd class="text-lg font-medium text-gray-900"><%= @pending_claims.count %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-5 py-3">
+        <%= link_to "View Claims", school_owner_claims_path, 
+            class: "text-sm text-blue-600 hover:text-blue-500" %>
+      </div>
+    </div>
+
+    <!-- Claim New School -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Claim School</dt>
+              <dd class="text-sm text-gray-900">Find your school and claim ownership</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-5 py-3">
+        <%= link_to "Find Schools", root_path, 
+            class: "text-sm text-blue-600 hover:text-blue-500" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Owned Schools -->
+  <% if @owned_schools.any? %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Your Schools</h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+          Schools you currently manage
+        </p>
+      </div>
+      <ul class="divide-y divide-gray-200">
+        <% @owned_schools.each do |school| %>
+          <li>
+            <div class="px-4 py-4 flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= school.name %>
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    <%= school.display_address %>
+                  </div>
+                </div>
+              </div>
+              <div class="flex space-x-2">
+                <%= link_to "View", school_owner_school_path(school), 
+                    class: "text-blue-600 hover:text-blue-500 text-sm font-medium" %>
+                <%= link_to "Edit", edit_school_owner_school_path(school), 
+                    class: "text-green-600 hover:text-green-500 text-sm font-medium" %>
+                <%= link_to "Public Page", school_path(school), target: "_blank",
+                    class: "text-gray-600 hover:text-gray-500 text-sm font-medium" %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <!-- Pending Claims -->
+  <% if @pending_claims.any? %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Pending Claims</h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+          Claims awaiting admin approval
+        </p>
+      </div>
+      <ul class="divide-y divide-gray-200">
+        <% @pending_claims.each do |claim| %>
+          <li>
+            <div class="px-4 py-4 flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= claim.school.name %>
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    Submitted <%= time_ago_in_words(claim.created_at) %> ago
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  <%= claim.status.humanize %>
+                </span>
+                <%= link_to "View", school_owner_claim_path(claim), 
+                    class: "ml-2 text-blue-600 hover:text-blue-500 text-sm font-medium" %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div>

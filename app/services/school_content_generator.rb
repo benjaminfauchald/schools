@@ -1,4 +1,4 @@
-# Service class for generating AI-powered content for schools using OpenAI
+# Service class for generating AI-powered content for schools using Azure OpenAI
 class SchoolContentGenerator
   require 'net/http'
   require 'uri'
@@ -8,11 +8,13 @@ class SchoolContentGenerator
     @school = school
     @title = title || "About #{school.name}"
     @description = description || "Learn about our school's history, mission, and educational philosophy."
-    @api_key = ENV['OPENAI_API_KEY']
+    @api_key = ENV['AZURE_OPENAI_API_KEY']
+    @endpoint = ENV['AZURE_OPENAI_ENDPOINT']
+    @deployment = ENV['AZURE_OPENAI_API_DEPLOYMENT']
   end
 
   def generate_page
-    return unless @api_key.present?
+    return unless @api_key.present? && @endpoint.present? && @deployment.present?
     
     # Check if page already exists for this title
     slug = @title.parameterize
@@ -51,7 +53,7 @@ class SchoolContentGenerator
 
   private
 
-  attr_reader :school, :api_key
+  attr_reader :school, :api_key, :endpoint, :deployment
 
   def compile_school_data
     {
@@ -103,16 +105,17 @@ class SchoolContentGenerator
   def generate_ai_content(school_data, title, description)
     prompt = build_master_prompt(school_data, title, description)
     
-    uri = URI('https://api.openai.com/v1/chat/completions')
+    # Build Azure OpenAI endpoint URL
+    azure_url = "#{endpoint}/openai/deployments/#{deployment}/chat/completions?api-version=2024-02-15-preview"
+    uri = URI(azure_url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     
     request = Net::HTTP::Post.new(uri)
-    request['Authorization'] = "Bearer #{api_key}"
+    request['api-key'] = api_key  # Azure uses 'api-key' header instead of 'Authorization'
     request['Content-Type'] = 'application/json'
     
     request.body = {
-      model: 'gpt-4',
       messages: [
         {
           role: 'system',
@@ -136,10 +139,10 @@ class SchoolContentGenerator
         
         return parse_ai_response(content_text) if content_text
       else
-        Rails.logger.error "OpenAI API error: #{response.code} - #{response.body}"
+        Rails.logger.error "Azure OpenAI API error: #{response.code} - #{response.body}"
       end
     rescue StandardError => e
-      Rails.logger.error "Error calling OpenAI API: #{e.message}"
+      Rails.logger.error "Error calling Azure OpenAI API: #{e.message}"
     end
     
     nil

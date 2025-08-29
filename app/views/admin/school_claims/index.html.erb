@@ -1,0 +1,137 @@
+<%#
+# Index
+
+This view is the template for the index page.
+It is responsible for rendering the search bar, header partial,
+navigation action link, and collection partial.
+%>
+
+<% content_for(:title) do %>
+  <%= display_resource_name(page.resource_name) %>
+<% end %>
+
+<header class="main-content__header" role="banner">
+  <%= render(
+    "search",
+    search_term: search_term,
+    resource_name: display_resource_name(page.resource_name)
+  ) %>
+
+  <%= link_to(
+    t(
+      "administrate.actions.new",
+      name: page.resource_name.titleize.downcase
+    ),
+    [:new, namespace, page.resource_name.to_sym],
+    class: "button",
+  ) %>
+</header>
+
+<section class="main-content__body main-content__body--flush">
+  <%= form_with url: admin_school_claims_path, method: :get, local: true, class: "bulk-actions-form" do |f| %>
+    <div class="bulk-actions-bar">
+      <div class="bulk-actions-controls">
+        <%= f.text_field :admin_notes, placeholder: "Admin notes for bulk actions...", class: "bulk-notes-input" %>
+        <%= f.submit "Bulk Approve", name: "bulk_action", value: "approve", class: "button button--success", onclick: "return confirmBulkAction('approve')" %>
+        <%= f.submit "Bulk Reject", name: "bulk_action", value: "reject", class: "button button--danger", onclick: "return confirmBulkAction('reject')" %>
+      </div>
+    </div>
+
+    <%= render(
+      "collection",
+      collection_presenter: page,
+      collection_field_name: page.resource_name,
+      page: page,
+      resources: resources,
+      table_title: "page-title"
+    ) %>
+  <% end %>
+</section>
+
+<script>
+function confirmBulkAction(action) {
+  const checkboxes = document.querySelectorAll('input[name="claim_ids[]"]:checked');
+  if (checkboxes.length === 0) {
+    alert('Please select at least one claim to ' + action + '.');
+    return false;
+  }
+  
+  const count = checkboxes.length;
+  const message = `Are you sure you want to ${action} ${count} claim${count > 1 ? 's' : ''}?`;
+  
+  if (confirm(message)) {
+    // Update form action based on bulk action
+    const form = document.querySelector('.bulk-actions-form');
+    if (action === 'approve') {
+      form.action = '<%= bulk_approve_admin_school_claims_path %>';
+    } else {
+      form.action = '<%= bulk_reject_admin_school_claims_path %>';
+    }
+    form.method = 'POST';
+    
+    // Add method override for POST
+    const methodField = document.createElement('input');
+    methodField.type = 'hidden';
+    methodField.name = '_method';
+    methodField.value = 'POST';
+    form.appendChild(methodField);
+    
+    return true;
+  }
+  return false;
+}
+
+function toggleAllClaims(checkbox) {
+  const checkboxes = document.querySelectorAll('input[name="claim_ids[]"]');
+  checkboxes.forEach(cb => cb.checked = checkbox.checked);
+}
+</script>
+
+<style>
+.bulk-actions-bar {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bulk-actions-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.bulk-notes-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button--success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.button--danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.button--success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.button--danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.claims-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+</style>

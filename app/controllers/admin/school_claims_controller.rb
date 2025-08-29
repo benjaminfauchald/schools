@@ -1,46 +1,115 @@
 module Admin
   class SchoolClaimsController < Admin::ApplicationController
-    # Overwrite any of the RESTful controller actions to implement custom behavior
-    # For example, you may want to send an email after a foo is updated.
-    #
-    # def update
-    #   super
-    #   send_foo_updated_email(requested_resource)
-    # end
-
-    # Override this method to specify custom lookup behavior.
-    # This will be used to set the resource for the `show`, `edit`, and `update`
-    # actions.
-    #
-    # def find_resource(param)
-    #   Foo.find_by!(slug: param)
-    # end
-
-    # The result of this lookup will be available as `requested_resource`
-
-    # Override this if you have certain roles that require a subset
-    # this will be used to set the records shown on the `index` action.
-    #
-    # def scoped_resource
-    #   if current_user.super_admin?
-    #     resource_class
-    #   else
-    #     resource_class.with_less_stuff
-    #   end
-    # end
-
-    # Override `resource_params` if you want to transform the submitted
-    # data before it's persisted. For example, the following would turn all
-    # empty values into nil values. It uses other APIs such as `resource_class`
-    # and `dashboard`:
-    #
-    # def resource_params
-    #   params.require(resource_class.model_name.param_key).
-    #     permit(dashboard.permitted_attributes(action_name)).
-    #     transform_values { |value| value == "" ? nil : value }
-    # end
-
-    # See https://administrate-demo.herokuapp.com/customizing_controller_actions
-    # for more information
+    def approve
+      claim = requested_resource
+      
+      if claim.can_approve?
+        claim.approve!(current_admin_user, notes: params[:admin_notes])
+        redirect_to admin_school_claim_path(claim), 
+                    notice: 'School claim approved successfully. User can now manage the school.'
+      else
+        redirect_to admin_school_claim_path(claim), 
+                    alert: 'Cannot approve this claim. It may already be processed.'
+      end
+    end
+    
+    def reject
+      claim = requested_resource
+      
+      if claim.can_reject?
+        claim.reject!(current_admin_user, notes: params[:admin_notes] || 'Claim rejected by admin')
+        redirect_to admin_school_claim_path(claim), 
+                    notice: 'School claim rejected.'
+      else
+        redirect_to admin_school_claim_path(claim), 
+                    alert: 'Cannot reject this claim. It may already be processed.'
+      end
+    end
+    
+    def bulk_approve
+      claim_ids = params[:claim_ids] || []
+      admin_notes = params[:admin_notes] || 'Bulk approved by admin'
+      
+      if claim_ids.empty?
+        redirect_back(fallback_location: admin_school_claims_path, alert: 'No claims selected for approval.')
+        return
+      end
+      
+      claims = SchoolClaim.where(id: claim_ids).pending
+      approved_count = 0
+      errors = []
+      
+      claims.each do |claim|
+        if claim.can_approve?
+          begin
+            claim.approve!(current_admin_user, notes: admin_notes)
+            approved_count += 1
+          rescue => e
+            errors << "Failed to approve claim for #{claim.school.name}: #{e.message}"
+          end
+        else
+          errors << "Cannot approve claim for #{claim.school.name}: already processed"
+        end
+      end
+      
+      if approved_count > 0
+        notice = "Successfully approved #{approved_count} claim#{'s' if approved_count != 1}."
+      else
+        notice = nil
+      end
+      
+      if errors.any?
+        alert = "Some claims could not be processed: #{errors.join(', ')}"
+      else
+        alert = nil
+      end
+      
+      redirect_back(fallback_location: admin_school_claims_path, notice: notice, alert: alert)
+    end
+    
+    def bulk_reject
+      claim_ids = params[:claim_ids] || []
+      admin_notes = params[:admin_notes] || 'Bulk rejected by admin'
+      
+      if claim_ids.empty?
+        redirect_back(fallback_location: admin_school_claims_path, alert: 'No claims selected for rejection.')
+        return
+      end
+      
+      claims = SchoolClaim.where(id: claim_ids).pending
+      rejected_count = 0
+      errors = []
+      
+      claims.each do |claim|
+        if claim.can_reject?
+          begin
+            claim.reject!(current_admin_user, notes: admin_notes)
+            rejected_count += 1
+          rescue => e
+            errors << "Failed to reject claim for #{claim.school.name}: #{e.message}"
+          end
+        else
+          errors << "Cannot reject claim for #{claim.school.name}: already processed"
+        end
+      end
+      
+      if rejected_count > 0
+        notice = "Successfully rejected #{rejected_count} claim#{'s' if rejected_count != 1}."
+      else
+        notice = nil
+      end
+      
+      if errors.any?
+        alert = "Some claims could not be processed: #{errors.join(', ')}"
+      else
+        alert = nil
+      end
+      
+      redirect_back(fallback_location: admin_school_claims_path, notice: notice, alert: alert)
+    end
+    
+    private
+    
+    # Inherit current_admin_user from ApplicationController
   end
 end

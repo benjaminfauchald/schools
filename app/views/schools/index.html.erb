@@ -1,13 +1,46 @@
 <!-- Schools Distance-Filtered Listing -->
-<div class="w-full" data-controller="schools" 
+<div class="w-full" data-controller="schools school-search" 
      data-schools-home-lat-value="<%= @home_location[:lat] %>" 
      data-schools-home-lng-value="<%= @home_location[:lng] %>"
-     data-schools-has-real-location-value="<%= params[:home_lat].present? %>">
+     data-schools-has-real-location-value="<%= params[:home_lat].present? %>"
+     data-school-search-home-lat-value="<%= @home_location[:lat] %>" 
+     data-school-search-home-lng-value="<%= @home_location[:lng] %>">
   
-  <!-- Header Section -->
+  <!-- Header Section with Search -->
   <div class="mb-8">
     <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">Schools Near You</h1>
-    <p class="text-lg text-gray-600 dark:text-gray-400">Discover quality schools in your area</p>
+    <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">Discover quality schools in your area</p>
+    
+    <!-- Search Section -->
+    <div class="relative max-w-2xl mx-auto">
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <input type="text"
+               data-school-search-target="searchInput"
+               data-action="input->school-search#search keydown->school-search#handleKeydown"
+               class="block w-full pl-10 pr-12 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+               placeholder="Search for schools by name..."
+               autocomplete="off">
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+          <div data-school-search-target="searchLoading" class="hidden">
+            <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Search Results Dropdown -->
+      <div data-school-search-target="searchResults" 
+           class="hidden absolute z-50 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl mt-2 max-h-96 overflow-y-auto">
+        <!-- Results will be populated here -->
+      </div>
+    </div>
   </div>
   
   <!-- Controls Panel -->

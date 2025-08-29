@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_28_112017) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_29_145658) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -56,6 +56,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_112017) do
     t.index ["place_id", "starts_at"], name: "index_events_on_place_id_and_starts_at"
     t.index ["place_id"], name: "index_events_on_place_id"
     t.index ["starts_at"], name: "index_events_on_starts_at"
+  end
+
+  create_table "magic_link_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "token", null: false
+    t.string "purpose", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expires_at"], name: "index_magic_link_tokens_on_expires_at"
+    t.index ["token"], name: "index_magic_link_tokens_on_token", unique: true
+    t.index ["user_id", "purpose"], name: "index_magic_link_tokens_on_user_id_and_purpose"
+    t.index ["user_id"], name: "index_magic_link_tokens_on_user_id"
   end
 
   create_table "media_items", force: :cascade do |t|
@@ -334,7 +348,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_112017) do
     t.string "facebook_url"
     t.string "line_id"
     t.string "whatsapp_number"
+    t.jsonb "facebook_content"
+    t.datetime "facebook_last_fetched"
+    t.string "facebook_profile_picture_url"
+    t.string "facebook_cover_photo_url"
     t.index ["district"], name: "index_schools_on_district"
+    t.index ["facebook_content"], name: "index_schools_on_facebook_content", using: :gin
     t.index ["geog"], name: "index_schools_on_geog", using: :gist
     t.index ["name"], name: "index_schools_on_name", opclass: :gin_trgm_ops, using: :gin
     t.index ["place_id"], name: "index_schools_on_place_id"
@@ -361,6 +380,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_112017) do
     t.index ["term_id", "taggable_type", "taggable_id", "context"], name: "index_taggings_unique_term_per_context", unique: true
     t.index ["term_id"], name: "index_taggings_on_term_id"
     t.index ["valid_from", "valid_to"], name: "index_taggings_on_valid_from_and_valid_to"
+  end
+
+  create_table "temp_claims", force: :cascade do |t|
+    t.bigint "school_id", null: false
+    t.string "token", null: false
+    t.string "email", null: false
+    t.string "evidence_url"
+    t.text "notes"
+    t.string "ip_address"
+    t.datetime "expires_at", null: false
+    t.string "status", default: "pending_registration"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_temp_claims_on_email"
+    t.index ["expires_at"], name: "index_temp_claims_on_expires_at"
+    t.index ["school_id"], name: "index_temp_claims_on_school_id"
+    t.index ["status"], name: "index_temp_claims_on_status"
+    t.index ["token"], name: "index_temp_claims_on_token", unique: true
   end
 
   create_table "terms", force: :cascade do |t|
@@ -395,6 +432,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_112017) do
     t.index ["place_id"], name: "index_travel_times_on_place_id"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.string "unconfirmed_email"
+    t.string "role", default: "school_owner", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["role"], name: "index_users_on_role"
+  end
+
   create_table "vocabularies", force: :cascade do |t|
     t.string "code", null: false
     t.string "label", null: false
@@ -405,15 +461,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_112017) do
   end
 
   add_foreign_key "events", "places"
+  add_foreign_key "magic_link_tokens", "users"
   add_foreign_key "media_items", "places"
   add_foreign_key "pages", "schools"
   add_foreign_key "places", "points"
   add_foreign_key "school_claims", "schools"
+  add_foreign_key "school_claims", "users"
   add_foreign_key "school_fee_bands", "school_fee_schedules"
   add_foreign_key "school_fee_schedules", "schools"
   add_foreign_key "school_grade_offerings", "schools"
   add_foreign_key "schools", "places"
   add_foreign_key "taggings", "terms"
+  add_foreign_key "temp_claims", "schools"
   add_foreign_key "terms", "terms", column: "parent_id"
   add_foreign_key "terms", "vocabularies"
   add_foreign_key "travel_times", "places"
