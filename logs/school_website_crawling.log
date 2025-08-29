@@ -126,3 +126,337 @@
 2025-08-24 23:56:55,074 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
 2025-08-24 23:59:01,345 - INFO - 📄 Found 5 pages for http://www.australianisb.ac.th/
 2025-08-24 23:59:01,345 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 5 pages
+2025-08-28 22:27:13,845 - INFO - 🔍 Starting crawl for http://www.rd.ac.th/
+2025-08-28 22:28:59,853 - INFO - 📄 Found 5 pages for http://www.rd.ac.th/
+2025-08-28 22:28:59,853 - INFO - ✅ Successfully crawled http://www.rd.ac.th/ - 5 pages
+2025-08-28 22:29:05,202 - INFO - 🔍 Starting crawl for https://th168.pro/
+2025-08-28 22:34:11,839 - INFO - 🔍 Starting crawl for http://www.rd.ac.th/
+2025-08-28 22:36:29,305 - INFO - 📄 Found 5 pages for http://www.rd.ac.th/
+2025-08-28 22:36:29,305 - INFO - ✅ Successfully crawled http://www.rd.ac.th/ - 5 pages
+2025-08-28 22:36:34,733 - INFO - 🔍 Starting crawl for https://th168.pro/
+2025-08-28 22:37:36,691 - INFO - 📄 Found 5 pages for https://th168.pro/
+2025-08-28 22:37:36,692 - INFO - ✅ Successfully crawled https://th168.pro/ - 5 pages
+2025-08-28 22:37:42,224 - INFO - 🔍 Starting crawl for http://www.chaengron.ac.th/
+2025-08-28 22:37:58,134 - INFO - 📄 Found 1 pages for http://www.chaengron.ac.th/
+2025-08-28 22:37:58,135 - INFO - ✅ Successfully crawled http://www.chaengron.ac.th/ - 1 pages
+2025-08-28 22:38:13,648 - INFO - 🔍 Starting crawl for https://web.facebook.com/watchangronschool
+2025-08-28 22:38:13,974 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://web.facebook.com/watchangronschool
+2025-08-28 22:38:19,439 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100068992132162&mibextid=ZbWKwL
+2025-08-28 22:38:19,780 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100068992132162&mibextid=ZbWKwL
+2025-08-28 22:38:25,220 - INFO - 🔍 Starting crawl for https://www.facebook.com/Amnuayvid
+2025-08-28 22:38:25,567 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/Amnuayvid
+2025-08-28 22:38:40,991 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100092303633081&mibextid=ZbWKwL
+2025-08-28 22:38:41,312 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100092303633081&mibextid=ZbWKwL
+2025-08-28 22:38:46,736 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100057725587308&mibextid=ZbWKwL
+2025-08-28 22:38:47,080 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100057725587308&mibextid=ZbWKwL
+2025-08-28 22:38:52,497 - INFO - 🔍 Starting crawl for https://www.facebook.com/watwijittrakannimit?mibextid=ZbWKwL
+2025-08-28 22:38:52,823 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/watwijittrakannimit?mibextid=ZbWKwL
+2025-08-28 22:39:08,262 - INFO - 🔍 Starting crawl for http://www.ps.ac.th/
+2025-08-28 22:40:13,599 - INFO - 📄 Found 1 pages for http://www.ps.ac.th/
+2025-08-28 22:40:13,600 - INFO - ✅ Successfully crawled http://www.ps.ac.th/ - 1 pages
+2025-08-28 22:40:19,079 - INFO - 🔍 Starting crawl for http://www.peizhigongxue.com/
+2025-08-28 22:43:01,739 - INFO - 📄 Found 5 pages for http://www.peizhigongxue.com/
+2025-08-28 22:43:01,741 - INFO - ✅ Successfully crawled http://www.peizhigongxue.com/ - 5 pages
+2025-08-28 22:43:07,193 - INFO - 🔍 Starting crawl for http://www.bangkok.go.th/klongnongyai
+2025-08-28 22:44:04,575 - INFO - 📄 Found 1 pages for http://www.bangkok.go.th/klongnongyai
+2025-08-28 22:44:04,576 - INFO - ✅ Successfully crawled http://www.bangkok.go.th/klongnongyai - 1 pages
+2025-08-28 22:44:20,004 - INFO - 🔍 Starting crawl for https://www.facebook.com/ratnadda
+2025-08-28 22:44:20,411 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/ratnadda
+2025-08-28 22:44:25,814 - INFO - 🔍 Starting crawl for http://www.ssm.ac.th/
+2025-08-28 22:45:34,915 - INFO - 📄 Found 5 pages for http://www.ssm.ac.th/
+2025-08-28 22:45:34,917 - INFO - ✅ Successfully crawled http://www.ssm.ac.th/ - 5 pages
+2025-08-28 22:45:40,457 - INFO - 🔍 Starting crawl for http://www.kornpitack.ac.th/
+2025-08-28 22:46:27,360 - INFO - 📄 Found 1 pages for http://www.kornpitack.ac.th/
+2025-08-28 22:46:27,361 - INFO - ✅ Successfully crawled http://www.kornpitack.ac.th/ - 1 pages
+2025-08-28 22:46:42,780 - INFO - 🔍 Starting crawl for http://watmuangschool.blogspot.com/p/blog-page.html
+2025-08-28 22:46:58,731 - INFO - 📄 Found 1 pages for http://watmuangschool.blogspot.com/p/blog-page.html
+2025-08-28 22:46:58,732 - INFO - ✅ Successfully crawled http://watmuangschool.blogspot.com/p/blog-page.html - 1 pages
+2025-08-28 22:47:04,172 - INFO - 🔍 Starting crawl for http://www.wsc.ac.th/
+2025-08-28 22:48:38,405 - INFO - 📄 Found 4 pages for http://www.wsc.ac.th/
+2025-08-28 22:48:38,406 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.wsc.ac.th/
+2025-08-28 22:48:43,891 - INFO - 🔍 Starting crawl for http://www.watnin.com/
+2025-08-28 22:50:02,470 - INFO - 📄 Found 5 pages for http://www.watnin.com/
+2025-08-28 22:50:02,470 - INFO - ✅ Successfully crawled http://www.watnin.com/ - 5 pages
+2025-08-28 22:50:17,865 - INFO - 🔍 Starting crawl for http://www.kasetgrooming.com/index.php
+2025-08-28 22:50:40,392 - ERROR - ❌ Crawl failed for http://www.kasetgrooming.com/index.php: Crawl job failed to return data
+2025-08-28 22:50:45,774 - INFO - 🔍 Starting crawl for https://watthakham.thai.ac/
+2025-08-28 22:51:31,818 - INFO - 📄 Found 1 pages for https://watthakham.thai.ac/
+2025-08-28 22:51:31,819 - INFO - ✅ Successfully crawled https://watthakham.thai.ac/ - 1 pages
+2025-08-28 22:51:37,236 - INFO - 🔍 Starting crawl for http://www.satrinon.ac.th/
+2025-08-28 22:52:44,011 - INFO - 📄 Found 5 pages for http://www.satrinon.ac.th/
+2025-08-28 22:52:44,012 - INFO - ✅ Successfully crawled http://www.satrinon.ac.th/ - 5 pages
+2025-08-28 22:52:59,561 - INFO - 🔍 Starting crawl for http://www.potinimit.ac.th/
+2025-08-28 22:53:37,510 - INFO - 📄 Found 2 pages for http://www.potinimit.ac.th/
+2025-08-28 22:53:37,511 - INFO - ✅ Successfully crawled http://www.potinimit.ac.th/ - 2 pages
+2025-08-28 22:53:42,959 - INFO - 🔍 Starting crawl for https://watthailandbuddhanayo.blogspot.com/
+2025-08-28 22:55:12,600 - INFO - 📄 Found 5 pages for https://watthailandbuddhanayo.blogspot.com/
+2025-08-28 22:55:12,602 - INFO - ✅ Successfully crawled https://watthailandbuddhanayo.blogspot.com/ - 5 pages
+2025-08-28 22:55:18,158 - INFO - 🔍 Starting crawl for http://www.sis.edu/bangkok
+2025-08-28 23:02:36,238 - INFO - 📄 Found 5 pages for http://www.sis.edu/bangkok
+2025-08-28 23:02:36,240 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.sis.edu/bangkok
+2025-08-28 23:02:51,873 - INFO - 🔍 Starting crawl for http://www.webythebrain.com/contact-us-map/
+2025-08-28 23:03:17,164 - ERROR - ❌ Crawl failed for http://www.webythebrain.com/contact-us-map/: Crawl job failed to return data
+2025-08-28 23:03:22,535 - INFO - 🔍 Starting crawl for http://www.siripenschool.ac.th/
+2025-08-28 23:04:27,909 - INFO - 📄 Found 5 pages for http://www.siripenschool.ac.th/
+2025-08-28 23:04:27,910 - INFO - ✅ Successfully crawled http://www.siripenschool.ac.th/ - 5 pages
+2025-08-28 23:04:33,434 - INFO - 🔍 Starting crawl for http://www.webnukoy.com/
+2025-08-28 23:05:54,646 - INFO - 📄 Found 5 pages for http://www.webnukoy.com/
+2025-08-28 23:05:54,651 - INFO - ✅ Successfully crawled http://www.webnukoy.com/ - 5 pages
+2025-08-28 23:06:10,149 - INFO - 🔍 Starting crawl for https://sites.google.com/view/bangkaenue-school/
+2025-08-28 23:07:07,019 - INFO - 📄 Found 5 pages for https://sites.google.com/view/bangkaenue-school/
+2025-08-28 23:07:07,020 - INFO - ✅ Successfully crawled https://sites.google.com/view/bangkaenue-school/ - 5 pages
+2025-08-28 23:07:12,408 - INFO - 🔍 Starting crawl for http://www.rnk.ac.th/
+2025-08-28 23:08:23,225 - INFO - 📄 Found 5 pages for http://www.rnk.ac.th/
+2025-08-28 23:08:23,226 - INFO - ✅ Successfully crawled http://www.rnk.ac.th/ - 5 pages
+2025-08-28 23:08:28,590 - INFO - 🔍 Starting crawl for https://www.facebook.com/kantatararam.school
+2025-08-28 23:08:29,092 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/kantatararam.school
+2025-08-28 23:08:44,473 - INFO - 🔍 Starting crawl for https://www.kbu.ac.th/
+2025-08-28 23:10:05,412 - INFO - 📄 Found 5 pages for https://www.kbu.ac.th/
+2025-08-28 23:10:05,413 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://www.kbu.ac.th/
+2025-08-28 23:10:10,765 - INFO - 🔍 Starting crawl for https://watthailandbuddhanayo.blogspot.com/
+2025-08-28 23:11:40,014 - INFO - 📄 Found 5 pages for https://watthailandbuddhanayo.blogspot.com/
+2025-08-28 23:11:40,015 - INFO - ✅ Successfully crawled https://watthailandbuddhanayo.blogspot.com/ - 5 pages
+2025-08-28 23:11:45,364 - INFO - 🔍 Starting crawl for https://www.thammislam.ac.th/thammislam/view/Layout/selection.php
+2025-08-28 23:12:01,982 - ERROR - ❌ Crawl failed for https://www.thammislam.ac.th/thammislam/view/Layout/selection.php: Crawl job failed to return data
+2025-08-28 23:12:17,357 - INFO - 🔍 Starting crawl for http://www.thanyarat.ac.th/
+2025-08-28 23:15:55,203 - INFO - 📄 Found 5 pages for http://www.thanyarat.ac.th/
+2025-08-28 23:15:55,204 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.thanyarat.ac.th/
+2025-08-28 23:16:00,601 - INFO - 🔍 Starting crawl for https://th168.pro/
+2025-08-28 23:17:05,215 - INFO - 📄 Found 5 pages for https://th168.pro/
+2025-08-28 23:17:05,215 - INFO - ✅ Successfully crawled https://th168.pro/ - 5 pages
+2025-08-28 23:17:10,577 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100057239958705&mibextid=ZbWKwL
+2025-08-28 23:17:10,898 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100057239958705&mibextid=ZbWKwL
+2025-08-28 23:17:26,261 - INFO - 🔍 Starting crawl for http://www.asc.ac.th/
+2025-08-28 23:21:39,087 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-28 23:22:37,775 - INFO - 📄 Found 5 pages for http://www.australianisb.ac.th/
+2025-08-28 23:22:37,776 - INFO - ✅ Successfully crawled http://www.australianisb.ac.th/ - 5 pages
+2025-08-28 23:25:51,214 - INFO - 📄 Found 4 pages for http://www.asc.ac.th/
+2025-08-28 23:25:51,214 - INFO - ✅ Successfully crawled http://www.asc.ac.th/ - 4 pages
+2025-08-28 23:25:56,751 - INFO - 🔍 Starting crawl for http://www.siamsingapore.com/
+2025-08-28 23:27:25,666 - INFO - 📄 Found 5 pages for http://www.siamsingapore.com/
+2025-08-28 23:27:25,666 - INFO - ✅ Successfully crawled http://www.siamsingapore.com/ - 5 pages
+2025-08-28 23:27:31,060 - INFO - 🔍 Starting crawl for https://dvpschool.ac.th/
+2025-08-28 23:28:48,527 - INFO - 📄 Found 5 pages for https://dvpschool.ac.th/
+2025-08-28 23:28:48,527 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://dvpschool.ac.th/
+2025-08-28 23:29:03,918 - INFO - 🔍 Starting crawl for http://www.nd.ac.th/
+2025-08-28 23:29:24,480 - INFO - 📄 Found 1 pages for http://www.nd.ac.th/
+2025-08-28 23:29:24,480 - INFO - ✅ Successfully crawled http://www.nd.ac.th/ - 1 pages
+2025-08-28 23:29:29,843 - INFO - 🔍 Starting crawl for http://ris-swiss-section.org/
+2025-08-28 23:30:52,998 - INFO - 📄 Found 5 pages for http://ris-swiss-section.org/
+2025-08-28 23:30:52,999 - INFO - ✅ Successfully crawled http://ris-swiss-section.org/ - 5 pages
+2025-08-28 23:30:58,374 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100090877404925&mibextid=ZbWKwL
+2025-08-28 23:30:58,700 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100090877404925&mibextid=ZbWKwL
+2025-08-28 23:31:14,110 - INFO - 🔍 Starting crawl for https://www.facebook.com/watbangbonschool?mibextid=ZbWKwL
+2025-08-28 23:31:14,437 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/watbangbonschool?mibextid=ZbWKwL
+2025-08-28 23:31:19,842 - INFO - 🔍 Starting crawl for https://www.facebook.com/SWBSchool
+2025-08-28 23:31:20,173 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/SWBSchool
+2025-08-28 23:31:25,604 - INFO - 🔍 Starting crawl for https://watthailandbuddhanayo.blogspot.com/
+2025-08-28 23:33:01,612 - INFO - 📄 Found 5 pages for https://watthailandbuddhanayo.blogspot.com/
+2025-08-28 23:33:01,613 - INFO - ✅ Successfully crawled https://watthailandbuddhanayo.blogspot.com/ - 5 pages
+2025-08-28 23:33:17,064 - INFO - 🔍 Starting crawl for https://www.facebook.com/084awps?mibextid=ZbWKwL
+2025-08-28 23:33:17,454 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/084awps?mibextid=ZbWKwL
+2025-08-28 23:33:22,827 - INFO - 🔍 Starting crawl for https://www.facebook.com/%E0%B9%82%E0%B8%A3%E0%B8%87%E0%B9%80%E0%B8%A3%E0%B8%B5%E0%B8%A2%E0%B8%99%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%84%E0%B8%95%E0%B8%A3%E0%B8%A1%E0%B8%B4%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%A3%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1-571345306250378/
+2025-08-28 23:33:23,159 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/%E0%B9%82%E0%B8%A3%E0%B8%87%E0%B9%80%E0%B8%A3%E0%B8%B5%E0%B8%A2%E0%B8%99%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B9%84%E0%B8%95%E0%B8%A3%E0%B8%A1%E0%B8%B4%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%A3%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1-571345306250378/
+2025-08-28 23:33:28,536 - INFO - 🔍 Starting crawl for http://www.misb.ac.th/
+2025-08-28 23:35:22,798 - INFO - 📄 Found 5 pages for http://www.misb.ac.th/
+2025-08-28 23:35:22,798 - INFO - ✅ Successfully crawled http://www.misb.ac.th/ - 5 pages
+2025-08-28 23:35:38,271 - INFO - 🔍 Starting crawl for http://www.abn.ac.th/
+2025-08-28 23:37:56,352 - INFO - 📄 Found 5 pages for http://www.abn.ac.th/
+2025-08-28 23:37:56,353 - INFO - ✅ Successfully crawled http://www.abn.ac.th/ - 5 pages
+2025-08-28 23:38:01,775 - INFO - 🔍 Starting crawl for https://www.nmrsw2.ac.th/
+2025-08-28 23:39:22,149 - INFO - 📄 Found 5 pages for https://www.nmrsw2.ac.th/
+2025-08-28 23:39:22,149 - INFO - ✅ Successfully crawled https://www.nmrsw2.ac.th/ - 5 pages
+2025-08-28 23:39:27,594 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100063713496068
+2025-08-28 23:39:32,556 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100063713496068
+2025-08-28 23:39:47,936 - INFO - 🔍 Starting crawl for https://www.facebook.com/watthongnaischool412?mibextid=ZbWKwL
+2025-08-28 23:39:48,283 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/watthongnaischool412?mibextid=ZbWKwL
+2025-08-28 23:39:53,706 - INFO - 🔍 Starting crawl for http://www.mounbumrungsil.com/
+2025-08-28 23:41:28,111 - INFO - 📄 Found 5 pages for http://www.mounbumrungsil.com/
+2025-08-28 23:41:28,111 - INFO - ✅ Successfully crawled http://www.mounbumrungsil.com/ - 5 pages
+2025-08-28 23:41:33,480 - INFO - 🔍 Starting crawl for http://www.watrangbua.ac.th/
+2025-08-28 23:42:45,369 - INFO - 📄 Found 1 pages for http://www.watrangbua.ac.th/
+2025-08-28 23:42:45,370 - INFO - ✅ Successfully crawled http://www.watrangbua.ac.th/ - 1 pages
+2025-08-28 23:43:00,729 - INFO - 🔍 Starting crawl for http://grad.pnru.ac.th/
+2025-08-28 23:44:21,205 - INFO - 📄 Found 5 pages for http://grad.pnru.ac.th/
+2025-08-28 23:44:21,205 - INFO - ✅ Successfully crawled http://grad.pnru.ac.th/ - 5 pages
+2025-08-28 23:44:26,562 - INFO - 🔍 Starting crawl for http://www.vanessa.ac.th/
+2025-08-28 23:45:23,655 - INFO - 📄 Found 5 pages for http://www.vanessa.ac.th/
+2025-08-28 23:45:23,656 - INFO - ✅ Successfully crawled http://www.vanessa.ac.th/ - 5 pages
+2025-08-28 23:45:29,014 - INFO - 🔍 Starting crawl for http://plearnpattana.ac.th/
+2025-08-28 23:46:43,950 - INFO - 📄 Found 5 pages for http://plearnpattana.ac.th/
+2025-08-28 23:46:43,951 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://plearnpattana.ac.th/
+2025-08-28 23:46:59,305 - INFO - 🔍 Starting crawl for http://www.lertlah.com/
+2025-08-28 23:48:19,860 - INFO - 📄 Found 5 pages for http://www.lertlah.com/
+2025-08-28 23:48:19,860 - INFO - ✅ Successfully crawled http://www.lertlah.com/ - 5 pages
+2025-08-28 23:48:25,231 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100064478300666&mibextid=ZbWKwL
+2025-08-28 23:48:25,562 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100064478300666&mibextid=ZbWKwL
+2025-08-28 23:48:30,915 - INFO - 🔍 Starting crawl for http://www.au.edu/
+2025-08-28 23:52:02,517 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-28 23:52:02,517 - ERROR - 💥 Exception during crawl: FirecrawlClient.crawl() got an unexpected keyword argument 'actions' for http://www.australianisb.ac.th/
+2025-08-28 23:52:27,428 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-28 23:52:53,312 - INFO - 📄 Found 4 pages for http://www.au.edu/
+2025-08-28 23:52:53,313 - INFO - ✅ Successfully crawled http://www.au.edu/ - 4 pages
+2025-08-28 23:53:08,747 - INFO - 🔍 Starting crawl for https://kpis.ac.th/
+2025-08-28 23:55:22,689 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-29 00:05:50,858 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-29 00:15:39,765 - ERROR - ❌ Crawl failed for https://kpis.ac.th/: Crawl job failed to return data
+2025-08-29 00:15:45,395 - INFO - 🔍 Starting crawl for https://www.facebook.com/Loysaischool/?mibextid=ZbWKwL
+2025-08-29 00:15:45,775 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/Loysaischool/?mibextid=ZbWKwL
+2025-08-29 00:15:51,164 - INFO - 🔍 Starting crawl for https://m.facebook.com/wikbthailand/
+2025-08-29 00:15:51,542 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://m.facebook.com/wikbthailand/
+2025-08-29 00:16:06,973 - INFO - 🔍 Starting crawl for http://www.rockademyworld.com/
+2025-08-29 00:19:02,908 - INFO - 📄 Found 5 pages for http://www.rockademyworld.com/
+2025-08-29 00:19:02,909 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.rockademyworld.com/
+2025-08-29 00:19:08,312 - INFO - 🔍 Starting crawl for https://www.lfib.ac.th/
+2025-08-29 00:21:22,962 - INFO - 📄 Found 5 pages for https://www.lfib.ac.th/
+2025-08-29 00:21:22,964 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://www.lfib.ac.th/
+2025-08-29 00:21:28,394 - INFO - 🔍 Starting crawl for https://www.streesp.ac.th/
+2025-08-29 00:23:31,715 - INFO - 📄 Found 5 pages for https://www.streesp.ac.th/
+2025-08-29 00:23:31,716 - INFO - ✅ Successfully crawled https://www.streesp.ac.th/ - 5 pages
+2025-08-29 00:23:47,200 - INFO - 🔍 Starting crawl for https://www.invictus.school/campuses/pathum-thani/principals-welcome
+2025-08-29 00:24:07,887 - INFO - 📄 Found 1 pages for https://www.invictus.school/campuses/pathum-thani/principals-welcome
+2025-08-29 00:24:07,888 - INFO - ✅ Successfully crawled https://www.invictus.school/campuses/pathum-thani/principals-welcome - 1 pages
+2025-08-29 00:24:13,327 - INFO - 🔍 Starting crawl for https://www.standrews-samakee.com/
+2025-08-29 00:26:20,758 - INFO - 📄 Found 5 pages for https://www.standrews-samakee.com/
+2025-08-29 00:26:20,761 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://www.standrews-samakee.com/
+2025-08-29 00:26:26,278 - INFO - 🔍 Starting crawl for http://www.watchaimongkol.ac.th/
+2025-08-29 00:28:24,113 - INFO - 📄 Found 5 pages for http://www.watchaimongkol.ac.th/
+2025-08-29 00:28:24,114 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.watchaimongkol.ac.th/
+2025-08-29 00:28:39,559 - INFO - 🔍 Starting crawl for https://th168.pro/
+2025-08-29 00:30:21,732 - INFO - 📄 Found 5 pages for https://th168.pro/
+2025-08-29 00:30:21,732 - INFO - ✅ Successfully crawled https://th168.pro/ - 5 pages
+2025-08-29 00:30:27,258 - INFO - 🔍 Starting crawl for https://www.shrewsbury.ac.th/city
+2025-08-29 00:32:46,501 - INFO - 📄 Found 5 pages for https://www.shrewsbury.ac.th/city
+2025-08-29 00:32:46,502 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://www.shrewsbury.ac.th/city
+2025-08-29 00:32:51,945 - INFO - 🔍 Starting crawl for http://www.kma.ac.th/
+2025-08-29 00:34:49,537 - INFO - 📄 Found 5 pages for http://www.kma.ac.th/
+2025-08-29 00:34:49,538 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.kma.ac.th/
+2025-08-29 00:35:05,048 - INFO - 🔍 Starting crawl for https://watchalor.thai.ac/
+2025-08-29 00:36:53,382 - INFO - 📄 Found 1 pages for https://watchalor.thai.ac/
+2025-08-29 00:36:53,384 - INFO - ✅ Successfully crawled https://watchalor.thai.ac/ - 1 pages
+2025-08-29 00:36:58,851 - INFO - 🔍 Starting crawl for http://www.ras.ac.th/
+2025-08-29 00:39:04,220 - INFO - 📄 Found 4 pages for http://www.ras.ac.th/
+2025-08-29 00:39:04,221 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.ras.ac.th/
+2025-08-29 00:39:09,669 - INFO - 🔍 Starting crawl for http://www.tsn.ac.th/
+2025-08-29 00:40:58,436 - INFO - 📄 Found 5 pages for http://www.tsn.ac.th/
+2025-08-29 00:40:58,437 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.tsn.ac.th/
+2025-08-29 00:41:13,899 - INFO - 🔍 Starting crawl for https://theprotutor.net/
+2025-08-29 00:42:48,801 - INFO - 📄 Found 5 pages for https://theprotutor.net/
+2025-08-29 00:42:48,802 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://theprotutor.net/
+2025-08-29 00:42:54,297 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100065481729586&mibextid=ZbWKwL
+2025-08-29 00:42:54,729 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100065481729586&mibextid=ZbWKwL
+2025-08-29 00:43:00,178 - INFO - 🔍 Starting crawl for http://www.bys.ac.th/
+2025-08-29 00:44:20,799 - INFO - 📄 Found 3 pages for http://www.bys.ac.th/
+2025-08-29 00:44:20,800 - INFO - ✅ Successfully crawled http://www.bys.ac.th/ - 3 pages
+2025-08-29 00:44:36,357 - INFO - 🔍 Starting crawl for http://ladsanun.ac.th/
+2025-08-29 00:45:04,990 - INFO - 📄 Found 1 pages for http://ladsanun.ac.th/
+2025-08-29 00:45:04,991 - INFO - ✅ Successfully crawled http://ladsanun.ac.th/ - 1 pages
+2025-08-29 00:45:10,449 - INFO - 🔍 Starting crawl for http://www.sangkeet.ac.th/
+2025-08-29 00:47:25,254 - INFO - 📄 Found 5 pages for http://www.sangkeet.ac.th/
+2025-08-29 00:47:25,257 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.sangkeet.ac.th/
+2025-08-29 00:47:30,788 - INFO - 🔍 Starting crawl for https://prakanong.ac.th/
+2025-08-29 00:49:08,912 - INFO - 📄 Found 5 pages for https://prakanong.ac.th/
+2025-08-29 00:49:08,914 - INFO - ✅ Successfully crawled https://prakanong.ac.th/ - 5 pages
+2025-08-29 00:49:24,447 - INFO - 🔍 Starting crawl for http://www.wlpschool.ac.th/
+2025-08-29 00:51:50,925 - INFO - 📄 Found 5 pages for http://www.wlpschool.ac.th/
+2025-08-29 00:51:50,926 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.wlpschool.ac.th/
+2025-08-29 00:51:56,455 - INFO - 🔍 Starting crawl for https://www.utsschool.com/home.php
+2025-08-29 00:53:53,672 - INFO - 📄 Found 5 pages for https://www.utsschool.com/home.php
+2025-08-29 00:53:53,676 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for https://www.utsschool.com/home.php
+2025-08-29 00:53:59,114 - INFO - 🔍 Starting crawl for http://www.bangpho.ac.th/
+2025-08-29 00:57:47,064 - INFO - 📄 Found 5 pages for http://www.bangpho.ac.th/
+2025-08-29 00:57:47,067 - INFO - ✅ Successfully crawled http://www.bangpho.ac.th/ - 5 pages
+2025-08-29 00:58:02,626 - INFO - 🔍 Starting crawl for https://www.facebook.com/watnoinoppakhunschool?mibextid=ZbWKwL
+2025-08-29 00:58:02,959 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/watnoinoppakhunschool?mibextid=ZbWKwL
+2025-08-29 00:58:08,417 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100068808491086&mibextid=ZbWKwL
+2025-08-29 00:58:08,855 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100068808491086&mibextid=ZbWKwL
+2025-08-29 00:58:14,314 - INFO - 🔍 Starting crawl for http://www.schoolweb.in.th/watbangkhlonok/
+2025-08-29 00:58:38,944 - ERROR - ❌ Crawl failed for http://www.schoolweb.in.th/watbangkhlonok/: Crawl job failed to return data
+2025-08-29 00:58:54,499 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100057589482371&mibextid=ZbWKwL
+2025-08-29 00:58:59,497 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100057589482371&mibextid=ZbWKwL
+2025-08-29 00:59:04,938 - INFO - 🔍 Starting crawl for http://www.nmk.ac.th/
+2025-08-29 01:00:57,043 - INFO - 📄 Found 5 pages for http://www.nmk.ac.th/
+2025-08-29 01:00:57,045 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.nmk.ac.th/
+2025-08-29 01:01:02,565 - INFO - 🔍 Starting crawl for https://m.facebook.com/profile.php?id=100063601355617
+2025-08-29 01:01:02,920 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://m.facebook.com/profile.php?id=100063601355617
+2025-08-29 01:01:18,445 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100044006154891&mibextid=ZbWKwL
+2025-08-29 01:01:18,847 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100044006154891&mibextid=ZbWKwL
+2025-08-29 01:01:24,373 - INFO - 🔍 Starting crawl for http://10220020.thaischool.in.th/
+2025-08-29 01:03:46,520 - ERROR - ❌ Crawl failed for http://10220020.thaischool.in.th/: Crawl job failed to return data
+2025-08-29 01:03:52,086 - INFO - 🔍 Starting crawl for https://watthailandbuddhanayo.blogspot.com/
+2025-08-29 01:05:58,343 - INFO - 📄 Found 5 pages for https://watthailandbuddhanayo.blogspot.com/
+2025-08-29 01:05:58,344 - INFO - ✅ Successfully crawled https://watthailandbuddhanayo.blogspot.com/ - 5 pages
+2025-08-29 01:06:13,914 - INFO - 🔍 Starting crawl for http://www.watchaomool.ac.th/
+2025-08-29 01:08:12,996 - INFO - 📄 Found 5 pages for http://www.watchaomool.ac.th/
+2025-08-29 01:08:12,998 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.watchaomool.ac.th/
+2025-08-29 01:08:18,538 - INFO - 🔍 Starting crawl for http://www.suananun.ac.th/
+2025-08-29 01:09:08,015 - INFO - 📄 Found 2 pages for http://www.suananun.ac.th/
+2025-08-29 01:09:08,016 - INFO - ✅ Successfully crawled http://www.suananun.ac.th/ - 2 pages
+2025-08-29 01:09:13,518 - INFO - 🔍 Starting crawl for http://www.sr.ac.th/
+2025-08-29 01:10:54,954 - INFO - 📄 Found 5 pages for http://www.sr.ac.th/
+2025-08-29 01:10:54,955 - INFO - ✅ Successfully crawled http://www.sr.ac.th/ - 5 pages
+2025-08-29 01:11:10,447 - INFO - 🔍 Starting crawl for https://www.facebook.com/pathombudissararam?mibextid=ZbWKwL
+2025-08-29 01:11:10,773 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/pathombudissararam?mibextid=ZbWKwL
+2025-08-29 01:11:16,218 - INFO - 🔍 Starting crawl for https://www.facebook.com/watthapraschool.page?mibextid=ZbWKwL
+2025-08-29 01:11:16,581 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/watthapraschool.page?mibextid=ZbWKwL
+2025-08-29 01:11:22,020 - INFO - 🔍 Starting crawl for http://www.thewphaingarm.com/
+2025-08-29 01:12:57,469 - INFO - 📄 Found 5 pages for http://www.thewphaingarm.com/
+2025-08-29 01:12:57,469 - INFO - ✅ Successfully crawled http://www.thewphaingarm.com/ - 5 pages
+2025-08-29 01:13:12,953 - INFO - 🔍 Starting crawl for https://www.canadianschool.com/
+2025-08-29 01:14:43,088 - INFO - 📄 Found 5 pages for https://www.canadianschool.com/
+2025-08-29 01:14:43,089 - INFO - ✅ Successfully crawled https://www.canadianschool.com/ - 5 pages
+2025-08-29 01:14:48,523 - INFO - 🔍 Starting crawl for https://watthailandbuddhanayo.blogspot.com/
+2025-08-29 01:17:06,307 - INFO - 📄 Found 5 pages for https://watthailandbuddhanayo.blogspot.com/
+2025-08-29 01:17:06,309 - INFO - ✅ Successfully crawled https://watthailandbuddhanayo.blogspot.com/ - 5 pages
+2025-08-29 01:17:11,798 - INFO - 🔍 Starting crawl for https://www.facebook.com/photowsc?mibextid=ZbWKwL
+2025-08-29 01:17:12,292 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/photowsc?mibextid=ZbWKwL
+2025-08-29 01:17:27,799 - INFO - 🔍 Starting crawl for https://www.facebook.com/watkallayanamitshcool?mibextid=ZbWKwL
+2025-08-29 01:17:28,127 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/watkallayanamitshcool?mibextid=ZbWKwL
+2025-08-29 01:17:33,600 - INFO - 🔍 Starting crawl for https://www.facebook.com/swyschool?mibextid=ZbWKwL
+2025-08-29 01:17:33,943 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/swyschool?mibextid=ZbWKwL
+2025-08-29 01:17:39,415 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100057368833566&mibextid=ZbWKwL
+2025-08-29 01:17:39,744 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100057368833566&mibextid=ZbWKwL
+2025-08-29 01:17:55,227 - INFO - 🔍 Starting crawl for https://www.facebook.com/sakaenaischool?mibextid=ZbWKwL
+2025-08-29 01:17:55,611 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/sakaenaischool?mibextid=ZbWKwL
+2025-08-29 01:18:01,076 - INFO - 🔍 Starting crawl for http://sks.ac.th/
+2025-08-29 01:19:54,091 - INFO - 📄 Found 5 pages for http://sks.ac.th/
+2025-08-29 01:19:54,092 - INFO - ✅ Successfully crawled http://sks.ac.th/ - 5 pages
+2025-08-29 01:19:59,646 - INFO - 🔍 Starting crawl for https://watthailandbuddhanayo.blogspot.com/
+2025-08-29 01:22:05,165 - INFO - 📄 Found 5 pages for https://watthailandbuddhanayo.blogspot.com/
+2025-08-29 01:22:05,168 - INFO - ✅ Successfully crawled https://watthailandbuddhanayo.blogspot.com/ - 5 pages
+2025-08-29 01:22:20,807 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100057576665119&mibextid=ZbWKwL
+2025-08-29 01:22:21,234 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100057576665119&mibextid=ZbWKwL
+2025-08-29 01:22:26,732 - INFO - 🔍 Starting crawl for https://watthailandbuddhanayo.blogspot.com/
+2025-08-29 01:25:03,878 - INFO - 📄 Found 5 pages for https://watthailandbuddhanayo.blogspot.com/
+2025-08-29 01:25:03,879 - INFO - ✅ Successfully crawled https://watthailandbuddhanayo.blogspot.com/ - 5 pages
+2025-08-29 01:25:09,457 - INFO - 🔍 Starting crawl for https://www.facebook.com/WatyotinpraditSchool?mibextid=ZbWKwL
+2025-08-29 01:25:09,781 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/WatyotinpraditSchool?mibextid=ZbWKwL
+2025-08-29 01:25:25,326 - INFO - 🔍 Starting crawl for https://www.facebook.com/klong9school?mibextid=ZbWKwL
+2025-08-29 01:25:25,654 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/klong9school?mibextid=ZbWKwL
+2025-08-29 01:25:31,116 - INFO - 🔍 Starting crawl for https://www.facebook.com/4Srichan?mibextid=ZbWKwL
+2025-08-29 01:25:31,486 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/4Srichan?mibextid=ZbWKwL
+2025-08-29 01:25:36,929 - INFO - 🔍 Starting crawl for http://www.wbp.ac.th/
+2025-08-29 01:27:33,899 - INFO - 📄 Found 5 pages for http://www.wbp.ac.th/
+2025-08-29 01:27:33,900 - INFO - ✅ Successfully crawled http://www.wbp.ac.th/ - 5 pages
+2025-08-29 01:27:49,397 - INFO - 🔍 Starting crawl for https://watthailandbuddhanayo.blogspot.com/
+2025-08-29 01:29:59,152 - INFO - 📄 Found 5 pages for https://watthailandbuddhanayo.blogspot.com/
+2025-08-29 01:29:59,153 - INFO - ✅ Successfully crawled https://watthailandbuddhanayo.blogspot.com/ - 5 pages
+2025-08-29 01:30:04,632 - INFO - 🔍 Starting crawl for http://www.swimmingkidsthailand.com/
+2025-08-29 01:32:04,398 - INFO - 📄 Found 5 pages for http://www.swimmingkidsthailand.com/
+2025-08-29 01:32:04,399 - INFO - ✅ Successfully crawled http://www.swimmingkidsthailand.com/ - 5 pages
+2025-08-29 01:32:09,869 - INFO - 🔍 Starting crawl for https://th168.pro/
+2025-08-29 01:33:47,128 - INFO - 📄 Found 5 pages for https://th168.pro/
+2025-08-29 01:33:47,129 - INFO - ✅ Successfully crawled https://th168.pro/ - 5 pages
+2025-08-29 01:34:02,640 - INFO - 🔍 Starting crawl for https://www.norwichschool.ac.th/
+2025-08-29 01:35:58,997 - INFO - 📄 Found 5 pages for https://www.norwichschool.ac.th/
+2025-08-29 01:35:58,998 - INFO - ✅ Successfully crawled https://www.norwichschool.ac.th/ - 5 pages
+2025-08-29 01:36:04,475 - INFO - 🔍 Starting crawl for https://www.facebook.com/profile.php?id=100064316304033&mibextid=ZbWKwL
+2025-08-29 01:36:04,819 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/profile.php?id=100064316304033&mibextid=ZbWKwL
+2025-08-29 01:36:10,269 - INFO - 🔍 Starting crawl for https://www.facebook.com/watdisanukaramschool?mibextid=ZbWKwL
+2025-08-29 01:36:10,604 - ERROR - 💥 Exception during crawl: Website Not Supported: Failed to start crawl. This website is no longer supported, please reach out to help@firecrawl.com for more info on how to activate it on your account. - No additional error details provided. for https://www.facebook.com/watdisanukaramschool?mibextid=ZbWKwL
+2025-08-29 01:36:26,091 - INFO - 🔍 Starting crawl for https://www.lilberrypreschool.com/
+2025-08-29 01:38:29,615 - INFO - 📄 Found 5 pages for https://www.lilberrypreschool.com/
+2025-08-29 01:38:29,616 - INFO - ✅ Successfully crawled https://www.lilberrypreschool.com/ - 5 pages
+2025-08-29 13:38:23,926 - INFO - 🔍 Starting crawl for http://www.australianisb.ac.th/
+2025-08-29 13:40:04,443 - INFO - 📄 Found 5 pages for http://www.australianisb.ac.th/
+2025-08-29 13:40:04,443 - ERROR - 💥 Exception during crawl: unhashable type: 'dict' for http://www.australianisb.ac.th/

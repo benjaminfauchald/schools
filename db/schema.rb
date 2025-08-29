@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_28_112017) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -69,6 +69,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
     t.index ["place_id", "kind"], name: "index_media_items_on_place_id_and_kind"
     t.index ["place_id", "sort_order"], name: "index_media_items_on_place_id_and_sort_order"
     t.index ["place_id"], name: "index_media_items_on_place_id"
+  end
+
+  create_table "pages", force: :cascade do |t|
+    t.bigint "school_id", null: false
+    t.string "title", null: false
+    t.string "slug", null: false
+    t.text "content", null: false
+    t.string "page_type", default: "blog", null: false
+    t.string "status", default: "draft", null: false
+    t.string "author"
+    t.datetime "published_at"
+    t.text "meta_description"
+    t.string "featured_image_url"
+    t.integer "sort_order", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["published_at"], name: "index_pages_on_published_at"
+    t.index ["school_id", "page_type"], name: "index_pages_on_school_id_and_page_type"
+    t.index ["school_id", "slug"], name: "index_pages_on_school_id_and_slug", unique: true
+    t.index ["school_id", "status"], name: "index_pages_on_school_id_and_status"
+    t.index ["school_id"], name: "index_pages_on_school_id"
+    t.index ["sort_order"], name: "index_pages_on_sort_order"
+    t.index ["status", "published_at"], name: "index_pages_on_status_and_published_at"
   end
 
   create_table "places", force: :cascade do |t|
@@ -383,6 +406,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
 
   add_foreign_key "events", "places"
   add_foreign_key "media_items", "places"
+  add_foreign_key "pages", "schools"
   add_foreign_key "places", "points"
   add_foreign_key "school_claims", "schools"
   add_foreign_key "school_fee_bands", "school_fee_schedules"

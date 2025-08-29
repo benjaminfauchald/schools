@@ -1,13 +1,37 @@
 # lib/tasks/data/web_page_to_llm_data.rake
 # 
-# Comprehensive school website crawling using Firecrawl
+# Comprehensive school website crawling using Firecrawl with JSON schema extraction
 # Extracts structured data for AI processing from school websites
+# Bypasses cookie consent issues by prioritizing structured JSON over raw markdown
+#
+# USAGE EXAMPLES:
+#   
+#   # Standard mode - crawls schools needing updates
+#   bin/rails data:web_page_to_llm_data
+#
+#   # Force update ALL schools with websites (ignores crawl age)
+#   FORCE_UPDATE=true bin/rails data:web_page_to_llm_data
+#
+#   # Preview what would be crawled without making changes
+#   DRY_RUN=true bin/rails data:web_page_to_llm_data
+#
+#   # Combine force update with dry run
+#   FORCE_UPDATE=true DRY_RUN=true bin/rails data:web_page_to_llm_data
+#
+#   # Custom configuration
+#   CRAWLING_DELAY=10 CRAWLING_BATCH_SIZE=2 bin/rails data:web_page_to_llm_data
 
 require 'json'
 require 'open3'
 
 namespace :data do
   desc "Crawl school websites to extract LLM-ready structured data using Firecrawl"
+  desc "Environment variables:"
+  desc "  FORCE_UPDATE=true - Force re-crawl all schools regardless of last crawl date"
+  desc "  DRY_RUN=true - Preview mode, no database changes"
+  desc "  MAX_CRAWL_AGE_DAYS=30 - Days before re-crawling (default: 30)"
+  desc "  CRAWLING_DELAY=5 - Seconds between crawls (default: 5)"
+  desc "  CRAWLING_BATCH_SIZE=3 - Schools per batch (default: 3)"
   task web_page_to_llm_data: :environment do
     # Configuration constants
     PYTHON_SCRIPT = Rails.root.join('scripts', 'crawl_school_websites.py').to_s
@@ -15,6 +39,7 @@ namespace :data do
     BATCH_SIZE = ENV.fetch('CRAWLING_BATCH_SIZE', 3).to_i  # schools per batch
     MAX_CRAWL_AGE_DAYS = ENV.fetch('MAX_CRAWL_AGE_DAYS', 30).to_i
     DRY_RUN = ENV['DRY_RUN'] == 'true'
+    FORCE_UPDATE = ENV['FORCE_UPDATE'] == 'true'
     
     # Initialize statistics
     @stats = {
@@ -55,23 +80,43 @@ namespace :data do
       puts "✅ Environment validation passed"
     end
 
+    def get_website_url(school)
+      # Prefer schools.website_url over places.website
+      school.website_url.present? ? school.website_url : school.place&.website
+    end
+
     def get_schools_to_crawl
       puts "📊 Analyzing schools requiring website crawling..."
       
-      # Get all schools with websites (via place association)
-      all_with_websites = School.joins(:place).where.not(places: {website: [nil, '']})
+      # Get all schools with websites (check both places.website AND schools.website_url)
+      all_with_websites = School.left_joins(:place).where(
+        "places.website IS NOT NULL AND places.website != '' OR schools.website_url IS NOT NULL AND schools.website_url != ''"
+      )
       
-      # Categories for crawling status
-      never_crawled = all_with_websites.where(schools: {website_crawled_at: nil})
-      expired_crawls = all_with_websites.where(
-        'schools.website_crawled_at < ?', 
-        MAX_CRAWL_AGE_DAYS.days.ago
-      )
-      recent_crawls = all_with_websites.where(
-        'schools.website_crawled_at >= ?', 
-        MAX_CRAWL_AGE_DAYS.days.ago
-      )
-      failed_crawls = all_with_websites.where(schools: {website_crawling_status: 'failed'})
+      # Handle force update mode
+      if FORCE_UPDATE
+        puts "⚡ FORCE_UPDATE enabled - will re-crawl ALL schools with websites"
+        schools_to_process = all_with_websites
+        never_crawled = all_with_websites.where(schools: {website_crawled_at: nil})
+        expired_crawls = School.none
+        recent_crawls = all_with_websites.where.not(schools: {website_crawled_at: nil})
+        failed_crawls = all_with_websites.where(schools: {website_crawling_status: 'failed'})
+      else
+        # Normal mode - respect crawl age and status
+        never_crawled = all_with_websites.where(schools: {website_crawled_at: nil})
+        expired_crawls = all_with_websites.where(
+          'schools.website_crawled_at < ?', 
+          MAX_CRAWL_AGE_DAYS.days.ago
+        )
+        recent_crawls = all_with_websites.where(
+          'schools.website_crawled_at >= ?', 
+          MAX_CRAWL_AGE_DAYS.days.ago
+        )
+        failed_crawls = all_with_websites.where(schools: {website_crawling_status: 'failed'})
+        
+        # Determine which schools to process
+        schools_to_process = never_crawled.or(expired_crawls).or(failed_crawls)
+      end
       
       puts "   📈 Website Crawling Status:"
       puts "   🆕 Never crawled: #{never_crawled.count}"
@@ -79,8 +124,9 @@ namespace :data do
       puts "   ✅ Recent valid crawls: #{recent_crawls.count}"
       puts "   ❌ Previous failures: #{failed_crawls.count}"
       
-      # Determine which schools to process
-      schools_to_process = never_crawled.or(expired_crawls).or(failed_crawls)
+      if FORCE_UPDATE
+        puts "   ⚡ FORCE_UPDATE: Will crawl ALL #{schools_to_process.count} schools (ignoring age)"
+      end
       
       puts "   🎯 Schools to process: #{schools_to_process.count}"
       
@@ -93,8 +139,9 @@ namespace :data do
     end
 
     def crawl_school_website(school)
+      website_url = get_website_url(school)
       puts "🔍 Crawling: #{school.name&.truncate(40) || "School ##{school.id}"}"
-      puts "   🌐 URL: #{school.place.website}"
+      puts "   🌐 URL: #{website_url}"
       
       # Update status to 'crawling'
       unless DRY_RUN
@@ -105,7 +152,7 @@ namespace :data do
       end
       
       # Call Python script to crawl the website
-      cmd = "python3 #{PYTHON_SCRIPT} --website \"#{school.place.website}\""
+      cmd = "python3 #{PYTHON_SCRIPT} --website \"#{website_url}\""
       stdout, stderr, status = Open3.capture3(cmd)
       
       if status.success?
@@ -146,7 +193,7 @@ namespace :data do
             end
             
             @stats[:failed_crawls] += 1
-            @stats[:errors] << "#{school.place.website}: #{error_msg}"
+            @stats[:errors] << "#{website_url}: #{error_msg}"
             return :failed
           end
           
@@ -162,7 +209,7 @@ namespace :data do
           end
           
           @stats[:failed_crawls] += 1
-          @stats[:errors] << "#{school.place.website}: #{error_msg}"
+          @stats[:errors] << "#{website_url}: #{error_msg}"
           return :failed
         end
         
@@ -178,7 +225,7 @@ namespace :data do
         end
         
         @stats[:failed_crawls] += 1
-        @stats[:errors] << "#{school.place.website}: #{error_msg}"
+        @stats[:errors] << "#{website_url}: #{error_msg}"
         return :failed
       end
     end
@@ -262,8 +309,9 @@ namespace :data do
       end
       
       # Skip if website URL is invalid
-      unless school.place.website =~ URI::DEFAULT_PARSER.make_regexp(['http', 'https'])
-        puts "⚠️  Skipped: #{school.name&.truncate(40)} (invalid URL: #{school.place.website})"
+      website_url = get_website_url(school)
+      unless website_url&.match?(URI::DEFAULT_PARSER.make_regexp(['http', 'https']))
+        puts "⚠️  Skipped: #{school.name&.truncate(40)} (invalid URL: #{website_url})"
         @stats[:skipped] += 1
         return true
       end

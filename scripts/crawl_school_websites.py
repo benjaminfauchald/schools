@@ -183,15 +183,17 @@ class SchoolWebsiteCrawler:
             ],  # Skip admin and private areas
             'scrape_options': {
                 'formats': [
-                    'markdown',
                     {
                         'type': 'json',
-                        'schema': self.school_schema
-                    }
+                        'schema': self.school_schema  # Prioritize structured JSON extraction
+                    },
+                    'markdown'  # Fallback for content extraction
                 ],
                 'only_main_content': True,
-                'wait_for': 3000,  # Wait 3 seconds for dynamic content
-                'remove_base64_images': True  # Reduce payload size
+                'wait_for': 10000,  # Extended wait for dynamic content and cookie dialogs
+                'remove_base64_images': True,  # Reduce payload size
+                'mobile': False,  # Use desktop view for better content
+                'skip_tls_verification': False  # Keep security enabled
             },
             'allow_subdomains': False,  # Stay on main domain only
             'allow_external_links': False,  # Don't follow external links

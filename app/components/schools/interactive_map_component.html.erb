@@ -60,18 +60,17 @@
         </div>
       </div>
     </div>
-
-    <!-- Directions Panel -->
+    <!-- Route Panel is disabled for now
     <div id="<%= directions_panel_id %>" class="hidden mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
       <h4 class="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
         <%= helpers.heroicon('map', css_class: 'w-4 h-4 mr-2') %>
-        Directions
+        Route
       </h4>
-      <div id="directions-content" class="text-sm text-gray-700 dark:text-gray-300">
-        <p>Calculating route...</p>
+      <div class="text-sm text-gray-700 dark:text-gray-300">
+        <p>Route is displayed on the map above.</p>
       </div>
     </div>
-
+    -->
     <!-- Address and Links -->
     <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
@@ -125,35 +124,52 @@
   };
   
   function initMap_<%= map_id.gsub('-', '_') %>() {
+    console.log('initMap function called for <%= map_id %>');
     const instance = mapInstance_<%= map_id.gsub('-', '_') %>;
     
-    if (instance.initialized) return;
+    if (instance.initialized) {
+      console.log('Map already initialized, skipping');
+      return;
+    }
     instance.initialized = true;
+    console.log('Starting map initialization');
     
     // Hide loading indicator
     const loadingElement = document.getElementById('map-loading');
-    if (loadingElement) loadingElement.style.display = 'none';
+    if (loadingElement) {
+      loadingElement.style.display = 'none';
+      console.log('Map loading indicator hidden');
+    }
     
     // Initialize map
-    instance.map = new google.maps.Map(document.getElementById(instance.mapId), {
-      zoom: 13,
-      center: instance.schoolPosition,
-      mapTypeControl: true,
-      streetViewControl: true,
-      fullscreenControl: true,
-      styles: [
-        {
-          featureType: 'poi.school',
-          stylers: [{ visibility: 'on' }, { color: '#4285f4' }]
-        }
-      ]
-    });
+    try {
+      const mapElement = document.getElementById(instance.mapId);
+      if (!mapElement) {
+        throw new Error(`Map container element not found: ${instance.mapId}`);
+      }
+      
+      instance.map = new google.maps.Map(mapElement, {
+        zoom: 13,
+        center: instance.schoolPosition,
+        mapTypeControl: true,
+        streetViewControl: true,
+        fullscreenControl: true,
+        styles: [
+          {
+            featureType: 'poi.school',
+            stylers: [{ visibility: 'on' }, { color: '#4285f4' }]
+          }
+        ]
+      });
+      console.log('Map created successfully');
+    } catch (error) {
+      console.error('Error creating map:', error);
+      return;
+    }
     
     // Initialize directions service
     instance.directionsService = new google.maps.DirectionsService();
-    instance.directionsRenderer = new google.maps.DirectionsRenderer({
-      panel: document.getElementById('directions-content')
-    });
+    instance.directionsRenderer = new google.maps.DirectionsRenderer();
     instance.directionsRenderer.setMap(instance.map);
     
     // Add school marker
@@ -314,7 +330,7 @@
         updateTravelInfo('Ready to navigate', `${leg.distance.text} via ${route.summary}`, leg.duration.text, 'success');
         document.getElementById('travel-distance').textContent = leg.distance.text;
         
-        // Show directions panel
+        // Show route panel (without detailed directions)
         document.getElementById(instance.directionsPanelId).classList.remove('hidden');
       } else {
         console.error('Directions request failed:', status);
@@ -350,40 +366,19 @@
     return null;
   }
   
-  // Initialize map when Google Maps API loads
+  // Make init function available globally for Google Maps callback
+  window.initMap_<%= map_id.gsub('-', '_') %> = initMap_<%= map_id.gsub('-', '_') %>;
+  
+  // Initialize immediately if Google Maps is already loaded
   if (typeof google !== 'undefined' && google.maps) {
-    // Google Maps already loaded
+    console.log('Google Maps already available, initializing map');
     setTimeout(() => initMap_<%= map_id.gsub('-', '_') %>(), 100);
   } else {
-    // Wait for Google Maps to load
-    window.initMap_<%= map_id.gsub('-', '_') %> = initMap_<%= map_id.gsub('-', '_') %>;
+    console.log('Waiting for Google Maps to load via callback');
   }
 </script>
 
 <!-- Load Google Maps API -->
-<% unless defined?(@@google_maps_loaded) %>
-<script>
-  if (typeof google === 'undefined' || !google.maps) {
-    const script = document.createElement('script');
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initAllMaps&libraries=geometry,places';
-    script.async = true;
-    script.defer = true;
-    
-    window.initAllMaps = function() {
-      // Initialize all map instances
-      Object.keys(window).forEach(key => {
-        if (key.startsWith('initMap_') && typeof window[key] === 'function') {
-          try {
-            window[key]();
-          } catch (e) {
-            console.error('Error initializing map:', key, e);
-          }
-        }
-      });
-    };
-    
-    document.head.appendChild(script);
-  }
+<script async defer 
+        src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap_<%= map_id.gsub('-', '_') %>&libraries=geometry,places">
 </script>
-<% @@google_maps_loaded = true %>
-<% end %>

@@ -54,6 +54,105 @@
           fee_bands: @merged_data.fee_bands || []
         ) %>
 
+    <!-- School Pages -->
+    <% if @school.pages.published.any? %>
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <%= render Schools::SectionHeaderComponent.new(
+              title: "School Pages",
+              icon: "document-text",
+              subtitle: "Learn more about our school through our pages and blog posts"
+            ) %>
+
+        <div class="px-6 pb-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- Dynamic School Pages -->
+            <% featured_pages = @school.pages.published.order(:sort_order, :created_at).limit(2) %>
+            <% if featured_pages.any? %>
+              <% featured_pages.each_with_index do |page, index| %>
+                <% 
+                  # Dynamic styling based on index
+                  gradient_classes = case index
+                  when 0
+                    "from-blue-50 to-indigo-50 border-blue-200"
+                  else
+                    "from-green-50 to-emerald-50 border-green-200"
+                  end
+                  
+                  text_color_classes = case index
+                  when 0
+                    "text-blue-600 hover:text-blue-800"
+                  else
+                    "text-green-600 hover:text-green-800"
+                  end
+                  
+                  icon_color_classes = case index
+                  when 0
+                    "text-blue-600"
+                  else
+                    "text-green-600"
+                  end
+                  
+                  # Dynamic icon based on page type
+                  icon_name = case page.page_type.downcase
+                  when 'about_us'
+                    'information-circle'
+                  when 'sports'
+                    'trophy'
+                  when 'academics'
+                    'academic-cap'
+                  when 'activities'
+                    'star'
+                  else
+                    'document-text'
+                  end
+                %>
+                <div class="bg-gradient-to-br <%= gradient_classes %> border rounded-lg p-6">
+                  <div class="flex items-center mb-3">
+                    <%= heroicon(icon_name, css_class: "w-6 h-6 #{icon_color_classes} mr-2") %>
+                    <h3 class="text-lg font-semibold text-black"><%= page.title %></h3>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-4">
+                    <%= truncate(page.generate_meta_description, length: 80) %>
+                  </p>
+                  <%= link_to "Read More", school_page_path(@school, page),
+                              class: "inline-flex items-center #{text_color_classes} font-medium transition-colors" %>
+                </div>
+              <% end %>
+            <% else %>
+              <!-- Fallback when no pages exist -->
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center mb-3">
+                  <%= heroicon('information-circle', css_class: 'w-6 h-6 text-gray-600 mr-2') %>
+                  <h3 class="text-lg font-semibold text-black">Information Coming Soon</h3>
+                </div>
+                <p class="text-sm text-gray-600 mb-4">
+                  We're preparing detailed information about <%= @school.name %>. Check back soon!
+                </p>
+              </div>
+            <% end %>
+
+            <!-- All Pages -->
+            <div class="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-6">
+              <div class="flex items-center mb-3">
+                <%= heroicon('squares-2x2', css_class: 'w-6 h-6 text-purple-600 mr-2') %>
+                <h3 class="text-lg font-semibold text-black">All Pages</h3>
+              </div>
+              <p class="text-sm text-gray-600 mb-4">
+                Browse all our pages including academics, sports, activities, and more.
+              </p>
+              <div class="text-sm text-purple-600 mb-4">
+                <%= pluralize(@school.pages.published.count, 'page') %> available
+              </div>
+              <%= link_to "View All Pages", school_pages_path(@school),
+                          class: "inline-flex items-center text-purple-600 hover:text-purple-800 font-medium transition-colors" %>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    <% end %>
+
     <!-- Photo Gallery -->
     <%= render Schools::PhotoGalleryComponent.new(
           media_items: @merged_data.media_items_array || []

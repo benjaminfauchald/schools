@@ -4,6 +4,7 @@ Rails.application.routes.draw do
       resources :places
       resources :points
       resources :schools
+      resources :pages
       resources :media_items
       resources :events
       resources :travel_times
@@ -45,6 +46,9 @@ Rails.application.routes.draw do
     collection do
       get :filtered, to: 'schools#filtered'
     end
+    
+    # Nested pages routes for school content
+    resources :pages, only: [:index, :show], path: 'pages'
   end
 
   # Settings page for location management

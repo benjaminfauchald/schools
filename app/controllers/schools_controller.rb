@@ -6,6 +6,7 @@ class SchoolsController < ApplicationController
 
   def show
     # Eager load all related data to avoid N+1 queries
+    # @school is already set by find_school before_action, just reload with includes
     @school = School.includes(
       :place,
       :current_taggings,
@@ -15,7 +16,7 @@ class SchoolsController < ApplicationController
       :media_items,
       current_taggings: { term: :vocabulary },
       place: :media_items
-    ).find_by!(slug: params[:id])
+    ).find(@school.id)
     
     # Find related point data if available
     @related_point = find_related_point(@school) if @school.place
@@ -168,7 +169,12 @@ class SchoolsController < ApplicationController
   end
 
   def find_school
-    @school = School.find_by!(slug: params[:id])
+    # Handle both slug and numeric ID formats
+    if params[:id].match?(/\A\d+\z/)
+      @school = School.find(params[:id])
+    else
+      @school = School.find_by!(slug: params[:id])
+    end
   end
   
   # Find related point data by proximity

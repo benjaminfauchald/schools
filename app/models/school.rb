@@ -7,6 +7,7 @@ class School < ApplicationRecord
   has_one :school_grade_offering, dependent: :destroy
   has_many :school_fee_schedules, dependent: :destroy
   has_many :school_claims, dependent: :destroy
+  has_many :pages, dependent: :destroy
   
   # Generic place associations (shared with other place types)
   has_many :media_items, through: :place
@@ -50,6 +51,117 @@ class School < ApplicationRecord
   before_validation :generate_slug, if: -> { name.present? && slug.blank? }
   after_update :sync_geography_from_coordinates, if: :saved_change_to_lat_or_lng?
   after_update :sync_coordinates_from_place, if: :saved_change_to_place_id?
+  
+  # Get contact info with Place fallback
+  def display_phone
+    phone.presence || formatted_phone_number
+  end
+  
+  def display_website
+    website_url.presence || website
+  end
+  
+  def display_address
+    if address_line_1.present?
+      [address_line_1, address_line_2, district, province, postcode].compact.join(', ')
+    else
+      formatted_address
+    end
+  end
+  
+  # Taxonomy helpers
+  def terms_by_context(context)
+    current_terms.joins(:vocabulary).where(vocabularies: { code: context })
+  end
+  
+  def curricula
+    terms_by_context('curriculum')
+  end
+  
+  def accreditations  
+    terms_by_context('accreditation')
+  end
+  
+  def facilities
+    terms_by_context('facility')
+  end
+  
+  def extracurriculars
+    terms_by_context('extracurricular')
+  end
+  
+  def languages
+    terms_by_context('language')
+  end
+  
+  def programs
+    terms_by_context('program')
+  end
+  
+  # Add terms to school
+  def add_term(term, notes: nil, valid_from: nil, valid_to: nil)
+    taggings.create!(
+      term: term,
+      context: term.vocabulary.code,
+      notes: notes,
+      valid_from: valid_from,
+      valid_to: valid_to
+    )
+  end
+  
+  # Remove term from school
+  def remove_term(term)
+    taggings.where(term: term).destroy_all
+  end
+  
+  # Check if school has specific term
+  def has_term?(term_or_slug, context: nil)
+    scope = current_taggings.joins(:term)
+    
+    if term_or_slug.is_a?(Term)
+      scope = scope.where(term: term_or_slug)
+    else
+      scope = scope.where(terms: { slug: term_or_slug.to_s })
+      scope = scope.joins(term: :vocabulary).where(vocabularies: { code: context }) if context
+    end
+    
+    scope.exists?
+  end
+  
+  # Get curriculum slugs (for API compatibility)
+  def curriculum_slugs
+    curricula.pluck(:slug)
+  end
+  
+  def accreditation_slugs
+    accreditations.pluck(:slug)
+  end
+  
+  def facility_slugs
+    facilities.pluck(:slug)
+  end
+  
+  # Fee helpers
+  def current_fee_schedule
+    school_fee_schedules.published.order(academic_year: :desc).first
+  end
+  
+  def tuition_range
+    current_fee_schedule&.tuition_range_display
+  end
+  
+  # Grade offering helpers
+  def age_range
+    school_grade_offering&.age_range_display || 'Ages not specified'
+  end
+  
+  def grade_levels
+    school_grade_offering&.grades_display || 'Grades not specified'
+  end
+  
+  def educational_level
+    school_grade_offering&.educational_level || 'Level not specified'
+  end
   
   private
   
@@ -148,23 +260,6 @@ class School < ApplicationRecord
     [address_line_1, address_line_2, district, province, postcode].compact.join(', ')
   end
   
-  # Get contact info with Place fallback
-  def display_phone
-    phone.presence || formatted_phone_number
-  end
-  
-  def display_website
-    website_url.presence || website
-  end
-  
-  def display_address
-    if address_line_1.present?
-      [address_line_1, address_line_2, district, province, postcode].compact.join(', ')
-    else
-      formatted_address
-    end
-  end
-  
   # Sync location data from associated Place
   def sync_from_place!
     return unless place
@@ -185,100 +280,6 @@ class School < ApplicationRecord
   
   def verified?
     last_verification_at.present? && last_verification_at > 6.months.ago
-  end
-  
-  # Taxonomy helpers
-  def terms_by_context(context)
-    current_terms.joins(:vocabulary).where(vocabularies: { code: context })
-  end
-  
-  def curricula
-    terms_by_context('curriculum')
-  end
-  
-  def accreditations  
-    terms_by_context('accreditation')
-  end
-  
-  def facilities
-    terms_by_context('facility')
-  end
-  
-  def extracurriculars
-    terms_by_context('extracurricular')
-  end
-  
-  def languages
-    terms_by_context('language')
-  end
-  
-  def programs
-    terms_by_context('program')
-  end
-  
-  # Add terms to school
-  def add_term(term, notes: nil, valid_from: nil, valid_to: nil)
-    taggings.create!(
-      term: term,
-      context: term.vocabulary.code,
-      notes: notes,
-      valid_from: valid_from,
-      valid_to: valid_to
-    )
-  end
-  
-  # Remove term from school
-  def remove_term(term)
-    taggings.where(term: term).destroy_all
-  end
-  
-  # Check if school has specific term
-  def has_term?(term_or_slug, context: nil)
-    scope = current_taggings.joins(:term)
-    
-    if term_or_slug.is_a?(Term)
-      scope = scope.where(term: term_or_slug)
-    else
-      scope = scope.where(terms: { slug: term_or_slug.to_s })
-      scope = scope.joins(term: :vocabulary).where(vocabularies: { code: context }) if context
-    end
-    
-    scope.exists?
-  end
-  
-  # Get curriculum slugs (for API compatibility)
-  def curriculum_slugs
-    curricula.pluck(:slug)
-  end
-  
-  def accreditation_slugs
-    accreditations.pluck(:slug)
-  end
-  
-  def facility_slugs
-    facilities.pluck(:slug)
-  end
-  
-  # Fee helpers
-  def current_fee_schedule
-    school_fee_schedules.published.order(academic_year: :desc).first
-  end
-  
-  def tuition_range
-    current_fee_schedule&.tuition_range_display
-  end
-  
-  # Grade offering helpers
-  def age_range
-    school_grade_offering&.age_range_display || 'Ages not specified'
-  end
-  
-  def grade_levels
-    school_grade_offering&.grades_display || 'Grades not specified'
-  end
-  
-  def educational_level
-    school_grade_offering&.educational_level || 'Level not specified'
   end
   
   private

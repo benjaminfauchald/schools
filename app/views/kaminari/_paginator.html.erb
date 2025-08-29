@@ -1,0 +1,23 @@
+<%= paginator.render do %>
+  <nav aria-label="Page navigation">
+    <ul class="inline-flex -space-x-px text-sm">
+      <li>
+        <%= prev_page_tag unless current_page.first? %>
+      </li>
+      
+      <% each_page do |page| %>
+        <li>
+          <% if page.display_tag? %>
+            <%= page_tag page %>
+          <% elsif !page.was_truncated? %>
+            <%= gap_tag %>
+          <% end %>
+        </li>
+      <% end %>
+      
+      <li>
+        <%= next_page_tag unless current_page.last? %>
+      </li>
+    </ul>
+  </nav>
+<% end %>

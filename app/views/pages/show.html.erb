@@ -1,0 +1,134 @@
+<div class="w-full">
+  
+  <!-- Navigation -->
+  <div class="mb-6 flex items-center space-x-2 text-sm text-gray-600">
+    <%= link_to school_path(@school), class: "hover:text-blue-600 transition-colors" do %>
+      <%= @school.name %>
+    <% end %>
+    <span>›</span>
+    <%= link_to school_pages_path(@school), class: "hover:text-blue-600 transition-colors" do %>
+      Pages
+    <% end %>
+    <span>›</span>
+    <span class="text-black"><%= @page.title %></span>
+  </div>
+
+  <!-- Page Header -->
+  <header class="mb-8">
+    <% if @page.featured_image_url.present? %>
+      <div class="mb-6">
+        <img src="<%= @page.featured_image_url %>" 
+             alt="<%= @page.title %>" 
+             class="w-full h-64 object-cover rounded-lg shadow-md">
+      </div>
+    <% end %>
+    
+    <div class="mb-4">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+        <%= @page.page_type.humanize %>
+      </span>
+    </div>
+    
+    <h1 class="text-4xl font-bold text-black mb-4">
+      <%= @page.title %>
+    </h1>
+    
+    <div class="flex items-center space-x-4 text-sm text-gray-600">
+      <% if @page.published_at %>
+        <div class="flex items-center">
+          <%= heroicon('calendar', css_class: 'w-4 h-4 mr-1') %>
+          Published <%= @page.published_at.strftime('%B %d, %Y') %>
+        </div>
+      <% end %>
+      
+      <% if @page.author.present? %>
+        <div class="flex items-center">
+          <%= heroicon('user', css_class: 'w-4 h-4 mr-1') %>
+          By <%= @page.author %>
+        </div>
+      <% end %>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <main class="prose prose-lg max-w-none">
+    <div class="bg-white rounded-lg shadow-sm border p-8">
+      <%= raw @page.content %>
+    </div>
+  </main>
+
+  <!-- Footer Actions -->
+  <footer class="mt-12 pt-8 border-t border-gray-200">
+    <div class="flex items-center justify-between">
+      <div>
+        <%= link_to school_pages_path(@school), 
+                    class: "inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors" do %>
+          <%= heroicon('arrow-left', css_class: 'w-4 h-4 mr-2') %>
+          Back to All Pages
+        <% end %>
+      </div>
+      
+      <div class="flex items-center space-x-4">
+        <!-- Share buttons -->
+        <span class="text-sm text-gray-600">Share:</span>
+        
+        <%= link_to "https://www.facebook.com/sharer/sharer.php?u=#{request.original_url}", 
+                    target: '_blank', 
+                    class: "text-blue-600 hover:text-blue-800 transition-colors" do %>
+          <span class="sr-only">Share on Facebook</span>
+          <%= heroicon('share', css_class: 'w-5 h-5') %>
+        <% end %>
+        
+        <%= link_to "https://twitter.com/intent/tweet?url=#{request.original_url}&text=#{@page.title}", 
+                    target: '_blank',
+                    class: "text-blue-400 hover:text-blue-600 transition-colors" do %>
+          <span class="sr-only">Share on Twitter</span>
+          <%= heroicon('at-symbol', css_class: 'w-5 h-5') %>
+        <% end %>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Related Pages -->
+  <% related_pages = @school.pages.published.where.not(id: @page.id).by_type(@page.page_type).limit(3) %>
+  <% if related_pages.any? %>
+    <section class="mt-12">
+      <h3 class="text-2xl font-semibold text-black mb-6">Related Pages</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <% related_pages.each do |related_page| %>
+          <div class="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
+            <h4 class="text-lg font-semibold text-black mb-2">
+              <%= link_to related_page.title, school_page_path(@school, related_page),
+                          class: "hover:text-blue-600 transition-colors" %>
+            </h4>
+            <p class="text-sm text-gray-600 mb-3">
+              <%= related_page.generate_meta_description %>
+            </p>
+            <div class="text-xs text-gray-500">
+              <%= related_page.published_at&.strftime('%B %d, %Y') %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+</div>
+
+<!-- SEO Meta Tags -->
+<% content_for :head do %>
+  <meta name="description" content="<%= @meta_description %>">
+  <meta property="og:title" content="<%= @page_title %>">
+  <meta property="og:description" content="<%= @meta_description %>">
+  <meta property="og:url" content="<%= request.original_url %>">
+  <% if @page.featured_image_url.present? %>
+    <meta property="og:image" content="<%= @page.featured_image_url %>">
+  <% end %>
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= @page_title %>">
+  <meta name="twitter:description" content="<%= @meta_description %>">
+  <% if @page.featured_image_url.present? %>
+    <meta name="twitter:image" content="<%= @page.featured_image_url %>">
+  <% end %>
+<% end %>
