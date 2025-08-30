@@ -10,6 +10,7 @@ class School < ApplicationRecord
   has_one :school_grade_offering, dependent: :destroy
   has_many :school_fee_schedules, dependent: :destroy
   has_many :school_claims, dependent: :destroy
+  has_many :school_inquiries, dependent: :destroy
   has_many :pages, dependent: :destroy
   
   # Generic place associations (shared with other place types)
@@ -26,7 +27,7 @@ class School < ApplicationRecord
   
   # Delegate location attributes to Place (single source of truth)
   delegate :formatted_address, :vicinity, :rating, :user_ratings_total, :formatted_phone_number,
-           :international_phone_number, :website, :url, :opening_hours, :photos, :reviews,
+           :international_phone_number, :website, :url, :opening_hours, :reviews,
            :google_maps_url, :coordinates, to: :place, prefix: false, allow_nil: true
   delegate :name, to: :place, prefix: :google, allow_nil: true
   
@@ -174,6 +175,42 @@ class School < ApplicationRecord
   # Check if school has approved claims
   def approved_claims?
     school_claims.where(status: 'approved').exists?
+  end
+  
+  # Photo visibility management methods
+  def visible_google_photos
+    return [] unless place&.photos&.present?
+    
+    place.photos.select { |photo| photo_visible?(photo) }
+  end
+  
+  def photo_visible?(photo)
+    return true unless photo_visibility_settings.present?
+    
+    photo_key = generate_photo_key(photo)
+    photo_visibility_settings.fetch(photo_key, true) # Default to visible
+  end
+  
+  def set_photo_visibility(photo, visible)
+    photo_key = generate_photo_key(photo)
+    self.photo_visibility_settings = (photo_visibility_settings || {}).merge(photo_key => visible)
+  end
+  
+  def toggle_photo_visibility(photo)
+    current_visibility = photo_visible?(photo)
+    set_photo_visibility(photo, !current_visibility)
+    !current_visibility
+  end
+  
+  # Generate a unique key for each Google Places photo
+  def generate_photo_key(photo)
+    if photo.is_a?(Hash)
+      photo['photo_reference'] || photo.to_s.hash.to_s
+    elsif photo.respond_to?(:photo_reference)
+      photo.photo_reference
+    else
+      photo.to_s.hash.to_s
+    end
   end
   
   private

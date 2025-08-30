@@ -56,12 +56,22 @@
       <div class="pt-6">
         <div class="flex flex-wrap gap-4">
           <% contact_actions.each do |action| %>
-            <%= link_to action[:url], 
-                        class: "inline-flex items-center px-6 py-3 text-base font-medium rounded-lg transition-colors #{action_button_classes(action)}",
-                        target: (action[:external] ? '_blank' : nil),
-                        rel: (action[:external] ? 'noopener noreferrer' : nil) do %>
-              <%= action_icon_svg(action[:icon]) if action[:icon] %>
-              <%= action[:label] %>
+            <% if action[:modal] %>
+              <button type="button"
+                      data-controller="school-contact-modal"
+                      data-action="click->school-contact-modal#openModal"
+                      class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg transition-colors <%= action_button_classes(action) %>">
+                <%= action_icon_svg(action[:icon]) if action[:icon] %>
+                <%= action[:label] %>
+              </button>
+            <% else %>
+              <%= link_to action[:url], 
+                          class: "inline-flex items-center px-6 py-3 text-base font-medium rounded-lg transition-colors #{action_button_classes(action)}",
+                          target: (action[:external] ? '_blank' : nil),
+                          rel: (action[:external] ? 'noopener noreferrer' : nil) do %>
+                <%= action_icon_svg(action[:icon]) if action[:icon] %>
+                <%= action[:label] %>
+              <% end %>
             <% end %>
           <% end %>
         </div>

@@ -1,5 +1,5 @@
 class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
-  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities]
+  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility]
   
   def index
     @schools = current_user.owned_schools.includes(:place)
@@ -48,9 +48,37 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
         format.json { render json: { success: true, message: 'School information updated successfully.' } }
       end
     else
+      # Collect all error messages
+      error_messages = []
+      error_messages.concat(@school.errors.full_messages) if @school.errors.any?
+      
+      unless school_updated
+        Rails.logger.error "School update failed: #{@school.errors.full_messages.join(', ')}"
+        error_messages << "Failed to update school information"
+      end
+      
+      unless taxonomy_updated
+        Rails.logger.error "Taxonomy update failed for school #{@school.id}"
+        error_messages << "Failed to update academic programs or facilities"
+      end
+      
+      # Add detailed parameter logging for debugging
+      Rails.logger.error "School params: #{school_params.inspect}"
+      Rails.logger.error "Taxonomy params: #{taxonomy_params.inspect}"
+      
       respond_to do |format|
         format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: { success: false, errors: @school.errors.full_messages } }
+        format.json { 
+          render json: { 
+            success: false, 
+            errors: error_messages.presence || ['Unknown error occurred'],
+            debug: {
+              school_updated: school_updated,
+              taxonomy_updated: taxonomy_updated,
+              school_errors: @school.errors.full_messages
+            }
+          } 
+        }
       end
     end
   end
@@ -128,7 +156,57 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     end
   end
   
+  def toggle_photo_visibility
+    @school = current_school
+    
+    unless params[:photo_key].present?
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Photo key is required.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    # Find the photo by key
+    photo = find_photo_by_key(params[:photo_key])
+    
+    unless photo
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Photo not found.' }, status: :not_found }
+      end
+      return
+    end
+    
+    # Toggle visibility
+    new_visibility = @school.toggle_photo_visibility(photo)
+    
+    if @school.save
+      create_audit_log(@school, 'update', ['photo_visibility'])
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true, 
+            visible: new_visibility,
+            message: new_visibility ? 'Photo is now visible.' : 'Photo is now hidden.'
+          } 
+        }
+      end
+    else
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Failed to update photo visibility.', errors: @school.errors.full_messages } }
+      end
+    end
+  end
+  
   private
+  
+  def find_photo_by_key(photo_key)
+    return nil unless @school.place&.photos&.present?
+    
+    @school.place.photos.find do |photo|
+      @school.send(:generate_photo_key, photo) == photo_key
+    end
+  end
   
   def set_school
     @school = current_school
@@ -140,7 +218,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       :address_line_1, :address_line_2, :district, :province, :postcode, :country_code,
       :facebook_url, :line_id, :whatsapp_number,
       :founded_year, :ownership, :avg_class_size, :student_teacher_ratio,
-      :boarding, :school_bus, :language_support_notes,
+      :boarding, :school_bus, :language_support_notes, :tone_of_voice,
       photos: []
     )
   end
@@ -151,7 +229,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       :address_line_1, :address_line_2, :district, :province, :postcode, :country_code,
       :facebook_url, :line_id, :whatsapp_number,
       :founded_year, :ownership, :avg_class_size, :student_teacher_ratio,
-      :boarding, :school_bus, :language_support_notes,
+      :boarding, :school_bus, :language_support_notes, :tone_of_voice,
       photos: [], curriculum: [], accreditation: [], language: [], program: [], facility: []
     )
   end
@@ -183,13 +261,30 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
   
   def update_school_taxonomy(taxonomy_params)
     success = true
+    errors = []
+    
+    Rails.logger.info "Starting taxonomy update for school #{@school.id} with params: #{taxonomy_params.inspect}"
     
     taxonomy_params.each do |vocabulary_code, term_codes|
       next if term_codes.blank?
       
+      Rails.logger.info "Processing vocabulary: #{vocabulary_code} with terms: #{term_codes.inspect}"
+      
       # Remove existing taggings for this vocabulary
       vocabulary = Vocabulary.find_by(code: vocabulary_code.to_s)
-      next unless vocabulary
+      unless vocabulary
+        error_msg = "Vocabulary not found for code: #{vocabulary_code}"
+        Rails.logger.error error_msg
+        errors << error_msg
+        success = false
+        next
+      end
+      
+      # Remove existing taggings
+      existing_count = @school.taggings.joins(:term)
+                               .where(terms: { vocabulary_id: vocabulary.id })
+                               .count
+      Rails.logger.info "Removing #{existing_count} existing taggings for vocabulary #{vocabulary_code}"
       
       @school.taggings.joins(:term)
              .where(terms: { vocabulary_id: vocabulary.id })
@@ -198,25 +293,40 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       # Add new taggings
       term_codes.reject(&:blank?).each do |term_slug|
         term = vocabulary.terms.find_by(slug: term_slug)
-        next unless term
+        unless term
+          error_msg = "Term not found for slug: #{term_slug} in vocabulary: #{vocabulary_code}"
+          Rails.logger.error error_msg
+          errors << error_msg
+          success = false
+          next
+        end
         
         tagging = @school.taggings.build(
           term: term,
-          tagger_id: current_user.id,
-          tagger_type: 'User',
           context: vocabulary_code.to_s
         )
         
         unless tagging.save
+          error_msg = "Failed to save tagging for term #{term_slug}: #{tagging.errors.full_messages.join(', ')}"
+          Rails.logger.error error_msg
+          errors << error_msg
           success = false
-          Rails.logger.error "Failed to save tagging: #{tagging.errors.full_messages}"
+        else
+          Rails.logger.info "Successfully created tagging for term: #{term_slug}"
         end
       end
     end
     
+    if errors.any?
+      Rails.logger.error "Taxonomy update completed with errors: #{errors.join('; ')}"
+    else
+      Rails.logger.info "Taxonomy update completed successfully"
+    end
+    
     success
   rescue => e
-    Rails.logger.error "Error updating school taxonomy: #{e.message}"
+    error_msg = "Exception in taxonomy update: #{e.message}\n#{e.backtrace.first(5).join("\n")}"
+    Rails.logger.error error_msg
     false
   end
 

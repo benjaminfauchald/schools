@@ -1,0 +1,18 @@
+<%#
+Override for Administrate's show action button to display generic "Show School" 
+instead of "Show [Resource Name]" to avoid long button text
+%>
+
+<% if defined?(resource) && resource.respond_to?(:school) %>
+  <%= link_to(
+    "Show School",
+    [namespace, resource], 
+    class: "button"
+  ) %>
+<% else %>
+  <%= link_to(
+    "Show #{resource.class.name.demodulize}",
+    [namespace, resource], 
+    class: "button"
+  ) %>
+<% end %>

@@ -32,6 +32,12 @@ Rails.application.routes.draw do
         get :facilities
         patch :update_facilities
         delete 'photos/:photo_id', action: :delete_photo, as: :delete_photo
+        patch :toggle_photo_visibility
+      end
+      resources :pages, except: [:show] do
+        collection do
+          post :generate_content
+        end
       end
     end
     resources :claims, only: [:index, :show, :new, :create] do
@@ -94,6 +100,7 @@ Rails.application.routes.draw do
       post 'location/validate', to: 'location#validate'
       post 'location/geocode', to: 'location#geocode'
       get 'places/nearby', to: 'places#nearby'
+      get 'photos/proxy', to: 'photos#proxy'
     end
   end
 
@@ -109,6 +116,8 @@ Rails.application.routes.draw do
     
     # Nested pages routes for school content
     resources :pages, only: [:index, :show], path: 'pages'
+    # School inquiry contact form
+    resources :school_inquiries, only: [:create]
   end
 
   # Settings page for location management

@@ -5,7 +5,21 @@ export default class extends Controller {
   static targets = ["submitButton"]
 
   handleSubmit(event) {
+    console.log('handleSubmit called, event type:', event.type)
     event.preventDefault()
+    event.stopPropagation()
+    
+    // Get form data
+    const form = event.target
+    console.log('Form action URL:', form.action)
+    console.log('Form method:', form.method)
+    
+    // Add .json to URL to force JSON response
+    let actionUrl = form.action
+    if (!actionUrl.includes('.json')) {
+      actionUrl += '.json'
+    }
+    console.log('Modified action URL:', actionUrl)
     
     // Disable submit button to prevent double submission
     if (this.hasSubmitButtonTarget) {
@@ -19,12 +33,11 @@ export default class extends Controller {
       `
     }
 
-    // Get form data
-    const form = event.target
+    // Create form data
     const formData = new FormData(form)
 
     // Submit via fetch
-    fetch(form.action, {
+    fetch(actionUrl, {
       method: form.method,
       headers: {
         'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
@@ -32,16 +45,25 @@ export default class extends Controller {
       },
       body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log('Response status:', response.status)
+      console.log('Response headers:', response.headers)
+      return response.json()
+    })
     .then(data => {
+      console.log('Server response:', data)
       if (data.success) {
         this.showToast('success', data.message)
       } else {
+        console.error('Server errors:', data.errors)
+        if (data.debug) {
+          console.error('Debug info:', data.debug)
+        }
         this.showToast('error', data.errors ? data.errors.join(', ') : 'An error occurred')
       }
     })
     .catch(error => {
-      console.error('Error:', error)
+      console.error('Network/Parse error:', error)
       this.showToast('error', 'An error occurred while saving')
     })
     .finally(() => {
@@ -51,6 +73,8 @@ export default class extends Controller {
         this.submitButtonTarget.innerHTML = 'Save School Information'
       }
     })
+    
+    return false // Prevent default form submission
   }
 
   showToast(type, message) {

@@ -2,3 +2,7 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 import "flowbite"
+
+// Action Text with Trix editor
+import "trix"
+import "@rails/actiontext"

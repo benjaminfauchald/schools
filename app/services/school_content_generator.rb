@@ -20,11 +20,8 @@ class SchoolContentGenerator
     slug = @title.parameterize
     return if @school.pages.where(slug: slug).exists?
 
-    # Compile school data for AI
-    school_data = compile_school_data
-
     # Generate content using OpenAI
-    content = generate_ai_content(school_data, @title, @description)
+    content = generate_ai_content_only
     
     return unless content.present?
 
@@ -42,6 +39,20 @@ class SchoolContentGenerator
 
     Rails.logger.info "Generated '#{@title}' page for school: #{@school.name}"
     page
+  end
+
+  # Generate content without creating a page (for preview/form filling)
+  def generate_ai_content_only
+    unless @api_key.present? && @endpoint.present? && @deployment.present?
+      Rails.logger.error "Missing Azure OpenAI configuration: API_KEY=#{@api_key.present?}, ENDPOINT=#{@endpoint.present?}, DEPLOYMENT=#{@deployment.present?}"
+      return nil
+    end
+    
+    # Compile school data for AI
+    school_data = compile_school_data
+
+    # Generate content using OpenAI
+    generate_ai_content(school_data, @title, @description)
   end
 
   # Backwards compatibility
@@ -62,6 +73,7 @@ class SchoolContentGenerator
       founded_year: school.founded_year,
       ownership: school.ownership,
       about: school.about,
+      tone_of_voice: school.tone_of_voice,
       
       # Location info
       address: school.display_address,
@@ -115,11 +127,18 @@ class SchoolContentGenerator
     request['api-key'] = api_key  # Azure uses 'api-key' header instead of 'Authorization'
     request['Content-Type'] = 'application/json'
     
+    # Build system message with tone of voice if available
+    system_message = if school_data[:tone_of_voice].present?
+      "You are a professional content writer specializing in educational institution marketing. Write engaging, informative content that highlights the unique aspects of each school. IMPORTANT: Adopt the following tone of voice throughout your writing: #{school_data[:tone_of_voice]}"
+    else
+      'You are a professional content writer specializing in educational institution marketing. Write engaging, informative content that highlights the unique aspects of each school.'
+    end
+    
     request.body = {
       messages: [
         {
           role: 'system',
-          content: 'You are a professional content writer specializing in educational institution marketing. Write engaging, informative content that highlights the unique aspects of each school.'
+          content: system_message
         },
         {
           role: 'user',
@@ -200,7 +219,7 @@ class SchoolContentGenerator
 
 You are an expert content writer specializing in educational institution web content. Generate a well-structured HTML article using modern web design principles taking into account all the data you have on the school above.
 
-CRITICAL FORMATTING REQUIREMENTS:
+#{school_data[:tone_of_voice].present? ? "TONE OF VOICE: Write in the following style: #{school_data[:tone_of_voice]}\n\n" : ""}CRITICAL FORMATTING REQUIREMENTS:
 - Output MUST be valid HTML with Tailwind CSS classes
 - Use semantic HTML5 elements
 - Apply Tailwind CSS for professional styling

@@ -20,12 +20,15 @@
         <div class="flex justify-between h-16">
           <div class="flex items-center">
             <%= link_to school_owner_dashboard_index_path, class: "flex items-center space-x-2" do %>
-              <span class="font-bold text-xl text-blue-600">School Owner</span>
+              <span class="font-bold text-xl text-blue-600">School Owner&nbsp;</span>
+            <% end %>
+            <% if content_for?(:school_name) %>
+              <span class="text-xl font-medium text-gray-900"> / <%= yield(:school_name) %></span>
             <% end %>
           </div>
           
           <!-- Navigation Links -->
-          <div class="hidden md:flex items-center space-x-8">
+          <div class="hidden md:flex items-center space-x-8 ml-auto">
             <%= link_to "Dashboard", school_owner_dashboard_index_path, 
                 class: "text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" %>
             <%= link_to "My Schools", school_owner_schools_path, 

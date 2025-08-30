@@ -52,24 +52,15 @@ class Schools::HeroComponent < ViewComponent::Base
       }
     end
     
-    if contact_info[:email]
-      actions << {
-        label: 'Email',
-        icon: 'envelope',
-        url: "mailto:#{contact_info[:email]}",
-        primary: false
-      }
-    end
-    
-    if contact_info[:website]
-      actions << {
-        label: 'Website',
-        icon: 'globe',
-        url: contact_info[:website],
-        primary: false,
-        external: true
-      }
-    end
+    # Contact Us modal button - always show
+    actions << {
+      label: 'Contact',
+      icon: 'chat-bubble-left-ellipsis',
+      url: '#',
+      primary: true,
+      modal: true,
+      contact_button: true
+    }
     
     if contact_info[:google_maps_url]
       actions << {
@@ -116,6 +107,8 @@ class Schools::HeroComponent < ViewComponent::Base
   def action_button_classes(action)
     if action[:claim_button]
       'bg-green-600 hover:bg-green-700 text-white shadow-lg'
+    elsif action[:contact_button]
+      'bg-blue-600 hover:bg-blue-700 text-white shadow-lg'
     elsif action[:primary]
       'bg-blue-600 hover:bg-blue-700 text-white'
     else

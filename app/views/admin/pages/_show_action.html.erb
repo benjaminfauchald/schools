@@ -1,0 +1,10 @@
+<%#
+Pages-specific override for Administrate's show action button 
+to display "Show School" instead of the full page title
+%>
+
+<%= link_to(
+  "Show School",
+  [namespace, resource], 
+  class: "button"
+) %>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background: linear-gradient(135deg, #ea580c, #f97316);
+        color: white;
+        padding: 20px;
+        border-radius: 8px 8px 0 0;
+      }
+      .content {
+        background: #f9f9f9;
+        padding: 20px;
+        border: 1px solid #ddd;
+      }
+      .footer {
+        background: #333;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 0 0 8px 8px;
+        font-size: 12px;
+      }
+      .inquiry-details {
+        background: white;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 15px 0;
+      }
+      .label {
+        font-weight: bold;
+        color: #555;
+      }
+      .button {
+        background: #ea580c;
+        color: white;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 6px;
+        display: inline-block;
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header">
+      <h1>New School Inquiry</h1>
+      <p>Someone is interested in <%= @school.name %>!</p>
+    </div>
+
+    <div class="content">
+      <p>A new inquiry has been submitted for <strong><%= @school.name %></strong>.</p>
+      
+      <div class="inquiry-details">
+        <p><span class="label">From:</span> <%= @inquiry.name %></p>
+        <p><span class="label">Email:</span> <%= @inquiry.email %></p>
+        <% if @inquiry.phone.present? %>
+          <p><span class="label">Phone:</span> <%= @inquiry.phone %></p>
+        <% end %>
+        <p><span class="label">Number of children:</span> <%= @inquiry.children_count %></p>
+        
+        <p><span class="label">Message:</span></p>
+        <div style="background: #f5f5f5; padding: 15px; border-radius: 4px; margin-top: 5px;">
+          <%= simple_format(@inquiry.message) %>
+        </div>
+        
+        <p><span class="label">Submitted:</span> <%= @inquiry.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+      </div>
+      
+      <p>
+        <strong>Next steps:</strong><br>
+        • Reply directly to this email to respond to <%= @inquiry.name %><br>
+        • Contact them via phone if provided<br>
+        • Follow up promptly - interested parents appreciate quick responses!
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>This inquiry was submitted through the Bangkok Schools directory.</p>
+      <p>To manage your school's listing, visit your school owner dashboard.</p>
+    </div>
+  </body>
+</html>
