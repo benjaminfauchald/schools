@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_30_143036) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_30_144703) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -127,7 +127,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_143036) do
     t.bigint "school_id", null: false
     t.string "title", null: false
     t.string "slug", null: false
-    t.text "content", null: false
     t.string "page_type", default: "blog", null: false
     t.string "status", default: "draft", null: false
     t.string "author"

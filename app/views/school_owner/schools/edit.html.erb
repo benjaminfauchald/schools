@@ -1,4 +1,5 @@
 <% content_for :title, "Edit #{@school.name}" %>
+<% content_for :school_name, @school.name %>
 
 <div class="min-h-screen bg-gray-50">
   <!-- Header -->
@@ -618,24 +619,55 @@
                 <% if @school.place&.photos&.any? %>
                   <div class="mb-8">
                     <h3 class="text-md font-medium text-gray-900 mb-4">Current Photos from Google Places</h3>
+                    <p class="text-sm text-gray-600 mb-4">Click on photos to show or hide them on your public school page.</p>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       <% @school.place.photos.each do |photo| %>
-                        <div class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                        <% photo_key = @school.send(:generate_photo_key, photo) %>
+                        <% is_visible = @school.photo_visible?(photo) %>
+                        <div class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden photo-toggle-container cursor-pointer group"
+                             data-photo-key="<%= photo_key %>"
+                             data-visible="<%= is_visible %>"
+                             data-controller="photo-visibility"
+                             data-action="click->photo-visibility#toggle"
+                             data-photo-visibility-school-id-value="<%= @school.id %>">
+                          
+                          <!-- Photo Image -->
                           <% if photo.is_a?(Hash) && photo['photo_reference'] %>
                             <%= image_tag "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=#{photo['photo_reference']}&key=#{ENV['GOOGLE_PLACES_API_KEY']}", 
                                 alt: "#{@school.name} photo",
-                                class: "w-full h-full object-cover hover:scale-105 transition-transform duration-200",
+                                class: "w-full h-full object-cover transition-all duration-200 #{'opacity-50' unless is_visible}",
                                 loading: "lazy" %>
                           <% elsif photo.respond_to?(:url) %>
                             <%= image_tag photo.url, 
                                 alt: "#{@school.name} photo",
-                                class: "w-full h-full object-cover hover:scale-105 transition-transform duration-200",
+                                class: "w-full h-full object-cover transition-all duration-200 #{'opacity-50' unless is_visible}",
                                 loading: "lazy" %>
                           <% else %>
                             <div class="w-full h-full flex items-center justify-center bg-gray-200">
                               <span class="text-gray-400 text-sm">Photo unavailable</span>
                             </div>
                           <% end %>
+                          
+                          <!-- Visibility Status Badge -->
+                          <div class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium <%= is_visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                            <%= is_visible ? 'Showing' : 'Hidden' %>
+                          </div>
+                          
+                          <!-- Click Overlay -->
+                          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                            <div class="opacity-0 group-hover:opacity-100 bg-white bg-opacity-90 rounded-full p-2 transition-opacity duration-200">
+                              <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <% if is_visible %>
+                                  <!-- Eye Off Icon (hide) -->
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+                                <% else %>
+                                  <!-- Eye Icon (show) -->
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                <% end %>
+                              </svg>
+                            </div>
+                          </div>
                         </div>
                       <% end %>
                     </div>
@@ -892,15 +924,12 @@
                             </button>
                           </div>
                           
-                          <!-- Trix Editor Container -->
-                          <div class="trix-container">
+                          <!-- Quill Editor Container -->
+                          <div class="quill-container">
                             <input id="page-content-hidden" type="hidden" name="page[content]">
-                            <trix-toolbar id="page-content-toolbar"></trix-toolbar>
-                            <trix-editor id="page-content-input" 
-                                         input="page-content-hidden"
-                                         toolbar="page-content-toolbar"
-                                         class="trix-content min-h-[300px] border border-gray-300 rounded-b-md"
-                                         placeholder="Write your page content here..."></trix-editor>
+                            <div id="page-content-input" 
+                                 class="min-h-[300px] border border-gray-300 rounded-md"
+                                 data-placeholder="Write your page content here..."></div>
                           </div>
                         </div>
                         
