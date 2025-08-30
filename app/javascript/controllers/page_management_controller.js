@@ -353,7 +353,6 @@ export default class extends Controller {
     // Reset form
     form.reset()
     document.getElementById('page-id').value = ''
-    document.getElementById('form-method').value = ''
     
     // Clear the Trix editor content
     const trixEditor = document.querySelector('trix-editor#page-content-input')
@@ -404,7 +403,7 @@ export default class extends Controller {
     
     // Populate form
     document.getElementById('page-id').value = pageId
-    document.getElementById('form-method').value = 'patch'
+    // Don't set form method - let it stay as POST since controller handles both
     document.getElementById('page-title-input').value = title
     document.getElementById('page-description-input').value = description
     
@@ -475,7 +474,6 @@ export default class extends Controller {
     const form = document.getElementById('page-form')
     form.reset()
     document.getElementById('page-id').value = ''
-    document.getElementById('form-method').value = ''
   }
 
   handleFormSubmit(event) {
@@ -527,7 +525,7 @@ export default class extends Controller {
   async handleGenerateArticle(event) {
     event.preventDefault()
     
-    const button = event.target
+    const button = event.target.closest('button')
     const titleInput = document.getElementById('page-title-input')
     const descriptionInput = document.getElementById('page-description-input')
     
@@ -538,7 +536,11 @@ export default class extends Controller {
       return
     }
     
-    // Show loading state
+    // Create and show loading overlay
+    const loadingOverlay = this.createLoadingOverlay()
+    document.body.appendChild(loadingOverlay)
+    
+    // Show loading state on button too
     const originalText = button.textContent
     button.disabled = true
     button.textContent = 'Generating...'
@@ -586,6 +588,11 @@ export default class extends Controller {
       console.error('Error generating article:', error)
       this.showNotification('An error occurred while generating content', 'error')
     } finally {
+      // Remove loading overlay
+      if (loadingOverlay && loadingOverlay.parentNode) {
+        loadingOverlay.remove()
+      }
+      
       // Restore button state
       button.disabled = false
       button.textContent = originalText
@@ -593,10 +600,89 @@ export default class extends Controller {
     }
   }
 
+  createLoadingOverlay() {
+    const overlay = document.createElement('div')
+    overlay.className = 'fixed inset-0 bg-gray-900 bg-opacity-50 z-[100] flex items-center justify-center'
+    overlay.style.backdropFilter = 'blur(2px)'
+    
+    const loadingContainer = document.createElement('div')
+    loadingContainer.className = 'bg-white rounded-lg p-8 max-w-sm w-full mx-4 shadow-2xl'
+    
+    loadingContainer.innerHTML = `
+      <div class="text-center">
+        <!-- Animated spinner -->
+        <div class="inline-flex items-center justify-center w-16 h-16 mb-4">
+          <svg class="animate-spin h-16 w-16 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+        
+        <!-- Loading text -->
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Generating Article</h3>
+        <p class="text-sm text-gray-600 mb-4">Our AI is crafting your content...</p>
+        
+        <!-- Progress bar -->
+        <div class="relative pt-1">
+          <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+            <div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-600 animate-pulse" style="width: 100%"></div>
+          </div>
+        </div>
+        
+        <!-- Rotating messages -->
+        <div class="text-xs text-gray-500" data-loading-messages>
+          <p class="loading-message">Analyzing your school's information...</p>
+        </div>
+      </div>
+    `
+    
+    overlay.appendChild(loadingContainer)
+    
+    // Start rotating messages
+    const messages = [
+      "Analyzing your school's information...",
+      "Crafting engaging content...",
+      "Applying your tone of voice...",
+      "Formatting the article...",
+      "Almost ready..."
+    ]
+    
+    let messageIndex = 0
+    const messageElement = overlay.querySelector('.loading-message')
+    
+    const messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % messages.length
+      messageElement.style.opacity = '0'
+      setTimeout(() => {
+        messageElement.textContent = messages[messageIndex]
+        messageElement.style.opacity = '1'
+      }, 300)
+    }, 3000)
+    
+    // Store the interval ID so we can clear it later
+    overlay.dataset.messageInterval = messageInterval
+    
+    // Add fade-in animation
+    overlay.style.opacity = '0'
+    setTimeout(() => {
+      overlay.style.transition = 'opacity 0.3s ease-in-out'
+      overlay.style.opacity = '1'
+    }, 10)
+    
+    // Clean up interval when overlay is removed
+    const originalRemove = overlay.remove.bind(overlay)
+    overlay.remove = function() {
+      clearInterval(parseInt(this.dataset.messageInterval))
+      originalRemove()
+    }
+    
+    return overlay
+  }
+
   showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div')
-    notification.className = `fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg text-white z-50 transform transition-transform duration-300 translate-x-full`
+    notification.className = `fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg text-white z-[110] transform transition-transform duration-300 translate-x-full`
     
     // Set background color based on type
     const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'
