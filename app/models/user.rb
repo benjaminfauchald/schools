@@ -41,11 +41,15 @@ class User < ApplicationRecord
     return true if admin?
     return false unless school_owner?
     
-    approved_claims.joins(:school).where(school: school).exists?
+    active_claims.joins(:school).where(school: school).exists?
   end
 
   def approved_claims
     school_claims.where(status: 'approved')
+  end
+
+  def active_claims
+    school_claims.active
   end
 
   def pending_claims
@@ -56,7 +60,7 @@ class User < ApplicationRecord
     return School.all if admin?
     
     School.joins(:school_claims)
-          .where(school_claims: { user: self, status: 'approved' })
+          .where(school_claims: { user: self, status: 'approved', revoked_at: nil })
   end
 
   def display_name

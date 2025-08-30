@@ -40,6 +40,17 @@ class ClaimNotificationMailer < ApplicationMailer
     )
   end
 
+  def claim_revoked(school_claim)
+    @school_claim = school_claim
+    @user = school_claim.user
+    @school = school_claim.school
+    
+    mail(
+      to: @user.email,
+      subject: "School Access Revoked - #{@school.name}"
+    )
+  end
+
   # Notify admins of new claims
   def new_claim_for_admin(school_claim)
     @school_claim = school_claim

@@ -1,5 +1,5 @@
 class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
-  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility]
+  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :import_website_data, :import_status]
   
   def index
     @schools = current_user.owned_schools.includes(:place)
@@ -198,6 +198,153 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     end
   end
   
+  def fetch_videos
+    @school = current_school
+    
+    unless @school.has_youtube_channel?
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'No YouTube channel configured.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    result = @school.fetch_youtube_videos
+    
+    if result[:success]
+      # Add visibility information to each video
+      videos_with_visibility = result[:videos].map do |video|
+        video.merge(
+          visible: @school.video_visible?(video),
+          video_key: @school.generate_video_key(video),
+          duration_formatted: YoutubeService.parse_duration(video[:duration]),
+          view_count_formatted: YoutubeService.format_view_count(video[:view_count])
+        )
+      end
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true, 
+            videos: videos_with_visibility,
+            channel_id: result[:channel_id],
+            fetched_at: result[:fetched_at]
+          } 
+        }
+      end
+    else
+      respond_to do |format|
+        format.json { render json: { success: false, message: result[:error] }, status: :bad_request }
+      end
+    end
+  end
+  
+  def toggle_video_visibility
+    @school = current_school
+    
+    unless params[:video_key].present?
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Video key is required.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    # Find the video by key from fetched videos
+    result = @school.fetch_youtube_videos
+    unless result[:success]
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Failed to fetch videos.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    video = result[:videos].find { |v| @school.generate_video_key(v) == params[:video_key] }
+    
+    unless video
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Video not found.' }, status: :not_found }
+      end
+      return
+    end
+    
+    # Toggle visibility
+    new_visibility = @school.toggle_video_visibility(video)
+    
+    if @school.save
+      create_audit_log(@school, 'update', ['video_visibility'])
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true, 
+            visible: new_visibility,
+            message: new_visibility ? 'Video is now visible.' : 'Video is now hidden.'
+          } 
+        }
+      end
+    else
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Failed to update video visibility.', errors: @school.errors.full_messages } }
+      end
+    end
+  end
+  
+  def import_website_data
+    @school = current_school
+    
+    unless @school.website_url.present?
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'No website URL found for this school.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    # Check if an import is already in progress
+    if @school.website_crawling_status == 'crawling'
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Import already in progress.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    # Queue the import job
+    begin
+      ImportSchoolWebsiteDataJob.perform_later(@school.id)
+      
+      # Update status to indicate import started
+      @school.update!(
+        website_crawling_status: 'crawling',
+        website_crawling_error: nil
+      )
+      
+      create_audit_log(@school, 'update', ['website_crawling_status'])
+      
+      respond_to do |format|
+        format.json { render json: { success: true, message: 'Website import started in background.' } }
+      end
+    rescue => e
+      Rails.logger.error "Failed to start website import for school #{@school.id}: #{e.message}"
+      
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Failed to start website import.' }, status: :internal_server_error }
+      end
+    end
+  end
+  
+  def import_status
+    @school = current_school
+    
+    status = {
+      status: @school.website_crawling_status || 'none',
+      last_crawled: @school.website_crawled_at,
+      pages_found: @school.website_pages_found,
+      error: @school.website_crawling_error
+    }
+    
+    respond_to do |format|
+      format.json { render json: status }
+    end
+  end
+  
   private
   
   def find_photo_by_key(photo_key)
@@ -216,7 +363,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     params.require(:school).permit(
       :name, :about, :website_url, :admissions_url, :phone, :email,
       :address_line_1, :address_line_2, :district, :province, :postcode, :country_code,
-      :facebook_url, :line_id, :whatsapp_number,
+      :facebook_url, :line_id, :whatsapp_number, :youtube_url, :linkedin_url, :twitter_url, :instagram_url,
       :founded_year, :ownership, :avg_class_size, :student_teacher_ratio,
       :boarding, :school_bus, :language_support_notes, :tone_of_voice,
       photos: []
@@ -227,7 +374,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     params.require(:school).permit(
       :name, :about, :website_url, :admissions_url, :phone, :email,
       :address_line_1, :address_line_2, :district, :province, :postcode, :country_code,
-      :facebook_url, :line_id, :whatsapp_number,
+      :facebook_url, :line_id, :whatsapp_number, :youtube_url, :linkedin_url, :twitter_url, :instagram_url,
       :founded_year, :ownership, :avg_class_size, :student_teacher_ratio,
       :boarding, :school_bus, :language_support_notes, :tone_of_voice,
       photos: [], curriculum: [], accreditation: [], language: [], program: [], facility: []

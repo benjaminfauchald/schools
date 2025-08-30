@@ -33,6 +33,10 @@ Rails.application.routes.draw do
         patch :update_facilities
         delete 'photos/:photo_id', action: :delete_photo, as: :delete_photo
         patch :toggle_photo_visibility
+        get :fetch_videos
+        patch :toggle_video_visibility
+        post :import_website_data
+        get :import_status
       end
       resources :pages, except: [:show] do
         collection do
@@ -68,10 +72,12 @@ Rails.application.routes.draw do
         collection do
           post :bulk_approve
           post :bulk_reject
+          post :bulk_revoke
         end
         member do
           patch :approve
           patch :reject
+          patch :revoke
         end
       end
       resources :school_fee_schedules
@@ -83,6 +89,7 @@ Rails.application.routes.draw do
       resources :school_fee_bands
       resources :users
       resources :temp_claims, only: [:index, :show, :edit, :update, :destroy]
+      resources :google_map_imports, only: [:index, :new, :create]
     end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

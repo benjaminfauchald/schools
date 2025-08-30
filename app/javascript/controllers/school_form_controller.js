@@ -6,13 +6,35 @@ export default class extends Controller {
 
   handleSubmit(event) {
     console.log('handleSubmit called, event type:', event.type)
+    
+    // Ensure we're handling the right form
+    const form = event.target
+    if (!form || !form.action) {
+      console.error('No form or action found')
+      return false
+    }
+    
+    // Only handle school update forms
+    if (!form.action.includes('/school_owner/schools/')) {
+      console.log('Not a school form, ignoring')
+      return true // Let other forms handle normally
+    }
+    
+    // Only handle PATCH requests (school updates), not DELETE requests (photo deletion)
+    const methodField = form.querySelector('input[name="_method"]')
+    const actualMethod = methodField ? methodField.value : form.method
+    if (actualMethod && actualMethod.toLowerCase() === 'delete') {
+      console.log('Delete request detected, allowing normal form submission')
+      return true // Let delete forms submit normally
+    }
+    
+    console.log('Handling school form submission')
     event.preventDefault()
     event.stopPropagation()
     
-    // Get form data
-    const form = event.target
     console.log('Form action URL:', form.action)
     console.log('Form method:', form.method)
+    console.log('Actual method (from _method field):', actualMethod)
     
     // Add .json to URL to force JSON response
     let actionUrl = form.action
@@ -35,19 +57,31 @@ export default class extends Controller {
 
     // Create form data
     const formData = new FormData(form)
+    
+    // Debug: log form data
+    console.log('Form data entries:')
+    for (let [key, value] of formData.entries()) {
+      console.log(`  ${key}: ${value}`)
+    }
 
     // Submit via fetch
     fetch(actionUrl, {
-      method: form.method,
+      method: 'POST', // Always use POST for Rails forms
       headers: {
         'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
       },
       body: formData
     })
     .then(response => {
       console.log('Response status:', response.status)
       console.log('Response headers:', response.headers)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+      
       return response.json()
     })
     .then(data => {

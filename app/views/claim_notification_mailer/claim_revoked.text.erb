@@ -1,0 +1,34 @@
+School Access Revoked - <%= @school.name %>
+
+Dear <%= @user.display_name %>,
+
+We are writing to inform you that your management access for <%= @school.name %> has been revoked.
+
+School Information:
+- Name: <%= @school.name %>
+<% if @school.display_address.present? -%>
+- Address: <%= @school.display_address %>
+<% end -%>
+- Access Revoked: <%= @school_claim.revoked_at.strftime("%B %d, %Y at %I:%M %p") %>
+
+<% if @school_claim.revocation_reason.present? -%>
+Reason for Revocation:
+<%= @school_claim.revocation_reason %>
+
+<% end -%>
+What This Means:
+- You no longer have access to edit the school's information
+- You cannot manage the school's pages, photos, or other content
+- The school listing is now available for new claims
+- Your account remains active, but access to this specific school has been removed
+
+Next Steps:
+If you believe this revocation was made in error or if your circumstances have changed, you may submit a new claim for this school. Please ensure you have proper documentation of your current role or authorization.
+
+If you have questions about this revocation, please contact our support team.
+
+You can submit a new claim at: <%= new_for_school_anonymous_claims_url(@school.id) %>
+
+Thank you for your understanding. We maintain these access controls to ensure school information is managed by authorized personnel.
+
+If you have any questions or concerns, please don't hesitate to contact our support team.

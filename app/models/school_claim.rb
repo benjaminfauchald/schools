@@ -5,17 +5,20 @@ class SchoolClaim < ApplicationRecord
   belongs_to :user
   
   validates :school_id, uniqueness: { scope: :user_id, message: 'already has a pending or approved claim' }
-  validates :status, inclusion: { in: %w[pending approved rejected] }
+  validates :status, inclusion: { in: %w[pending approved rejected revoked] }
   validates :evidence_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }, allow_blank: true
   
   enum :status, {
     pending: 'pending',
     approved: 'approved', 
-    rejected: 'rejected'
+    rejected: 'rejected',
+    revoked: 'revoked'
   }
   
   scope :by_status, ->(status) { where(status: status) }
   scope :recent, -> { order(created_at: :desc) }
+  scope :active, -> { where(status: 'approved', revoked_at: nil) }
+  scope :revoked, -> { where.not(revoked_at: nil) }
   
   # Callbacks
   after_create :send_submission_notifications
@@ -67,6 +70,34 @@ class SchoolClaim < ApplicationRecord
     pending?
   end
   
+  # Revoke an approved claim
+  def revoke!(admin_user, reason:)
+    return false unless can_revoke?
+    
+    transaction do
+      update!(
+        status: 'revoked',
+        revoked_at: Time.current,
+        revoked_by_id: admin_user.id,
+        revocation_reason: reason
+      )
+      
+      # TODO: Remove school_admin role when User/Role system exists
+      # user.remove_role(:school_admin, school)
+      
+      # Log the revocation
+      create_audit_log(admin_user, 'revoke', reason)
+      
+      # Send notification email
+      ClaimNotificationMailer.claim_revoked(self).deliver_later
+    end
+  end
+  
+  # Check if claim can be revoked
+  def can_revoke?
+    approved? && revoked_at.nil?
+  end
+  
   # Days since claim was submitted
   def days_pending
     return 0 unless pending?
@@ -81,6 +112,19 @@ class SchoolClaim < ApplicationRecord
   # Get user email for admin display
   def user_email
     user&.email
+  end
+  
+  # Check if claim is currently active (approved and not revoked)
+  def active?
+    approved? && revoked_at.nil?
+  end
+  
+  # Get revoked by admin user (if revoked)
+  def revoked_by
+    return nil unless revoked_by_id
+    # TODO: Replace with actual User model lookup when available
+    # User.find_by(id: revoked_by_id)
+    "Admin ID: #{revoked_by_id}"
   end
   
   private

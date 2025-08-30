@@ -73,7 +73,43 @@
     <% elsif page.resource.approved? %>
       <div class="claim-result approved">
         <h3>✓ Claim Approved</h3>
-        <p>This claim was approved and the user now has management access to the school.</p>
+        <% if page.resource.active? %>
+          <p>This claim was approved and the user now has management access to the school.</p>
+          
+          <!-- Revoke Action -->
+          <div class="revoke-section">
+            <h4>Revoke Access</h4>
+            <p class="revoke-description">
+              If you need to revoke this user's access (e.g., they left their job, incorrect approval), 
+              you can revoke their claim while preserving the history.
+            </p>
+            <%= form_with url: revoke_admin_school_claim_path(page.resource), method: :patch, local: true, class: "revoke-form" do |f| %>
+              <div class="notes-field">
+                <%= f.label :revocation_reason, "Revocation Reason (required)", class: "field-label required" %>
+                <%= f.text_area :revocation_reason, 
+                    placeholder: "Please provide a reason for revocation (e.g., 'User left employment', 'Incorrect approval')...", 
+                    class: "admin-notes-textarea",
+                    rows: 3,
+                    required: true %>
+              </div>
+              <div class="action-button-group">
+                <%= f.submit "🚫 Revoke Access", 
+                    class: "button button--revoke", 
+                    onclick: "return confirm('Are you sure you want to revoke this claim? The school will become available for new claims.')" %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p>This claim was approved but has been revoked.</p>
+          <div class="revocation-info">
+            <p class="admin-notes"><strong>Revoked:</strong> <%= page.resource.revoked_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+            <p class="admin-notes"><strong>Revoked by:</strong> <%= page.resource.revoked_by %></p>
+            <% if page.resource.revocation_reason.present? %>
+              <p class="admin-notes"><strong>Reason:</strong> <%= page.resource.revocation_reason %></p>
+            <% end %>
+          </div>
+        <% end %>
+        
         <% if page.resource.admin_notes.present? %>
           <p class="admin-notes"><strong>Admin Notes:</strong> <%= page.resource.admin_notes %></p>
         <% end %>
@@ -191,6 +227,12 @@
   border: 1px solid #f5c6cb;
 }
 
+.status-revoked {
+  background-color: #f0f0f0;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
 .claim-actions {
   margin-top: 1.5rem;
 }
@@ -263,6 +305,48 @@
 .button--reject:hover {
   background-color: #c82333;
   border-color: #bd2130;
+}
+
+.button--revoke {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+.button--revoke:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+.revoke-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.revoke-section h4 {
+  margin: 0 0 0.5rem 0;
+  color: #495057;
+}
+
+.revoke-description {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.revoke-form {
+  margin-top: 1rem;
+}
+
+.revocation-info {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  border-left: 3px solid #6c757d;
+  margin-top: 0.5rem;
 }
 
 .claim-result {

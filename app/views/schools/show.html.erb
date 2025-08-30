@@ -161,7 +161,7 @@
 
     <!-- Claim This School -->
     <% if user_signed_in? && current_user.school_owner? %>
-      <% unless current_user.can_edit_school?(@school) || current_user.school_claims.where(school: @school).exists? %>
+      <% unless current_user.can_edit_school?(@school) || current_user.school_claims.where(school: @school).active.exists? %>
         <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
           <div class="flex items-center justify-between">
             <div>

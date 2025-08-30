@@ -31,6 +31,10 @@
     Points
   <% end %>
 
+  <%= link_to new_admin_google_map_import_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'google_map_imports'}" do %>
+    Import Google Map Entry
+  <% end %>
+
   <div class="navigation__separator"></div>
 
   <%= link_to admin_media_items_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'media_items'}" do %>

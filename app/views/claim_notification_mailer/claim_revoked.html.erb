@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background-color: #f0f0f0; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dee2e6; }
+      .content { background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; }
+      .button { background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 0; }
+      .school-info { background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0; }
+      .revocation-reason { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; margin: 15px 0; border-left: 3px solid #6c757d; }
+      .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 style="margin: 0; color: #495057;">School Access Revoked</h1>
+        <p style="margin: 10px 0 0 0;">Your management access has been revoked.</p>
+      </div>
+
+      <div class="content">
+        <p>Dear <%= @user.display_name %>,</p>
+
+        <p>We are writing to inform you that your management access for <strong><%= @school.name %></strong> has been revoked.</p>
+
+        <div class="school-info">
+          <h3 style="margin-top: 0;">School Information</h3>
+          <p><strong>Name:</strong> <%= @school.name %></p>
+          <% if @school.display_address.present? %>
+            <p><strong>Address:</strong> <%= @school.display_address %></p>
+          <% end %>
+          <p><strong>Access Revoked:</strong> <%= @school_claim.revoked_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+        </div>
+
+        <% if @school_claim.revocation_reason.present? %>
+          <div class="revocation-reason">
+            <h3 style="margin-top: 0; color: #495057;">Reason for Revocation</h3>
+            <p style="margin-bottom: 0;"><%= simple_format(@school_claim.revocation_reason) %></p>
+          </div>
+        <% end %>
+
+        <h3>What This Means:</h3>
+        <ul>
+          <li>You no longer have access to edit the school's information</li>
+          <li>You cannot manage the school's pages, photos, or other content</li>
+          <li>The school listing is now available for new claims</li>
+          <li>Your account remains active, but access to this specific school has been removed</li>
+        </ul>
+
+        <h3>Next Steps:</h3>
+        <p>If you believe this revocation was made in error or if your circumstances have changed, you may submit a new claim for this school. Please ensure you have proper documentation of your current role or authorization.</p>
+
+        <p>If you have questions about this revocation, please contact our support team.</p>
+
+        <a href="<%= new_for_school_anonymous_claims_url(@school.id) %>" class="button">Submit New Claim</a>
+      </div>
+
+      <div class="footer">
+        <p>Thank you for your understanding. We maintain these access controls to ensure school information is managed by authorized personnel.</p>
+        <p>If you have any questions or concerns, please don't hesitate to contact our support team.</p>
+      </div>
+    </div>
+  </body>
+</html>

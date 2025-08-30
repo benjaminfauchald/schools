@@ -175,9 +175,14 @@ class School < ApplicationRecord
     school_claims.exists?
   end
   
-  # Check if school has approved claims
+  # Check if school has approved claims (including revoked ones)
   def approved_claims?
     school_claims.where(status: 'approved').exists?
+  end
+  
+  # Check if school has active (approved and not revoked) claims
+  def active_claims?
+    school_claims.active.exists?
   end
   
   # Photo visibility management methods
@@ -213,6 +218,56 @@ class School < ApplicationRecord
       photo.photo_reference
     else
       photo.to_s.hash.to_s
+    end
+  end
+  
+  # YouTube video management methods
+  def has_youtube_channel?
+    youtube_url.present?
+  end
+  
+  def fetch_youtube_videos(max_results: 50)
+    return { success: false, error: "No YouTube URL configured" } unless has_youtube_channel?
+    
+    youtube_service = YoutubeService.new
+    youtube_service.fetch_channel_videos(youtube_url, max_results: max_results)
+  end
+  
+  def visible_youtube_videos
+    return [] unless has_youtube_channel?
+    
+    result = fetch_youtube_videos
+    return [] unless result[:success]
+    
+    result[:videos].select { |video| video_visible?(video) }
+  end
+  
+  def video_visible?(video)
+    return true unless video_visibility_settings.present?
+    
+    video_key = generate_video_key(video)
+    video_visibility_settings.fetch(video_key, true) # Default to visible
+  end
+  
+  def set_video_visibility(video, visible)
+    video_key = generate_video_key(video)
+    self.video_visibility_settings = (video_visibility_settings || {}).merge(video_key => visible)
+  end
+  
+  def toggle_video_visibility(video)
+    current_visibility = video_visible?(video)
+    set_video_visibility(video, !current_visibility)
+    !current_visibility
+  end
+  
+  # Generate a unique key for each YouTube video
+  def generate_video_key(video)
+    if video.is_a?(Hash)
+      video[:video_id] || video['video_id'] || video.to_s.hash.to_s
+    elsif video.respond_to?(:video_id)
+      video.video_id
+    else
+      video.to_s.hash.to_s
     end
   end
   

@@ -7,6 +7,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Ruby on Rails 8.0.2 application for managing OpenStreetMap (OSM) geographic data, specifically focusing on points of interest in Bangkok including schools and amenities. The application integrates with Google Places API to enrich OSM data and uses PostGIS for spatial database operations.
 
 
+When you use a library, API or gem, first check the docs with MCP server ref and context7
+
+Temporary File Management Rules
+1. Always Use /tmp Directory
+
+ALL temporary files MUST be created in the tmp/ directory
+Never create temporary files in app/, lib/, config/, or any other project directories
+Use Rails.root.join('tmp') to ensure correct path
+
+2. Mandatory Cleanup
+
+Delete temporary files immediately after use
+Use ensure blocks to guarantee cleanup even if errors occur
+Never leave temporary files behind after task completion
+
+3. Naming Conventions
+
+Use descriptive names with timestamps: tmp/import_#{timestamp}_#{SecureRandom.hex(4)}.csv
+Include process identifiers to avoid conflicts: tmp/processing_#{Process.pid}_data.json
+Never create numbered duplicates like "filename 2.rb" or "file_copy.rb"
+
 
   Backup Usage Examples:
 

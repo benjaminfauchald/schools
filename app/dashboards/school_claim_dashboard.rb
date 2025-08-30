@@ -14,6 +14,9 @@ class SchoolClaimDashboard < Administrate::BaseDashboard
     school: Field::BelongsTo,
     user: Field::BelongsTo.with_options(display_name: :email),
     status: Field::Select.with_options(searchable: false, collection: ->(field) { field.resource.class.send(field.attribute.to_s.pluralize).keys }),
+    revoked_at: Field::DateTime,
+    revoked_by_id: Field::Number,
+    revocation_reason: Field::Text,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
   }.freeze
@@ -40,6 +43,9 @@ class SchoolClaimDashboard < Administrate::BaseDashboard
     status
     evidence_url
     admin_notes
+    revoked_at
+    revoked_by_id
+    revocation_reason
     created_at
     updated_at
   ].freeze
@@ -68,7 +74,9 @@ class SchoolClaimDashboard < Administrate::BaseDashboard
   COLLECTION_FILTERS = {
     pending: ->(resources) { resources.pending },
     approved: ->(resources) { resources.approved },
-    rejected: ->(resources) { resources.rejected }
+    rejected: ->(resources) { resources.rejected },
+    revoked: ->(resources) { resources.revoked },
+    active: ->(resources) { resources.active }
   }.freeze
 
   # Overwrite this method to customize how school claims are displayed

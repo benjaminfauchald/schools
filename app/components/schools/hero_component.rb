@@ -82,8 +82,8 @@ class Schools::HeroComponent < ViewComponent::Base
     if helpers.user_signed_in?
       user = helpers.current_user
       return false unless user&.school_owner?
-      # Don't show if user can already edit this school or has pending claim
-      !user.can_edit_school?(school) && !user.school_claims.where(school: school).exists?
+      # Don't show if user can already edit this school or has pending/active claim
+      !user.can_edit_school?(school) && !user.school_claims.where(school: school).where(status: ['pending', 'approved'], revoked_at: nil).exists?
     else
       # Show for anonymous users if school is unclaimed
       true

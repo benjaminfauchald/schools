@@ -1,0 +1,237 @@
+<% content_for(:title) { "Import Google Map Entry" } %>
+
+<header class="header">
+  <h1 class="header__heading">Import Google Map Entry</h1>
+  <div class="header__actions">
+    <%= link_to "← Back to Dashboard", admin_root_path, class: "btn btn--secondary" %>
+  </div>
+</header>
+
+<section class="main-content__body">
+  <div class="form-container">
+    <div class="flash-messages">
+      <% if flash[:notice] %>
+        <div class="flash flash--notice"><%= flash[:notice] %></div>
+      <% end %>
+      <% if flash[:alert] %>
+        <div class="flash flash--alert"><%= flash[:alert] %></div>
+      <% end %>
+    </div>
+
+    <div class="instructions-card">
+      <h2>📍 Import School from Google Maps</h2>
+      <p>Enter a Google Maps URL to import place information and automatically create a new school entry.</p>
+      
+      <div class="example-section">
+        <h3>📋 Supported URL Formats:</h3>
+        <ul class="example-urls">
+          <li><strong>Place URLs:</strong><br>
+              <code>https://www.google.com/maps/place/School+Name/@14.123,100.456,17z/...</code></li>
+          <li><strong>Search URLs:</strong><br>
+              <code>https://www.google.com/maps/search/school+name/@14.123,100.456,15z/...</code></li>
+          <li><strong>Share URLs:</strong><br>
+              <code>https://maps.app.goo.gl/ABC123...</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <%= form_with url: admin_google_map_imports_path, method: :post, local: true, class: "form" do |form| %>
+      <div class="form-field">
+        <%= form.label :google_maps_url, "Google Maps URL", class: "form-label" %>
+        <%= form.text_field :google_maps_url, 
+            value: params[:google_maps_url],
+            placeholder: "https://www.google.com/maps/search/kis/@14.1391503,95.6837865,7z?entry=ttu&g_ep=EgoyMDI1MDgyNS4wIKXMDSoASAFQAw%3D%3D",
+            class: "form-input",
+            required: true %>
+        <p class="form-help-text">
+          Paste the complete Google Maps URL here. The system will extract the place ID and import all available information.
+        </p>
+      </div>
+
+      <div class="form-actions">
+        <%= form.submit "🔄 Import Place", class: "btn btn--primary" %>
+        <%= link_to "Cancel", admin_root_path, class: "btn btn--secondary" %>
+      </div>
+    <% end %>
+
+    <div class="process-info">
+      <h3>⚙️ What happens during import:</h3>
+      <ol class="process-steps">
+        <li><strong>Extract Place ID:</strong> Parse the Google Maps URL to find the unique place identifier</li>
+        <li><strong>Fetch Place Data:</strong> Contact Google Places API to get complete information</li>
+        <li><strong>Create Place Record:</strong> Store location data, ratings, photos, and reviews</li>
+        <li><strong>Generate School:</strong> Convert place data into a school entry with proper address structure</li>
+        <li><strong>Ready for Review:</strong> New school starts in 'draft' status for admin review and editing</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+.instructions-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.instructions-card h2 {
+  margin: 0 0 1rem 0;
+  color: #2d3748;
+  font-size: 1.25rem;
+}
+
+.instructions-card h3 {
+  margin: 1.5rem 0 0.75rem 0;
+  color: #4a5568;
+  font-size: 1rem;
+}
+
+.example-section {
+  margin-top: 1rem;
+}
+
+.example-urls {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.example-urls li {
+  margin: 0.75rem 0;
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+
+.example-urls code {
+  font-size: 0.875rem;
+  word-break: break-all;
+  color: #2b6cb0;
+  background: #ebf8ff;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.form-container {
+  max-width: 800px;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-help-text {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.15s ease-in-out;
+  border: 1px solid;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.btn--primary:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.btn--secondary {
+  background: #f9fafb;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.btn--secondary:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.process-info {
+  margin-top: 3rem;
+  padding: 1.5rem;
+  background: #fffbeb;
+  border: 1px solid #fbbf24;
+  border-radius: 8px;
+}
+
+.process-info h3 {
+  margin: 0 0 1rem 0;
+  color: #92400e;
+}
+
+.process-steps {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.process-steps li {
+  margin: 0.75rem 0;
+  color: #451a03;
+}
+
+.process-steps strong {
+  color: #92400e;
+}
+
+.flash {
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.flash--notice {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.flash--alert {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+</style>

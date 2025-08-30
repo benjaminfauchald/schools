@@ -175,6 +175,21 @@
               <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
             </a>
 
+            <!-- Videos (only show if YouTube URL is present) -->
+            <% if @school.has_youtube_channel? %>
+              <a href="#videos" 
+                 data-section="videos"
+                 data-action="click->school-form-navigation#navigateToSection"
+                 data-school-form-navigation-target="navItem"
+                 class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+                <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                Videos
+                <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+              </a>
+            <% end %>
+
             <!-- Pages -->
             <a href="#pages" 
                data-section="pages"
@@ -185,6 +200,19 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
               Pages
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+
+            <!-- Data Import -->
+            <a href="#data-import" 
+               data-section="data-import"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+              </svg>
+              Data Import
               <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
             </a>
           </nav>
@@ -367,6 +395,30 @@
           <%= form.label :whatsapp_number, "WhatsApp Number", class: "block text-sm font-medium text-gray-700" %>
           <%= form.telephone_field :whatsapp_number, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "+66 91 234 5678" %>
           <p class="mt-1 text-xs text-gray-500">WhatsApp contact number</p>
+        </div>
+        
+        <div>
+          <%= form.label :youtube_url, "YouTube Channel", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.url_field :youtube_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://www.youtube.com/channel/yourschool" %>
+          <p class="mt-1 text-xs text-gray-500">Your school's YouTube channel</p>
+        </div>
+        
+        <div>
+          <%= form.label :linkedin_url, "LinkedIn Profile", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.url_field :linkedin_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://www.linkedin.com/company/yourschool" %>
+          <p class="mt-1 text-xs text-gray-500">Your school's LinkedIn company page</p>
+        </div>
+        
+        <div>
+          <%= form.label :twitter_url, "Twitter Profile", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.url_field :twitter_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://twitter.com/yourschool" %>
+          <p class="mt-1 text-xs text-gray-500">Your school's Twitter profile</p>
+        </div>
+        
+        <div>
+          <%= form.label :instagram_url, "Instagram Profile", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.url_field :instagram_url, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "https://www.instagram.com/yourschool" %>
+          <p class="mt-1 text-xs text-gray-500">Your school's Instagram profile</p>
                 </div>
                 </div>
               </div>
@@ -771,6 +823,128 @@
                 </div>
               </div>
 
+              <!-- Videos Section (only show if YouTube URL is present) -->
+              <% if @school.has_youtube_channel? %>
+                <div data-school-form-navigation-target="section" 
+                     data-section="videos" 
+                     class="hidden bg-white border border-gray-200 rounded-lg p-6"
+                     data-controller="youtube-videos"
+                     data-youtube-videos-school-id-value="<%= @school.id %>"
+                     data-youtube-videos-fetch-url-value="<%= fetch_videos_school_owner_school_path(@school) %>"
+                     data-youtube-videos-toggle-url-value="<%= toggle_video_visibility_school_owner_school_path(@school) %>">
+                  
+                  <div class="flex items-center mb-6">
+                    <svg class="w-6 h-6 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                    <div>
+                      <h2 class="text-lg font-medium text-gray-900">YouTube Videos</h2>
+                      <p class="text-sm text-gray-600">Manage which videos from your YouTube channel are shown on your school page</p>
+                    </div>
+                  </div>
+
+                  <!-- YouTube Channel Info -->
+                  <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h3 class="text-sm font-medium text-gray-900">Connected YouTube Channel</h3>
+                        <p class="text-sm text-gray-600 mt-1"><%= @school.youtube_url %></p>
+                      </div>
+                      <a href="<%= @school.youtube_url %>" 
+                         target="_blank"
+                         class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <svg class="w-4 h-4 mr-1.5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        View Channel
+                      </a>
+                    </div>
+                  </div>
+
+                  <!-- Loading State -->
+                  <div data-youtube-videos-target="loadingState" class="hidden">
+                    <div class="flex items-center justify-center py-12">
+                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                      <span class="ml-3 text-gray-600">Loading videos from YouTube...</span>
+                    </div>
+                  </div>
+
+                  <!-- Error State -->
+                  <div data-youtube-videos-target="errorState" class="hidden">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div class="flex">
+                        <div class="flex-shrink-0">
+                          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                          </svg>
+                        </div>
+                        <div class="ml-3">
+                          <h3 class="text-sm font-medium text-red-800">Failed to load videos</h3>
+                          <div class="mt-2 text-sm text-red-700">
+                            <p class="error-message">An error occurred while fetching videos from YouTube.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Empty State -->
+                  <div data-youtube-videos-target="emptyState" class="hidden">
+                    <div class="text-center py-12">
+                      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                      </svg>
+                      <h3 class="mt-2 text-sm font-medium text-gray-900">No videos found</h3>
+                      <p class="mt-1 text-sm text-gray-500">Your YouTube channel doesn't have any videos yet, or they may be private.</p>
+                    </div>
+                  </div>
+
+                  <!-- Videos Grid -->
+                  <div data-youtube-videos-target="videosContainer" class="hidden">
+                    <div class="mb-4 flex items-center justify-between">
+                      <p class="text-sm text-gray-600">Click on videos to show or hide them on your public school page.</p>
+                      <div class="text-xs text-gray-500">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-green-800 mr-2">
+                          <span class="w-2 h-2 bg-green-600 rounded-full mr-1"></span>
+                          Visible
+                        </span>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full bg-red-100 text-red-800">
+                          <span class="w-2 h-2 bg-red-600 rounded-full mr-1"></span>
+                          Hidden
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <!-- Videos will be populated here by JavaScript -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" data-youtube-videos-target="videoGrid">
+                      <!-- Video cards will be inserted here -->
+                    </div>
+                  </div>
+
+                  <!-- Help Text -->
+                  <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex">
+                      <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                      </div>
+                      <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">How video visibility works</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                          <ul class="list-disc space-y-1 pl-4">
+                            <li>Videos are visible by default when first loaded</li>
+                            <li>Hidden videos won't appear on your public school page</li>
+                            <li>Visitors can still access hidden videos directly on YouTube</li>
+                            <li>Video data is cached for 30 minutes for better performance</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+
               <!-- Pages Section -->
               <div data-school-form-navigation-target="section" 
                    data-section="pages" 
@@ -878,6 +1052,272 @@
                 </div>
               </div>
 
+              <!-- Data Import Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="data-import" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6"
+                   data-controller="data-import"
+                   data-data-import-school-id-value="<%= @school.id %>">
+                <div class="flex items-center mb-6">
+                  <svg class="w-6 h-6 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                  </svg>
+                  <div>
+                    <h2 class="text-lg font-medium text-gray-900">Data Import</h2>
+                    <p class="text-sm text-gray-600">Import content from your website and social media accounts</p>
+                  </div>
+                </div>
+
+                <!-- Import Sources List -->
+                <div class="space-y-4">
+                  <!-- Website Import -->
+                  <% if @school.website_url.present? %>
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
+                      <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                          </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-gray-900">Website</p>
+                          <p class="text-sm text-gray-500 truncate"><%= @school.website_url %></p>
+                          <% if @school.website_crawled_at.present? %>
+                            <p class="text-xs text-gray-400">
+                              Last imported: <%= time_ago_in_words(@school.website_crawled_at) %> ago
+                              <% if @school.website_crawling_status == 'completed' %>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 ml-2">
+                                  Success
+                                </span>
+                              <% elsif @school.website_crawling_status == 'failed' %>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 ml-2">
+                                  Failed
+                                </span>
+                              <% end %>
+                            </p>
+                          <% else %>
+                            <p class="text-xs text-gray-400">Never imported</p>
+                          <% end %>
+                        </div>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <button type="button" 
+                                data-action="click->data-import#importWebsite"
+                                data-data-import-url-value="<%= @school.website_url %>"
+                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                          <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                          </svg>
+                          Import
+                        </button>
+                      </div>
+                    </div>
+                  <% end %>
+
+                  <!-- Facebook Import -->
+                  <% if @school.facebook_url.present? %>
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg opacity-50">
+                      <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                          <svg class="w-6 h-6 text-blue-700" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                          </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-gray-900">Facebook</p>
+                          <p class="text-sm text-gray-500 truncate"><%= @school.facebook_url %></p>
+                          <p class="text-xs text-gray-400">Coming soon</p>
+                        </div>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <button type="button" 
+                                disabled
+                                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-500 bg-gray-100 cursor-not-allowed">
+                          <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                          </svg>
+                          Coming Soon
+                        </button>
+                      </div>
+                    </div>
+                  <% end %>
+
+                  <!-- Instagram Import -->
+                  <% if @school.instagram_url.present? %>
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg opacity-50">
+                      <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                          <svg class="w-6 h-6 text-pink-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                          </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-gray-900">Instagram</p>
+                          <p class="text-sm text-gray-500 truncate"><%= @school.instagram_url %></p>
+                          <p class="text-xs text-gray-400">Coming soon</p>
+                        </div>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <button type="button" 
+                                disabled
+                                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-500 bg-gray-100 cursor-not-allowed">
+                          <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                          </svg>
+                          Coming Soon
+                        </button>
+                      </div>
+                    </div>
+                  <% end %>
+
+                  <!-- YouTube Import -->
+                  <% if @school.youtube_url.present? %>
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg opacity-50">
+                      <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                          <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                          </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-gray-900">YouTube</p>
+                          <p class="text-sm text-gray-500 truncate"><%= @school.youtube_url %></p>
+                          <p class="text-xs text-gray-400">Coming soon</p>
+                        </div>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <button type="button" 
+                                disabled
+                                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-500 bg-gray-100 cursor-not-allowed">
+                          <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                          </svg>
+                          Coming Soon
+                        </button>
+                      </div>
+                    </div>
+                  <% end %>
+
+                  <!-- LinkedIn Import -->
+                  <% if @school.linkedin_url.present? %>
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg opacity-50">
+                      <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                          <svg class="w-6 h-6 text-blue-800" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                          </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-gray-900">LinkedIn</p>
+                          <p class="text-sm text-gray-500 truncate"><%= @school.linkedin_url %></p>
+                          <p class="text-xs text-gray-400">Coming soon</p>
+                        </div>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <button type="button" 
+                                disabled
+                                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-500 bg-gray-100 cursor-not-allowed">
+                          <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                          </svg>
+                          Coming Soon
+                        </button>
+                      </div>
+                    </div>
+                  <% end %>
+
+                  <!-- Twitter Import -->
+                  <% if @school.twitter_url.present? %>
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg opacity-50">
+                      <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                          <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                          </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-gray-900">Twitter</p>
+                          <p class="text-sm text-gray-500 truncate"><%= @school.twitter_url %></p>
+                          <p class="text-xs text-gray-400">Coming soon</p>
+                        </div>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <button type="button" 
+                                disabled
+                                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-500 bg-gray-100 cursor-not-allowed">
+                          <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                          </svg>
+                          Coming Soon
+                        </button>
+                      </div>
+                    </div>
+                  <% end %>
+
+                  <!-- No Sources Message -->
+                  <% unless @school.website_url.present? || @school.facebook_url.present? || @school.instagram_url.present? || @school.youtube_url.present? || @school.linkedin_url.present? || @school.twitter_url.present? %>
+                    <div class="text-center py-12 bg-gray-50 rounded-lg">
+                      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                      </svg>
+                      <h3 class="mt-2 text-sm font-medium text-gray-900">No data sources available</h3>
+                      <p class="mt-1 text-sm text-gray-500">
+                        Add your website URL and social media links in the 
+                        <a href="#contact-information" 
+                           data-action="click->school-form-navigation#navigateToSection"
+                           class="text-blue-600 hover:text-blue-800">Contact Information</a> and 
+                        <a href="#social-media" 
+                           data-action="click->school-form-navigation#navigateToSection"
+                           class="text-blue-600 hover:text-blue-800">Social Media</a> sections to enable data import.
+                      </p>
+                    </div>
+                  <% end %>
+                </div>
+
+                <!-- Import Status Modal -->
+                <div data-data-import-target="statusModal" class="fixed inset-0 z-50 hidden overflow-y-auto" style="z-index: 9999;" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                  <div class="flex items-center justify-center min-h-screen pt-16 px-4 pb-20 text-center sm:pt-20">
+                    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" aria-hidden="true"></div>
+                    <div class="relative inline-block bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full mx-auto">
+                      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-purple-600 animate-spin" data-data-import-target="loadingIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            <svg class="h-6 w-6 text-green-600 hidden" data-data-import-target="successIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <svg class="h-6 w-6 text-red-600 hidden" data-data-import-target="errorIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                          </div>
+                          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" data-data-import-target="modalTitle">
+                              Importing Data...
+                            </h3>
+                            <div class="mt-2">
+                              <p class="text-sm text-gray-500" data-data-import-target="modalMessage">
+                                Please wait while we import data from your website. This may take a few minutes.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" 
+                                data-action="click->data-import#closeModal"
+                                data-data-import-target="closeButton"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled>
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Page Editor Modal -->
               <div id="page-editor-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -911,8 +1351,7 @@
                           <%= text_field_tag "page[title]", "", 
                               id: "page-title-input",
                               class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
-                              placeholder: "Enter page title",
-                              required: true %>
+                              placeholder: "Enter page title" %>
                         </div>
                         
                         <div>
