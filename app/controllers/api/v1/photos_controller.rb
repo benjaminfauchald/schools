@@ -1,11 +1,13 @@
 require 'net/http'
+require 'cgi'
+require 'openssl'
 
 class Api::V1::PhotosController < ApplicationController
   # Skip CSRF for API endpoints
   skip_before_action :verify_authenticity_token
   
   def proxy
-    photo_reference = params[:photo_reference]
+    photo_reference = CGI.unescape(params[:photo_reference].to_s)
     max_width = params[:max_width] || 400
     
     return head :bad_request unless photo_reference.present?
@@ -18,8 +20,25 @@ class Api::V1::PhotosController < ApplicationController
     google_url = "https://maps.googleapis.com/maps/api/place/photo?photoreference=#{photo_reference}&maxwidth=#{max_width}&key=#{api_key}"
     
     begin
-      # Fetch the image from Google Places API
+      # Fetch the image from Google Places API (follow redirects)
       response = Net::HTTP.get_response(URI(google_url))
+      
+      # Handle redirect (Google Places API returns 302 to actual image URL)
+      if response.code == '302' && response['Location']
+        begin
+          redirect_uri = URI(response['Location'])
+          http = Net::HTTP.new(redirect_uri.host, redirect_uri.port)
+          http.use_ssl = true if redirect_uri.scheme == 'https'
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE if redirect_uri.scheme == 'https'
+          
+          request = Net::HTTP::Get.new(redirect_uri)
+          final_response = http.request(request)
+          response = final_response
+        rescue => redirect_error
+          head :internal_server_error
+          return
+        end
+      end
       
       if response.code == '200'
         # Set appropriate headers and serve the image
@@ -28,11 +47,9 @@ class Api::V1::PhotosController < ApplicationController
                   disposition: 'inline',
                   filename: "school_photo_#{photo_reference.first(10)}.jpg"
       else
-        # Return a 1x1 transparent pixel if image fails
         head :not_found
       end
     rescue StandardError => e
-      Rails.logger.error "Photo proxy error: #{e.message}"
       head :internal_server_error
     end
   end

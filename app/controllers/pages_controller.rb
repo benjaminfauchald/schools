@@ -8,6 +8,9 @@ class PagesController < ApplicationController
     @pages = @school.pages.published.includes(:school)
     @grouped_pages = group_pages_by_type(@pages)
     
+    # Check if current user can edit this school (for navigation)
+    @can_edit_school = current_user&.can_edit_school?(@school)
+    
     # SEO meta tags
     @page_title = "#{@school.name} - Pages & Information"
     @meta_description = "Browse all pages and information about #{@school.name}, including about us, blog posts, academics, sports, and activities."
@@ -19,6 +22,9 @@ class PagesController < ApplicationController
     # SEO meta tags
     @page_title = "#{@page.title} - #{@school.name}"
     @meta_description = @page.generate_meta_description
+    
+    # Check if current user can edit this school (for navigation)
+    @can_edit_school = current_user&.can_edit_school?(@school)
     
     # Track page views (could be enhanced with analytics)
     Rails.logger.info "Page view: School #{@school.id}, Page #{@page.id} (#{@page.title})"

@@ -1,5 +1,22 @@
 <div class="w-full">
   
+  <!-- School Owner Navigation -->
+  <% if @can_edit_school %>
+    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-sm text-blue-800">
+          <%= heroicon('pencil-square', css_class: 'w-4 h-4') %>
+          <span>You can edit this school's pages</span>
+        </div>
+        <%= link_to edit_school_owner_school_path(@school, anchor: 'pages'), 
+                    class: "inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors" do %>
+          <%= heroicon('cog-6-tooth', css_class: 'w-4 h-4 mr-1') %>
+          Manage Pages
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  
   <!-- Navigation -->
   <div class="mb-6 flex items-center space-x-2 text-sm text-gray-600">
     <%= link_to school_path(@school), class: "hover:text-blue-600 transition-colors" do %>

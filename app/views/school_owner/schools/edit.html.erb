@@ -620,6 +620,7 @@
                   <div class="mb-8">
                     <h3 class="text-md font-medium text-gray-900 mb-4">Current Photos from Google Places</h3>
                     <p class="text-sm text-gray-600 mb-4">Click on photos to show or hide them on your public school page.</p>
+                    
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       <% @school.place.photos.each do |photo| %>
                         <% photo_key = @school.send(:generate_photo_key, photo) %>
@@ -632,29 +633,41 @@
                              data-photo-visibility-school-id-value="<%= @school.id %>">
                           
                           <!-- Photo Image -->
-                          <% if photo.is_a?(Hash) && photo['photo_reference'] %>
-                            <%= image_tag "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=#{photo['photo_reference']}&key=#{ENV['GOOGLE_PLACES_API_KEY']}", 
+                          <% photo_reference = photo.is_a?(Hash) ? photo['photo_reference'] : photo.try(:photo_reference) %>
+                          <% if photo_reference.present? %>
+                            <% photo_url = "/api/v1/photos/proxy?photo_reference=#{CGI.escape(photo_reference)}&max_width=400&t=#{Time.current.to_i}" %>
+                            <%= image_tag photo_url,
                                 alt: "#{@school.name} photo",
-                                class: "w-full h-full object-cover transition-all duration-200 #{'opacity-50' unless is_visible}",
-                                loading: "lazy" %>
+                                class: "absolute inset-0 w-full h-full object-cover transition-all duration-200 #{'opacity-50' unless is_visible} z-0",
+                                loading: "lazy",
+                                onerror: "this.onerror=null; this.parentElement.innerHTML='<div class=\"w-full h-full flex items-center justify-center bg-red-100 text-red-600 text-xs p-2 relative z-10\">Image failed to load</div>';" %>
                           <% elsif photo.respond_to?(:url) %>
                             <%= image_tag photo.url, 
                                 alt: "#{@school.name} photo",
                                 class: "w-full h-full object-cover transition-all duration-200 #{'opacity-50' unless is_visible}",
-                                loading: "lazy" %>
+                                loading: "lazy",
+                                onerror: "this.onerror=null; this.parentElement.innerHTML='<div class=\"w-full h-full flex items-center justify-center bg-red-100 text-red-600 text-xs p-2\">Image failed to load</div>';" %>
                           <% else %>
-                            <div class="w-full h-full flex items-center justify-center bg-gray-200">
-                              <span class="text-gray-400 text-sm">Photo unavailable</span>
+                            <div class="w-full h-full flex items-center justify-center bg-gray-200 text-center p-2">
+                              <div>
+                                <span class="text-gray-400 text-sm">No photo reference found</span>
+                                <% if Rails.env.development? %>
+                                  <br><small class="text-xs break-all">
+                                    Photo: <%= photo.inspect[0..100] %>...<br>
+                                    Reference: <%= photo_reference.inspect %>
+                                  </small>
+                                <% end %>
+                              </div>
                             </div>
                           <% end %>
                           
                           <!-- Visibility Status Badge -->
-                          <div class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium <%= is_visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                          <div class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium <%= is_visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %> z-20">
                             <%= is_visible ? 'Showing' : 'Hidden' %>
                           </div>
                           
                           <!-- Click Overlay -->
-                          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                          <div class="absolute inset-0 bg-transparent group-hover:bg-black group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center z-10">
                             <div class="opacity-0 group-hover:opacity-100 bg-white bg-opacity-90 rounded-full p-2 transition-opacity duration-200">
                               <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <% if is_visible %>
@@ -836,7 +849,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                               </svg>
                             </button>
-                            <%= link_to school_page_path(@school, page), target: "_blank", class: "text-gray-400 hover:text-gray-600" do %>
+                            <%= link_to school_page_path(@school, page), class: "text-gray-400 hover:text-gray-600" do %>
                               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                               </svg>
