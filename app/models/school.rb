@@ -6,6 +6,9 @@ class School < ApplicationRecord
   # Active Storage attachments
   has_many_attached :photos
   
+  # Store accessor for preferences JSONB column
+  store_accessor :preferences, :tone_of_voice
+  
   # School-specific associations
   has_one :school_grade_offering, dependent: :destroy
   has_many :school_fee_schedules, dependent: :destroy

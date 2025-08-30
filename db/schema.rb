@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_30_113211) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_30_143036) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -411,12 +411,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_113211) do
     t.string "facebook_cover_photo_url"
     t.text "tone_of_voice"
     t.jsonb "photo_visibility_settings", default: {}
+    t.jsonb "preferences", default: {}, null: false
     t.index ["district"], name: "index_schools_on_district"
     t.index ["facebook_content"], name: "index_schools_on_facebook_content", using: :gin
     t.index ["geog"], name: "index_schools_on_geog", using: :gist
     t.index ["name"], name: "index_schools_on_name", opclass: :gin_trgm_ops, using: :gin
     t.index ["photo_visibility_settings"], name: "index_schools_on_photo_visibility_settings", using: :gin
     t.index ["place_id"], name: "index_schools_on_place_id"
+    t.index ["preferences"], name: "index_schools_on_preferences", using: :gin
     t.index ["province"], name: "index_schools_on_province"
     t.index ["slug"], name: "index_schools_on_slug", unique: true
     t.index ["status", "place_id"], name: "index_schools_on_status_and_place_id"

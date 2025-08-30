@@ -173,6 +173,19 @@
               Photos
               <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
             </a>
+
+            <!-- Pages -->
+            <a href="#pages" 
+               data-section="pages"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Pages
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
           </nav>
                 </div>
                 </div>
@@ -710,6 +723,228 @@
                       </div>
                     </div>
                   <% end %>
+                </div>
+              </div>
+
+              <!-- Pages Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="pages" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6"
+                   data-controller="page-management">
+                <div class="flex items-center justify-between mb-6">
+                  <div class="flex items-center">
+                    <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <div>
+                      <h2 class="text-lg font-medium text-gray-900">School Pages</h2>
+                      <p class="text-sm text-gray-600">Create blog posts and informational pages for your school</p>
+                    </div>
+                  </div>
+                  <button type="button" 
+                          id="create-new-page-btn"
+                          class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Create New Page
+                  </button>
+                </div>
+
+                <!-- Tone of Voice Setting -->
+                <div class="mb-6 bg-gray-50 rounded-lg p-4">
+                  <label for="tone_of_voice" class="block text-sm font-medium text-gray-700 mb-2">
+                    Tone of Voice for Generated Content
+                  </label>
+                  <%= select_tag "school[tone_of_voice]", 
+                      options_for_select([
+                        ["Professional and Formal", "professional"],
+                        ["Warm and Welcoming", "warm"],
+                        ["Modern and Dynamic", "modern"],
+                        ["Academic and Scholarly", "academic"],
+                        ["Friendly and Approachable", "friendly"]
+                      ], @school.preferences&.dig("tone_of_voice") || "professional"),
+                      class: "block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+                  <p class="mt-1 text-xs text-gray-500">
+                    This setting will be used when generating AI content for your pages
+                  </p>
+                </div>
+
+                <!-- Pages List -->
+                <div class="space-y-4">
+                  <% if @school.pages.any? %>
+                    <% @school.pages.order(created_at: :desc).each do |page| %>
+                      <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between">
+                          <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-medium text-gray-900 truncate">
+                              <%= page.title %>
+                            </h3>
+                            <p class="text-sm text-gray-500 mt-1">
+                              <%= truncate(page.meta_description || strip_tags(page.content.to_s), length: 150) %>
+                            </p>
+                            <div class="mt-2 flex items-center space-x-4 text-xs text-gray-500">
+                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full <%= page.status == 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+                                <%= page.status.capitalize %>
+                              </span>
+                              <span>Type: <%= page.page_type.humanize %></span>
+                              <span>Created <%= time_ago_in_words(page.created_at) %> ago</span>
+                            </div>
+                          </div>
+                          <div class="ml-4 flex-shrink-0 flex space-x-2">
+                            <button type="button" 
+                                    class="edit-page-btn text-blue-600 hover:text-blue-800"
+                                    data-page-id="<%= page.id %>"
+                                    data-page-title="<%= page.title %>"
+                                    data-page-description="<%= page.meta_description %>"
+                                    data-page-content="<%= page.content.body.to_html if page.content.present? %>"
+                                    data-page-status="<%= page.status %>"
+                                    data-page-type="<%= page.page_type %>">
+                              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                              </svg>
+                            </button>
+                            <%= link_to school_page_path(@school, page), target: "_blank", class: "text-gray-400 hover:text-gray-600" do %>
+                              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                              </svg>
+                            <% end %>
+                            <%= button_to school_owner_school_page_path(@school, page), 
+                                method: :delete,
+                                class: "text-red-600 hover:text-red-800",
+                                data: { confirm: "Are you sure you want to delete this page?" } do %>
+                              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                              </svg>
+                            <% end %>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  <% else %>
+                    <div class="text-center py-12 bg-gray-50 rounded-lg">
+                      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                      <h3 class="mt-2 text-sm font-medium text-gray-900">No pages yet</h3>
+                      <p class="mt-1 text-sm text-gray-500">Get started by creating your first page.</p>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Page Editor Modal -->
+              <div id="page-editor-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                  <!-- Background overlay -->
+                  <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                  
+                  <!-- Modal panel -->
+                  <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                      <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                          Create New Page
+                        </h3>
+                        <button type="button" id="close-page-modal" class="text-gray-400 hover:text-gray-500">
+                          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                      
+                      <!-- Page Form -->
+                      <%= form_tag school_owner_school_pages_path(@school), 
+                          id: "page-form",
+                          method: :post,
+                          class: "space-y-6" do %>
+                        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+                        <%= hidden_field_tag :page_id, "", id: "page-id" %>
+                        <%= hidden_field_tag :_method, "", id: "form-method" %>
+                        
+                        <div>
+                          <label for="page-title-input" class="block text-sm font-medium text-gray-700">Title</label>
+                          <%= text_field_tag "page[title]", "", 
+                              id: "page-title-input",
+                              class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                              placeholder: "Enter page title",
+                              required: true %>
+                        </div>
+                        
+                        <div>
+                          <label for="page-description-input" class="block text-sm font-medium text-gray-700">Meta Description</label>
+                          <%= text_area_tag "page[meta_description]", "",
+                              id: "page-description-input",
+                              rows: 2,
+                              class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                              placeholder: "Brief description for search engines (optional)" %>
+                        </div>
+                        
+                        <div>
+                          <div class="flex items-center justify-between mb-2">
+                            <label for="page-content-input" class="block text-sm font-medium text-gray-700">Content</label>
+                            <button type="button" 
+                                    id="generate-article-btn"
+                                    class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                              <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                              </svg>
+                              Generate with AI
+                            </button>
+                          </div>
+                          
+                          <!-- Trix Editor Container -->
+                          <div class="trix-container">
+                            <input id="page-content-hidden" type="hidden" name="page[content]">
+                            <trix-toolbar id="page-content-toolbar"></trix-toolbar>
+                            <trix-editor id="page-content-input" 
+                                         input="page-content-hidden"
+                                         toolbar="page-content-toolbar"
+                                         class="trix-content min-h-[300px] border border-gray-300 rounded-b-md"
+                                         placeholder="Write your page content here..."></trix-editor>
+                          </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                          <div>
+                            <label for="page-status-input" class="block text-sm font-medium text-gray-700">Status</label>
+                            <%= select_tag "page[status]", 
+                                options_for_select([
+                                  ["Draft", "draft"],
+                                  ["Published", "published"]
+                                ], "draft"),
+                                id: "page-status-input",
+                                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+                          </div>
+                          
+                          <div>
+                            <label for="page-type-input" class="block text-sm font-medium text-gray-700">Page Type</label>
+                            <%= select_tag "page[page_type]", 
+                                options_for_select([
+                                  ["Blog Post", "blog_post"],
+                                  ["News", "news"],
+                                  ["Event", "event"],
+                                  ["Information", "information"]
+                                ], "blog_post"),
+                                id: "page-type-input",
+                                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+                          </div>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3 pt-4 border-t">
+                          <button type="button" 
+                                  id="cancel-page-btn"
+                                  class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Cancel
+                          </button>
+                          <button type="submit" 
+                                  class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Save Page
+                          </button>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
                 </div>
               </div>
 
