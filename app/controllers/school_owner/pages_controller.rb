@@ -43,22 +43,36 @@ class SchoolOwner::PagesController < SchoolOwner::ApplicationController
   end
 
   def create
+    Rails.logger.info "=== Page Create/Update Request ==="
+    Rails.logger.info "Page ID parameter: #{params[:page_id]}"
+    Rails.logger.info "Page params: #{page_params.inspect}"
+    Rails.logger.info "Content received: #{page_params[:content]&.truncate(300) || 'nil'}"
+    Rails.logger.info "Content length: #{page_params[:content]&.length || 0}"
+    
     # Check if this is actually an update based on page_id parameter
     if params[:page_id].present?
       @page = @school.pages.find(params[:page_id])
+      Rails.logger.info "Updating existing page: #{@page.id}"
+      
       if @page.update(page_params)
+        Rails.logger.info "Page updated successfully. Content after save: #{@page.content.body.to_s.truncate(300) rescue 'error'}"
         redirect_to edit_school_owner_school_path(@school, anchor: 'pages'), 
                     notice: 'Page was successfully updated.'
       else
+        Rails.logger.error "Page update failed: #{@page.errors.full_messages.join(', ')}"
         redirect_to edit_school_owner_school_path(@school, anchor: 'pages'), 
                     alert: "Error updating page: #{@page.errors.full_messages.join(', ')}"
       end
     else
       @page = @school.pages.build(page_params)
+      Rails.logger.info "Creating new page"
+      
       if @page.save
+        Rails.logger.info "Page created successfully. Content after save: #{@page.content.body.to_s.truncate(300) rescue 'error'}"
         redirect_to edit_school_owner_school_path(@school, anchor: 'pages'), 
                     notice: 'Page was successfully created.'
       else
+        Rails.logger.error "Page creation failed: #{@page.errors.full_messages.join(', ')}"
         redirect_to edit_school_owner_school_path(@school, anchor: 'pages'), 
                     alert: "Error creating page: #{@page.errors.full_messages.join(', ')}"
       end
