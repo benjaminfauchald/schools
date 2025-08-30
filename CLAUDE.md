@@ -25,6 +25,14 @@ This is a Ruby on Rails 8.0.2 application for managing OpenStreetMap (OSM) geogr
   # Create backup before restore
   rails data:backup
 
+Generate Blog pages
+  - ✅ data:generate_school_about_pages - Batch generate about pages
+  - ✅ data:generate_school_about_page[ID] - Generate for specific school
+  - ✅ data:list_schools_for_content_generation - List eligible schools
+
+
+  4. Admin Interface
+
 
 
 Now working:

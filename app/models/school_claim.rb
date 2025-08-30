@@ -2,7 +2,7 @@
 # Implements ownership verification workflow with evidence submission and admin approval
 class SchoolClaim < ApplicationRecord
   belongs_to :school
-  # Note: user_id references will be added when User model exists
+  belongs_to :user
   
   validates :school_id, uniqueness: { scope: :user_id, message: 'already has a pending or approved claim' }
   validates :status, inclusion: { in: %w[pending approved rejected] }
@@ -16,6 +16,9 @@ class SchoolClaim < ApplicationRecord
   
   scope :by_status, ->(status) { where(status: status) }
   scope :recent, -> { order(created_at: :desc) }
+  
+  # Callbacks
+  after_create :send_submission_notifications
   
   # Approve the claim and grant school admin role
   def approve!(admin_user, notes: nil)
@@ -31,6 +34,9 @@ class SchoolClaim < ApplicationRecord
       
       # Log the approval
       create_audit_log(admin_user, 'approve', notes)
+      
+      # Send notification email
+      ClaimNotificationMailer.claim_approved(self).deliver_later
     end
   end
   
@@ -45,6 +51,9 @@ class SchoolClaim < ApplicationRecord
       
       # Log the rejection
       create_audit_log(admin_user, 'reject', notes)
+      
+      # Send notification email
+      ClaimNotificationMailer.claim_rejected(self).deliver_later
     end
   end
   
@@ -69,7 +78,20 @@ class SchoolClaim < ApplicationRecord
     pending? && days_pending > 30
   end
   
+  # Get user email for admin display
+  def user_email
+    user&.email
+  end
+  
   private
+  
+  def send_submission_notifications
+    # Send confirmation email to user
+    ClaimNotificationMailer.claim_submitted(self).deliver_later
+    
+    # Send notification to admins
+    ClaimNotificationMailer.new_claim_for_admin(self).deliver_later
+  end
   
   def create_audit_log(admin_user, action, notes)
     # TODO: Create audit log when AuditLog model is available

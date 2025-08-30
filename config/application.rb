@@ -29,6 +29,9 @@ module Schools
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
+    
+    # Add fields directory to autoload paths for custom Administrate fields
+    config.autoload_paths += %W(#{config.root}/app/fields)
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -37,6 +40,12 @@ module Schools
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+    
+    # Active Storage configuration
+    config.active_storage.variant_processor = :mini_magick
+    
+    # Add forms directory to autoload paths
+    config.autoload_paths << Rails.root.join('app', 'forms')
 
     # Don't generate system test files.
     config.generators.system_tests = nil

@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
 class Schools::HeroComponent < ViewComponent::Base
-  def initialize(hero_data:, contact_info:)
+  def initialize(hero_data:, contact_info:, school: nil)
     @hero_data = hero_data
     @contact_info = contact_info
+    @school = school
   end
 
   private
 
-  attr_reader :hero_data, :contact_info
+  attr_reader :hero_data, :contact_info, :school
 
   def school_name
     hero_data[:name]
@@ -37,33 +38,29 @@ class Schools::HeroComponent < ViewComponent::Base
   def contact_actions
     actions = []
     
+    # Add claim button for unclaimed schools
+    if should_show_claim_button?
+      actions << claim_button_action
+    end
+    
     if contact_info[:phone]
       actions << {
         label: 'Call',
         icon: 'phone',
         url: "tel:#{contact_info[:phone].gsub(/\D/, '')}",
-        primary: true
-      }
-    end
-    
-    if contact_info[:email]
-      actions << {
-        label: 'Email',
-        icon: 'envelope',
-        url: "mailto:#{contact_info[:email]}",
         primary: false
       }
     end
     
-    if contact_info[:website]
-      actions << {
-        label: 'Website',
-        icon: 'globe',
-        url: contact_info[:website],
-        primary: false,
-        external: true
-      }
-    end
+    # Contact Us modal button - always show
+    actions << {
+      label: 'Contact',
+      icon: 'chat-bubble-left-ellipsis',
+      url: '#',
+      primary: true,
+      modal: true,
+      contact_button: true
+    }
     
     if contact_info[:google_maps_url]
       actions << {
@@ -78,17 +75,44 @@ class Schools::HeroComponent < ViewComponent::Base
     actions
   end
 
+  def should_show_claim_button?
+    return false unless school
+    return false if school.claimed?
+    
+    if helpers.user_signed_in?
+      user = helpers.current_user
+      return false unless user&.school_owner?
+      # Don't show if user can already edit this school or has pending claim
+      !user.can_edit_school?(school) && !user.school_claims.where(school: school).exists?
+    else
+      # Show for anonymous users if school is unclaimed
+      true
+    end
+  end
+  
+  def claim_button_action
+    {
+      label: 'Claim This School',
+      icon: 'building-office-2',
+      url: helpers.new_direct_claim_path(school_id: school.id),
+      primary: true,
+      claim_button: true
+    }
+  end
+
   def stat_icon_svg(icon_name)
     helpers.heroicon(icon_name, css_class: "w-5 h-5 text-blue-600")
   end
 
-  def action_button_classes(primary: false)
-    base = "inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md transition-colors duration-200"
-    
-    if primary
-      "#{base} border-transparent text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+  def action_button_classes(action)
+    if action[:claim_button]
+      'bg-green-600 hover:bg-green-700 text-white shadow-lg'
+    elsif action[:contact_button]
+      'bg-blue-600 hover:bg-blue-700 text-white shadow-lg'
+    elsif action[:primary]
+      'bg-blue-600 hover:bg-blue-700 text-white'
     else
-      "#{base} border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+      'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
     end
   end
 

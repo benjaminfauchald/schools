@@ -3,10 +3,18 @@
 class School < ApplicationRecord
   belongs_to :place, optional: true
   
+  # Active Storage attachments
+  has_many_attached :photos
+  
+  # Store accessor for preferences JSONB column
+  store_accessor :preferences, :tone_of_voice
+  
   # School-specific associations
   has_one :school_grade_offering, dependent: :destroy
   has_many :school_fee_schedules, dependent: :destroy
   has_many :school_claims, dependent: :destroy
+  has_many :school_inquiries, dependent: :destroy
+  has_many :pages, dependent: :destroy
   
   # Generic place associations (shared with other place types)
   has_many :media_items, through: :place
@@ -22,7 +30,7 @@ class School < ApplicationRecord
   
   # Delegate location attributes to Place (single source of truth)
   delegate :formatted_address, :vicinity, :rating, :user_ratings_total, :formatted_phone_number,
-           :international_phone_number, :website, :url, :opening_hours, :photos, :reviews,
+           :international_phone_number, :website, :url, :opening_hours, :reviews,
            :google_maps_url, :coordinates, to: :place, prefix: false, allow_nil: true
   delegate :name, to: :place, prefix: :google, allow_nil: true
   
@@ -50,6 +58,163 @@ class School < ApplicationRecord
   before_validation :generate_slug, if: -> { name.present? && slug.blank? }
   after_update :sync_geography_from_coordinates, if: :saved_change_to_lat_or_lng?
   after_update :sync_coordinates_from_place, if: :saved_change_to_place_id?
+  
+  # Get contact info with Place fallback
+  def display_phone
+    phone.presence || formatted_phone_number
+  end
+  
+  def display_website
+    website_url.presence || website
+  end
+  
+  def display_address
+    if address_line_1.present?
+      [address_line_1, address_line_2, district, province, postcode].compact.join(', ')
+    else
+      formatted_address
+    end
+  end
+  
+  # Taxonomy helpers
+  def terms_by_context(context)
+    current_terms.joins(:vocabulary).where(vocabularies: { code: context })
+  end
+  
+  def curricula
+    terms_by_context('curriculum')
+  end
+  
+  def accreditations  
+    terms_by_context('accreditation')
+  end
+  
+  def facilities
+    terms_by_context('facility')
+  end
+  
+  def extracurriculars
+    terms_by_context('extracurricular')
+  end
+  
+  def languages
+    terms_by_context('language')
+  end
+  
+  def programs
+    terms_by_context('program')
+  end
+  
+  # Add terms to school
+  def add_term(term, notes: nil, valid_from: nil, valid_to: nil)
+    taggings.create!(
+      term: term,
+      context: term.vocabulary.code,
+      notes: notes,
+      valid_from: valid_from,
+      valid_to: valid_to
+    )
+  end
+  
+  # Remove term from school
+  def remove_term(term)
+    taggings.where(term: term).destroy_all
+  end
+  
+  # Check if school has specific term
+  def has_term?(term_or_slug, context: nil)
+    scope = current_taggings.joins(:term)
+    
+    if term_or_slug.is_a?(Term)
+      scope = scope.where(term: term_or_slug)
+    else
+      scope = scope.where(terms: { slug: term_or_slug.to_s })
+      scope = scope.joins(term: :vocabulary).where(vocabularies: { code: context }) if context
+    end
+    
+    scope.exists?
+  end
+  
+  # Get curriculum slugs (for API compatibility)
+  def curriculum_slugs
+    curricula.pluck(:slug)
+  end
+  
+  def accreditation_slugs
+    accreditations.pluck(:slug)
+  end
+  
+  def facility_slugs
+    facilities.pluck(:slug)
+  end
+  
+  # Fee helpers
+  def current_fee_schedule
+    school_fee_schedules.published.order(academic_year: :desc).first
+  end
+  
+  def tuition_range
+    current_fee_schedule&.tuition_range_display
+  end
+  
+  # Grade offering helpers
+  def age_range
+    school_grade_offering&.age_range_display || 'Ages not specified'
+  end
+  
+  def grade_levels
+    school_grade_offering&.grades_display || 'Grades not specified'
+  end
+  
+  def educational_level
+    school_grade_offering&.educational_level || 'Level not specified'
+  end
+  
+  # Check if school has any claims (approved or pending)
+  def claimed?
+    school_claims.exists?
+  end
+  
+  # Check if school has approved claims
+  def approved_claims?
+    school_claims.where(status: 'approved').exists?
+  end
+  
+  # Photo visibility management methods
+  def visible_google_photos
+    return [] unless place&.photos&.present?
+    
+    place.photos.select { |photo| photo_visible?(photo) }
+  end
+  
+  def photo_visible?(photo)
+    return true unless photo_visibility_settings.present?
+    
+    photo_key = generate_photo_key(photo)
+    photo_visibility_settings.fetch(photo_key, true) # Default to visible
+  end
+  
+  def set_photo_visibility(photo, visible)
+    photo_key = generate_photo_key(photo)
+    self.photo_visibility_settings = (photo_visibility_settings || {}).merge(photo_key => visible)
+  end
+  
+  def toggle_photo_visibility(photo)
+    current_visibility = photo_visible?(photo)
+    set_photo_visibility(photo, !current_visibility)
+    !current_visibility
+  end
+  
+  # Generate a unique key for each Google Places photo
+  def generate_photo_key(photo)
+    if photo.is_a?(Hash)
+      photo['photo_reference'] || photo.to_s.hash.to_s
+    elsif photo.respond_to?(:photo_reference)
+      photo.photo_reference
+    else
+      photo.to_s.hash.to_s
+    end
+  end
   
   private
   
@@ -148,23 +313,6 @@ class School < ApplicationRecord
     [address_line_1, address_line_2, district, province, postcode].compact.join(', ')
   end
   
-  # Get contact info with Place fallback
-  def display_phone
-    phone.presence || formatted_phone_number
-  end
-  
-  def display_website
-    website_url.presence || website
-  end
-  
-  def display_address
-    if address_line_1.present?
-      [address_line_1, address_line_2, district, province, postcode].compact.join(', ')
-    else
-      formatted_address
-    end
-  end
-  
   # Sync location data from associated Place
   def sync_from_place!
     return unless place
@@ -187,98 +335,29 @@ class School < ApplicationRecord
     last_verification_at.present? && last_verification_at > 6.months.ago
   end
   
-  # Taxonomy helpers
-  def terms_by_context(context)
-    current_terms.joins(:vocabulary).where(vocabularies: { code: context })
+  # Facebook data helpers
+  def has_facebook_data?
+    facebook_content.present?
   end
   
-  def curricula
-    terms_by_context('curriculum')
+  def facebook_logo_url
+    facebook_profile_picture_url || facebook_content&.dig('visual_assets', 'profile_picture', 'url')
   end
   
-  def accreditations  
-    terms_by_context('accreditation')
+  def facebook_hero_image_url
+    facebook_cover_photo_url || facebook_content&.dig('visual_assets', 'cover_photo', 'url')
   end
   
-  def facilities
-    terms_by_context('facility')
+  def facebook_data_age_in_days
+    return nil unless facebook_last_fetched
+    (Time.current - facebook_last_fetched) / 1.day
   end
   
-  def extracurriculars
-    terms_by_context('extracurricular')
-  end
-  
-  def languages
-    terms_by_context('language')
-  end
-  
-  def programs
-    terms_by_context('program')
-  end
-  
-  # Add terms to school
-  def add_term(term, notes: nil, valid_from: nil, valid_to: nil)
-    taggings.create!(
-      term: term,
-      context: term.vocabulary.code,
-      notes: notes,
-      valid_from: valid_from,
-      valid_to: valid_to
+  def needs_facebook_refresh?
+    facebook_url.present? && (
+      facebook_last_fetched.nil? || 
+      facebook_data_age_in_days > 30
     )
-  end
-  
-  # Remove term from school
-  def remove_term(term)
-    taggings.where(term: term).destroy_all
-  end
-  
-  # Check if school has specific term
-  def has_term?(term_or_slug, context: nil)
-    scope = current_taggings.joins(:term)
-    
-    if term_or_slug.is_a?(Term)
-      scope = scope.where(term: term_or_slug)
-    else
-      scope = scope.where(terms: { slug: term_or_slug.to_s })
-      scope = scope.joins(term: :vocabulary).where(vocabularies: { code: context }) if context
-    end
-    
-    scope.exists?
-  end
-  
-  # Get curriculum slugs (for API compatibility)
-  def curriculum_slugs
-    curricula.pluck(:slug)
-  end
-  
-  def accreditation_slugs
-    accreditations.pluck(:slug)
-  end
-  
-  def facility_slugs
-    facilities.pluck(:slug)
-  end
-  
-  # Fee helpers
-  def current_fee_schedule
-    school_fee_schedules.published.order(academic_year: :desc).first
-  end
-  
-  def tuition_range
-    current_fee_schedule&.tuition_range_display
-  end
-  
-  # Grade offering helpers
-  def age_range
-    school_grade_offering&.age_range_display || 'Ages not specified'
-  end
-  
-  def grade_levels
-    school_grade_offering&.grades_display || 'Grades not specified'
-  end
-  
-  def educational_level
-    school_grade_offering&.educational_level || 'Level not specified'
   end
   
   private

@@ -1,0 +1,158 @@
+<%#
+# Collection
+
+This partial is used to display a collection of resources on the index page.
+By default, it renders a table with every instance of the resource.
+
+## Local variables:
+
+- `collection_presenter`:
+  An instance of [Administrate::Page::Collection][1].
+  Contains methods to help display a collection of resources,
+  including `#attribute_names`, `#attribute_types`, `#resources`,
+  and `#table_title`.
+- `collection_field_name`:
+  A string representing the field used to group the resources by class name.
+- `page`:
+  An instance of [Administrate::Page::Collection][1].
+- `resources`:
+  An ActiveModel::Relation collection of resources to be displayed.
+- `table_title`:
+  A string to be used as the table's title.
+
+[1]: http://www.rubydoc.info/gems/administrate/Administrate/Page/Collection
+%>
+
+<table aria-labelledby="<%= table_title %>" class="collection-data claims-table">
+  <thead>
+    <tr class="js-table-header">
+      <th class="cell-label cell-label--light cell--checkbox">
+        <input type="checkbox" onchange="toggleAllClaims(this)" title="Select all">
+      </th>
+
+      <% collection_presenter.attribute_types.each do |attr_name, attr_type| %>
+        <th class="cell-label
+        cell-label--<%= attr_type.html_class %>
+        cell-label--<%= collection_presenter.ordered_html_class(attr_name) %>
+        cell-label--<%= "#{collection_presenter.resource_name}_#{attr_name}" %>"
+        scope="col"
+        aria-sort="<%= sort_order(collection_presenter.ordered_html_class(attr_name)) %>">
+        <%= link_to(sanitized_order_params(page, collection_field_name).merge(
+          collection_presenter.order_params_for(attr_name, key: collection_field_name)
+        )) do %>
+        <%= t(
+          "helpers.label.#{collection_presenter.resource_name}.#{attr_name}",
+          default: attr_name.to_s.humanize.titleize,
+        ) %>
+            <% if collection_presenter.ordered_by?(attr_name) %>
+              <span class="cell-label__sort-indicator cell-label__sort-indicator--<%= collection_presenter.ordered_html_class(attr_name) %>">
+                <svg aria-hidden="true">
+                  <use xlink:href="#icon-up-caret" />
+                </svg>
+              </span>
+            <% end %>
+          <% end %>
+        </th>
+      <% end %>
+
+      <th class="cell-label cell-label--light cell--actions">Actions</th>
+      <th class="cell-label cell-label--light">Show</th>
+      <th class="cell-label cell-label--light">Edit</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% resources.each do |resource| %>
+      <tr class="js-table-row"
+          tabindex="0"
+          role="button" data-url="<%= polymorphic_path([namespace, resource]) %>"
+          >
+
+        <td class="cell-data cell--checkbox">
+          <% if resource.pending? %>
+            <%= check_box_tag "claim_ids[]", resource.id, false, id: "claim_#{resource.id}" %>
+          <% end %>
+        </td>
+
+        <% collection_presenter.attributes_for(resource).each do |attribute| %>
+          <td class="cell-data cell-data--<%= attribute.html_class %>">
+            <a href="<%= polymorphic_path([namespace, resource]) %>"
+               tabindex="-1">
+              <%= render_field attribute %>
+            </a>
+          </td>
+        <% end %>
+
+        <td class="cell-data cell--actions">
+          <% if resource.pending? %>
+            <%= link_to "Approve", [:approve, namespace, resource], 
+                method: :patch,
+                class: "button button--small button--success",
+                data: { confirm: "Are you sure you want to approve this claim?" } %>
+            <%= link_to "Reject", [:reject, namespace, resource], 
+                method: :patch,
+                class: "button button--small button--danger", 
+                data: { confirm: "Are you sure you want to reject this claim?" } %>
+          <% else %>
+            <span class="status-badge status-badge--<%= resource.status %>">
+              <%= resource.status.capitalize %>
+            </span>
+          <% end %>
+        </td>
+
+        <td><%= link_to(
+          t("administrate.actions.show"),
+          [namespace, resource],
+          class: "action-show",
+        ) %></td>
+
+        <td><%= link_to(
+          t("administrate.actions.edit"),
+          [:edit, namespace, resource],
+          class: "action-edit",
+        ) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<style>
+.cell--checkbox {
+  width: 40px;
+  text-align: center;
+}
+
+.cell--actions {
+  width: 200px;
+  text-align: center;
+}
+
+.button--small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  margin: 0 0.2rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-badge--approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge--rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge--pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+</style>

@@ -1,5 +1,7 @@
 class AdminUser < ApplicationRecord
-  # Include default devise modules if you plan to use Devise later
-  # devise :database_authenticatable, :registerable,
-  #        :recoverable, :rememberable, :validatable
+  # Include default devise modules
+  devise :database_authenticatable, 
+         :recoverable, :rememberable, :validatable
+
+  validates :email, presence: true, uniqueness: true
 end

@@ -1,0 +1,23 @@
+NEW SCHOOL INQUIRY
+
+Someone is interested in <%= @school.name %>!
+
+INQUIRY DETAILS:
+From: <%= @inquiry.name %>
+Email: <%= @inquiry.email %>
+<% if @inquiry.phone.present? %>Phone: <%= @inquiry.phone %><% end %>
+Number of children: <%= @inquiry.children_count %>
+
+MESSAGE:
+<%= @inquiry.message %>
+
+Submitted: <%= @inquiry.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+
+NEXT STEPS:
+• Reply directly to this email to respond to <%= @inquiry.name %>
+• Contact them via phone if provided  
+• Follow up promptly - interested parents appreciate quick responses!
+
+---
+This inquiry was submitted through the Bangkok Schools directory.
+To manage your school's listing, visit your school owner dashboard.

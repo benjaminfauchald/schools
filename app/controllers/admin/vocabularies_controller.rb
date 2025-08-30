@@ -12,9 +12,13 @@ module Admin
     # This will be used to set the resource for the `show`, `edit`, and `update`
     # actions.
     #
-    # def find_resource(param)
-    #   Foo.find_by!(slug: param)
-    # end
+    def find_resource(param)
+      if param.to_s.match?(/\A\d+\z/) # If param is numeric, use regular ID lookup
+        Vocabulary.find(param)
+      else # If param is non-numeric, assume it's a code
+        Vocabulary.find_by!(code: param)
+      end
+    end
 
     # The result of this lookup will be available as `requested_resource`
 

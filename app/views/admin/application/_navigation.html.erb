@@ -1,0 +1,85 @@
+<nav class="navigation" role="navigation">
+  <%= link_to admin_root_path, class: "navigation__link #{'navigation__link--active' if current_page?(admin_root_path)}" do %>
+    Dashboard
+  <% end %>
+
+  <%= link_to admin_school_claims_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'school_claims'}" do %>
+    School Claims
+    <% begin
+         pending_count = SchoolClaim.pending.count 
+         if pending_count > 0 %>
+      <span class="navigation__badge"><%= pending_count %></span>
+    <%   end
+       rescue => e
+         # Silently ignore if model not available
+       end %>
+  <% end %>
+
+  <%= link_to admin_schools_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'schools'}" do %>
+    Schools
+  <% end %>
+
+  <%= link_to admin_users_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'users'}" do %>
+    Users
+  <% end %>
+
+  <%= link_to admin_places_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'places'}" do %>
+    Places
+  <% end %>
+
+  <%= link_to admin_points_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'points'}" do %>
+    Points
+  <% end %>
+
+  <div class="navigation__separator"></div>
+
+  <%= link_to admin_media_items_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'media_items'}" do %>
+    Media Items
+  <% end %>
+
+  <%= link_to admin_events_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'events'}" do %>
+    Events
+  <% end %>
+
+  <%= link_to admin_travel_times_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'travel_times'}" do %>
+    Travel Times
+  <% end %>
+
+  <div class="navigation__separator"></div>
+
+  <%= link_to admin_vocabularies_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'vocabularies'}" do %>
+    Vocabularies
+  <% end %>
+
+  <%= link_to admin_terms_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'terms'}" do %>
+    Terms
+  <% end %>
+
+  <%= link_to admin_taggings_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'taggings'}" do %>
+    Taggings
+  <% end %>
+
+  <div class="navigation__separator"></div>
+
+  <%= link_to admin_audit_logs_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'audit_logs'}" do %>
+    Audit Logs
+  <% end %>
+</nav>
+
+<style>
+.navigation__badge {
+  background: #dc3545;
+  color: white;
+  border-radius: 10px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+  font-weight: 600;
+}
+
+.navigation__separator {
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+  margin: 0.5rem 0;
+}
+</style>

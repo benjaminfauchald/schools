@@ -1,0 +1,161 @@
+<% content_for :title, "Claim Submitted Successfully" %>
+
+<div class="max-w-2xl mx-auto">
+  <!-- Success Header -->
+  <div class="text-center mb-8">
+    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+      <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Claim Submitted!</h1>
+    <% if @claim_result %>
+      <p class="text-lg text-gray-600">
+        Your claim for <strong><%= @claim_result['school_name'] %></strong> has been processed.
+      </p>
+    <% end %>
+  </div>
+
+  <% if @claim_result %>
+    <!-- Status Card -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <% if @claim_result['created_user'] %>
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+            </div>
+          <% else %>
+            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          <% end %>
+        </div>
+        <div class="ml-4">
+          <h3 class="text-lg font-medium text-gray-900">
+            <% if @claim_result['created_user'] %>
+              Account Created & Claim Submitted
+            <% else %>
+              Claim Added to Your Account
+            <% end %>
+          </h3>
+          <p class="mt-1 text-sm text-gray-600">
+            <%= @claim_result['message'] %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">What Happens Next</h3>
+      
+      <div class="space-y-4">
+        <% if @claim_result['created_user'] %>
+          <div class="flex items-start">
+            <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <span class="text-sm font-medium text-blue-600">1</span>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-sm font-medium text-gray-900">Check Your Email</h4>
+              <p class="text-sm text-gray-600">We've sent a verification email to <strong><%= @claim_result['email'] %></strong>. Click the link to verify your account.</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start">
+            <div class="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+              <span class="text-sm font-medium text-gray-600">2</span>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-sm font-medium text-gray-900">Admin Review</h4>
+              <p class="text-sm text-gray-600">Our team will review your claim within 3-5 business days.</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start">
+            <div class="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+              <span class="text-sm font-medium text-gray-600">3</span>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-sm font-medium text-gray-900">Start Managing</h4>
+              <p class="text-sm text-gray-600">Once approved, you can update your school's information and claim additional schools.</p>
+            </div>
+          </div>
+        <% else %>
+          <div class="flex items-start">
+            <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <span class="text-sm font-medium text-blue-600">1</span>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-sm font-medium text-gray-900">Admin Review</h4>
+              <p class="text-sm text-gray-600">Our team will review your new claim within 3-5 business days.</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start">
+            <div class="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+              <span class="text-sm font-medium text-gray-600">2</span>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-sm font-medium text-gray-900">Email Updates</h4>
+              <p class="text-sm text-gray-600">You'll receive email notifications when your claim status changes.</p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Claim Details -->
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
+      <h4 class="text-sm font-medium text-gray-900 mb-3">Claim Details</h4>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-600">School:</span>
+          <span class="text-gray-900"><%= @claim_result['school_name'] %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">Email:</span>
+          <span class="text-gray-900"><%= @claim_result['email'] %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">Submitted:</span>
+          <span class="text-gray-900"><%= Time.current.strftime("%B %d, %Y at %I:%M %p") %></span>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Actions -->
+  <div class="bg-white border border-gray-200 rounded-lg p-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h4 class="text-sm font-medium text-gray-900">What would you like to do next?</h4>
+        <p class="text-sm text-gray-600">You can claim additional schools or browse existing listings.</p>
+      </div>
+      
+      <div class="flex space-x-3">
+        <%= link_to "Browse Schools", root_path, 
+            class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" %>
+        
+        <% if user_signed_in? %>
+          <%= link_to "My Dashboard", school_owner_dashboard_index_path, 
+              class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" %>
+        <% else %>
+          <%= link_to "Sign In", new_user_session_path, 
+              class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Section -->
+  <div class="mt-8 text-center">
+    <p class="text-sm text-gray-500">
+      Need help? Contact our support team or check your email for verification instructions.
+    </p>
+  </div>
+</div>

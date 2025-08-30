@@ -10,12 +10,50 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_30_144703) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
   enable_extension "postgis"
+
+  create_table "action_text_rich_texts", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "body"
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
+  end
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
 
   create_table "admin_users", force: :cascade do |t|
     t.string "email"
@@ -58,6 +96,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
     t.index ["starts_at"], name: "index_events_on_starts_at"
   end
 
+  create_table "magic_link_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "token", null: false
+    t.string "purpose", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expires_at"], name: "index_magic_link_tokens_on_expires_at"
+    t.index ["token"], name: "index_magic_link_tokens_on_token", unique: true
+    t.index ["user_id", "purpose"], name: "index_magic_link_tokens_on_user_id_and_purpose"
+    t.index ["user_id"], name: "index_magic_link_tokens_on_user_id"
+  end
+
   create_table "media_items", force: :cascade do |t|
     t.bigint "place_id", null: false
     t.string "kind", null: false
@@ -69,6 +121,28 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
     t.index ["place_id", "kind"], name: "index_media_items_on_place_id_and_kind"
     t.index ["place_id", "sort_order"], name: "index_media_items_on_place_id_and_sort_order"
     t.index ["place_id"], name: "index_media_items_on_place_id"
+  end
+
+  create_table "pages", force: :cascade do |t|
+    t.bigint "school_id", null: false
+    t.string "title", null: false
+    t.string "slug", null: false
+    t.string "page_type", default: "blog", null: false
+    t.string "status", default: "draft", null: false
+    t.string "author"
+    t.datetime "published_at"
+    t.text "meta_description"
+    t.string "featured_image_url"
+    t.integer "sort_order", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["published_at"], name: "index_pages_on_published_at"
+    t.index ["school_id", "page_type"], name: "index_pages_on_school_id_and_page_type"
+    t.index ["school_id", "slug"], name: "index_pages_on_school_id_and_slug", unique: true
+    t.index ["school_id", "status"], name: "index_pages_on_school_id_and_status"
+    t.index ["school_id"], name: "index_pages_on_school_id"
+    t.index ["sort_order"], name: "index_pages_on_sort_order"
+    t.index ["status", "published_at"], name: "index_pages_on_status_and_published_at"
   end
 
   create_table "places", force: :cascade do |t|
@@ -272,6 +346,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
     t.index ["school_id"], name: "index_school_grade_offerings_on_school_id", unique: true
   end
 
+  create_table "school_inquiries", force: :cascade do |t|
+    t.bigint "school_id", null: false
+    t.string "name", null: false
+    t.string "email", null: false
+    t.string "phone"
+    t.text "message", null: false
+    t.integer "children_count", null: false
+    t.string "status", default: "new", null: false
+    t.datetime "read_at"
+    t.string "ip_address"
+    t.text "admin_notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_school_inquiries_on_email"
+    t.index ["school_id", "created_at"], name: "index_school_inquiries_on_school_id_and_created_at"
+    t.index ["school_id"], name: "index_school_inquiries_on_school_id"
+    t.index ["status"], name: "index_school_inquiries_on_status"
+  end
+
   create_table "schools", force: :cascade do |t|
     t.bigint "place_id"
     t.string "name", null: false
@@ -311,10 +404,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
     t.string "facebook_url"
     t.string "line_id"
     t.string "whatsapp_number"
+    t.jsonb "facebook_content"
+    t.datetime "facebook_last_fetched"
+    t.string "facebook_profile_picture_url"
+    t.string "facebook_cover_photo_url"
+    t.text "tone_of_voice"
+    t.jsonb "photo_visibility_settings", default: {}
+    t.jsonb "preferences", default: {}, null: false
     t.index ["district"], name: "index_schools_on_district"
+    t.index ["facebook_content"], name: "index_schools_on_facebook_content", using: :gin
     t.index ["geog"], name: "index_schools_on_geog", using: :gist
     t.index ["name"], name: "index_schools_on_name", opclass: :gin_trgm_ops, using: :gin
+    t.index ["photo_visibility_settings"], name: "index_schools_on_photo_visibility_settings", using: :gin
     t.index ["place_id"], name: "index_schools_on_place_id"
+    t.index ["preferences"], name: "index_schools_on_preferences", using: :gin
     t.index ["province"], name: "index_schools_on_province"
     t.index ["slug"], name: "index_schools_on_slug", unique: true
     t.index ["status", "place_id"], name: "index_schools_on_status_and_place_id"
@@ -338,6 +441,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
     t.index ["term_id", "taggable_type", "taggable_id", "context"], name: "index_taggings_unique_term_per_context", unique: true
     t.index ["term_id"], name: "index_taggings_on_term_id"
     t.index ["valid_from", "valid_to"], name: "index_taggings_on_valid_from_and_valid_to"
+  end
+
+  create_table "temp_claims", force: :cascade do |t|
+    t.bigint "school_id", null: false
+    t.string "token", null: false
+    t.string "email", null: false
+    t.string "evidence_url"
+    t.text "notes"
+    t.string "ip_address"
+    t.datetime "expires_at", null: false
+    t.string "status", default: "pending_registration"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_temp_claims_on_email"
+    t.index ["expires_at"], name: "index_temp_claims_on_expires_at"
+    t.index ["school_id"], name: "index_temp_claims_on_school_id"
+    t.index ["status"], name: "index_temp_claims_on_status"
+    t.index ["token"], name: "index_temp_claims_on_token", unique: true
   end
 
   create_table "terms", force: :cascade do |t|
@@ -372,6 +493,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
     t.index ["place_id"], name: "index_travel_times_on_place_id"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.string "unconfirmed_email"
+    t.string "role", default: "school_owner", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["role"], name: "index_users_on_role"
+  end
+
   create_table "vocabularies", force: :cascade do |t|
     t.string "code", null: false
     t.string "label", null: false
@@ -381,15 +521,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_101305) do
     t.index ["code"], name: "index_vocabularies_on_code", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "events", "places"
+  add_foreign_key "magic_link_tokens", "users"
   add_foreign_key "media_items", "places"
+  add_foreign_key "pages", "schools"
   add_foreign_key "places", "points"
   add_foreign_key "school_claims", "schools"
+  add_foreign_key "school_claims", "users"
   add_foreign_key "school_fee_bands", "school_fee_schedules"
   add_foreign_key "school_fee_schedules", "schools"
   add_foreign_key "school_grade_offerings", "schools"
+  add_foreign_key "school_inquiries", "schools"
   add_foreign_key "schools", "places"
   add_foreign_key "taggings", "terms"
+  add_foreign_key "temp_claims", "schools"
   add_foreign_key "terms", "terms", column: "parent_id"
   add_foreign_key "terms", "vocabularies"
   add_foreign_key "travel_times", "places"

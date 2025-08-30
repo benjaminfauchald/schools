@@ -140,9 +140,10 @@ class SchoolDataMerger
   def media_items
     items = []
     
-    # Add Google Places photos first (these are real photos)
+    # Add Google Places photos first (these are real photos), but only visible ones
     if place&.photos.present?
-      google_photos = place.photos.map.with_index do |photo, index|
+      visible_photos = place.photos.select { |photo| school.photo_visible?(photo) }
+      google_photos = visible_photos.map.with_index do |photo, index|
         OpenStruct.new(
           kind: 'photo',
           url: google_places_photo_url(photo['photo_reference']),

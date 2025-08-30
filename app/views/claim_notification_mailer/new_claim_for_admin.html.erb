@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffeaa7; }
+      .content { background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; }
+      .button { background-color: #dc3545; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 10px 10px 0; }
+      .button.approve { background-color: #28a745; }
+      .school-info { background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0; }
+      .user-info { background-color: #e3f2fd; padding: 15px; border-radius: 4px; margin: 15px 0; border: 1px solid #bbdefb; }
+      .alert-icon { color: #856404; font-size: 24px; text-align: center; margin-bottom: 15px; }
+      .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="alert-icon">⚠️</div>
+        <h1 style="margin: 0; color: #856404; text-align: center;">New School Claim Requires Review</h1>
+        <p style="margin: 10px 0 0 0; text-align: center;">Action required: Review and approve/reject claim</p>
+      </div>
+
+      <div class="content">
+        <p>A new school claim has been submitted and requires admin review.</p>
+
+        <div class="user-info">
+          <h3 style="margin-top: 0;">Claimant Information</h3>
+          <p><strong>User:</strong> <%= @user.display_name %></p>
+          <p><strong>Email:</strong> <%= @user.email %></p>
+          <p><strong>Role:</strong> <%= @user.role.humanize %></p>
+          <p><strong>Account Created:</strong> <%= @user.created_at.strftime("%B %d, %Y") %></p>
+          <p><strong>Confirmed:</strong> <%= @user.confirmed? ? 'Yes' : 'No' %></p>
+        </div>
+
+        <div class="school-info">
+          <h3 style="margin-top: 0;">School Information</h3>
+          <p><strong>Name:</strong> <%= @school.name %></p>
+          <% if @school.display_address.present? %>
+            <p><strong>Address:</strong> <%= @school.display_address %></p>
+          <% end %>
+          <% if @school.display_phone.present? %>
+            <p><strong>Phone:</strong> <%= @school.display_phone %></p>
+          <% end %>
+          <% if @school.display_website.present? %>
+            <p><strong>Website:</strong> <a href="<%= @school.display_website %>"><%= @school.display_website %></a></p>
+          <% end %>
+          <p><strong>Claim Submitted:</strong> <%= @school_claim.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+        </div>
+
+        <h3>Claim Details</h3>
+        
+        <% if @school_claim.evidence_url.present? %>
+          <p><strong>Evidence URL:</strong> <a href="<%= @school_claim.evidence_url %>" target="_blank"><%= @school_claim.evidence_url %></a></p>
+        <% else %>
+          <p><strong>Evidence URL:</strong> <em>None provided</em></p>
+        <% end %>
+
+        <% 
+          # Try to find the original temp claim notes
+          temp_claim = TempClaim.find_by(email: @user.email, school: @school)
+          user_notes = temp_claim&.notes
+        %>
+        <% if user_notes.present? %>
+          <p><strong>Additional Notes from User:</strong></p>
+          <blockquote style="border-left: 3px solid #007bff; padding-left: 15px; margin: 15px 0; color: #6c757d; background-color: #f8f9fa; padding: 10px 15px; border-radius: 4px;">
+            <%= simple_format(user_notes) %>
+          </blockquote>
+        <% else %>
+          <p><strong>Additional Notes:</strong> <em>None provided</em></p>
+        <% end %>
+
+        <h3>Review Required</h3>
+        <p>Please review the evidence and determine if this user should be granted management access to this school listing.</p>
+
+        <p><strong>Review Actions:</strong></p>
+        <a href="<%= admin_school_claim_url(@school_claim) %>" class="button">Review Claim</a>
+        <a href="<%= admin_school_claims_url %>" class="button" style="background-color: #007bff;">All Claims</a>
+
+        <h3>Verification Checklist</h3>
+        <ul>
+          <li>Is the evidence URL valid and accessible?</li>
+          <li>Does the evidence clearly show the user's connection to the school?</li>
+          <li>Is the user's role appropriate for managing school information?</li>
+          <li>Are there any red flags or security concerns?</li>
+          <li>Does the school information match the evidence provided?</li>
+        </ul>
+      </div>
+
+      <div class="footer">
+        <p>This is an automated notification. Please log into the admin panel to review and process this claim.</p>
+        <p><strong>Time sensitive:</strong> Please review claims within 3-5 business days to maintain good user experience.</p>
+      </div>
+    </div>
+  </body>
+</html>

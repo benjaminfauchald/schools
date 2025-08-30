@@ -12,8 +12,8 @@ class SchoolClaimDashboard < Administrate::BaseDashboard
     admin_notes: Field::Text,
     evidence_url: Field::String,
     school: Field::BelongsTo,
+    user: Field::BelongsTo.with_options(display_name: :email),
     status: Field::Select.with_options(searchable: false, collection: ->(field) { field.resource.class.send(field.attribute.to_s.pluralize).keys }),
-    user_id: Field::Number,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
   }.freeze
@@ -25,20 +25,21 @@ class SchoolClaimDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
     id
-    admin_notes
-    evidence_url
     school
+    user
+    status
+    created_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
     id
-    admin_notes
-    evidence_url
     school
+    user
     status
-    user_id
+    evidence_url
+    admin_notes
     created_at
     updated_at
   ].freeze
@@ -47,11 +48,11 @@ class SchoolClaimDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-    admin_notes
-    evidence_url
     school
+    user
     status
-    user_id
+    evidence_url
+    admin_notes
   ].freeze
 
   # COLLECTION_FILTERS
@@ -64,12 +65,15 @@ class SchoolClaimDashboard < Administrate::BaseDashboard
   #   COLLECTION_FILTERS = {
   #     open: ->(resources) { resources.where(open: true) }
   #   }.freeze
-  COLLECTION_FILTERS = {}.freeze
+  COLLECTION_FILTERS = {
+    pending: ->(resources) { resources.pending },
+    approved: ->(resources) { resources.approved },
+    rejected: ->(resources) { resources.rejected }
+  }.freeze
 
   # Overwrite this method to customize how school claims are displayed
   # across all pages of the admin dashboard.
-  #
-  # def display_resource(school_claim)
-  #   "SchoolClaim ##{school_claim.id}"
-  # end
+  def display_resource(school_claim)
+    "#{school_claim.school.name} - #{school_claim.user.email} (#{school_claim.status.capitalize})"
+  end
 end

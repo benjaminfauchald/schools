@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+      .content { background-color: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; }
+      .button { background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 0; }
+      .school-info { background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0; }
+      .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 style="margin: 0; color: #007bff;">School Claim Submitted</h1>
+        <p style="margin: 10px 0 0 0;">Your claim has been received and is being reviewed.</p>
+      </div>
+
+      <div class="content">
+        <p>Dear <%= @user.display_name %>,</p>
+
+        <p>Thank you for submitting your school claim. We have received your request to manage the listing for <strong><%= @school.name %></strong>.</p>
+
+        <div class="school-info">
+          <h3 style="margin-top: 0;">School Information</h3>
+          <p><strong>Name:</strong> <%= @school.name %></p>
+          <% if @school.display_address.present? %>
+            <p><strong>Address:</strong> <%= @school.display_address %></p>
+          <% end %>
+          <p><strong>Claim Submitted:</strong> <%= @school_claim.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+        </div>
+
+        <h3>What Happens Next?</h3>
+        <ol>
+          <li><strong>Review Process:</strong> Our team will review your claim and evidence within 3-5 business days.</li>
+          <li><strong>Verification:</strong> We may contact you if we need additional information.</li>
+          <li><strong>Notification:</strong> You'll receive an email notification once your claim is processed.</li>
+          <li><strong>Access:</strong> If approved, you'll be able to manage your school's information through your dashboard.</li>
+        </ol>
+
+        <% if @school_claim.evidence_url.present? %>
+          <p><strong>Evidence Provided:</strong> <a href="<%= @school_claim.evidence_url %>"><%= @school_claim.evidence_url %></a></p>
+        <% end %>
+
+        <% if @school_claim.admin_notes.present? %>
+          <p><strong>Additional Notes:</strong></p>
+          <blockquote style="border-left: 3px solid #007bff; padding-left: 15px; margin: 15px 0; color: #6c757d;">
+            <%= simple_format(@school_claim.admin_notes) %>
+          </blockquote>
+        <% end %>
+
+        <% if @user.confirmed? %>
+          <p>You can access your dashboard anytime using the secure link below. This link will automatically sign you in and is valid for 48 hours.</p>
+          <a href="<%= magic_link_dashboard_url(@magic_token.token) %>" class="button">Access Dashboard</a>
+          <p style="margin-top: 15px;"><small>This secure link will automatically sign you in. No password required!</small></p>
+        <% else %>
+          <p><strong>Important:</strong> Please confirm your email address to activate your account and access your dashboard.</p>
+          <a href="<%= confirmation_url(@user, confirmation_token: @user.confirmation_token) %>" class="button">Confirm Email & Access Dashboard</a>
+          <p style="margin-top: 15px;"><small>This will verify your email address and give you access to manage your school claims.</small></p>
+        <% end %>
+      </div>
+
+      <div class="footer">
+        <p>If you have any questions about your claim, please don't hesitate to contact our support team.</p>
+        <p>Thank you for helping us maintain accurate school information!</p>
+      </div>
+    </div>
+  </body>
+</html>

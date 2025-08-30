@@ -1,0 +1,29 @@
+<%#
+Override for Administrate's form action buttons to use generic text
+instead of resource-specific text to avoid long button text
+%>
+
+<%= form_with(
+      model: [namespace, page.resource],
+      url: [namespace, page.resource],
+      local: true
+    ) do |f| %>
+
+  <% page.attributes.each do |field| -%>
+    <div class="field-unit field-unit--<%= field.html_class %>">
+      <%= render_field field, f: f %>
+    </div>
+  <% end -%>
+
+  <div class="form-actions">
+    <%= f.submit "Update #{page.page_title.singularize}", class: "btn btn--success" %>
+    
+    <%= link_to "Show School", 
+        [namespace, page.resource], 
+        class: "btn btn--neutral" %>
+        
+    <%= link_to "Back to #{page.page_title}", 
+        [namespace, page.resource.class.name.demodulize.downcase.pluralize.to_sym], 
+        class: "btn btn--neutral" %>
+  </div>
+<% end %>

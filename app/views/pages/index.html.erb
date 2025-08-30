@@ -1,0 +1,116 @@
+<div class="w-full">
+  
+  <!-- School Owner Navigation -->
+  <% if @can_edit_school %>
+    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-sm text-blue-800">
+          <%= heroicon('pencil-square', css_class: 'w-4 h-4') %>
+          <span>You can edit this school's pages</span>
+        </div>
+        <%= link_to edit_school_owner_school_path(@school, anchor: 'pages'), 
+                    class: "inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors" do %>
+          <%= heroicon('cog-6-tooth', css_class: 'w-4 h-4 mr-1') %>
+          Manage Pages
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- Navigation -->
+  <div class="mb-6">
+    <%= link_to school_path(@school), class: "inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors" do %>
+      <%= heroicon('arrow-left', css_class: 'w-4 h-4 mr-2') %>
+      Back to <%= @school.name %>
+    <% end %>
+  </div>
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-black mb-4">
+      <%= @school.name %> - Pages & Information
+    </h1>
+    <p class="text-lg text-gray-600">
+      Explore all pages and information about our school, including our story, latest news, academics, and more.
+    </p>
+  </div>
+
+  <!-- Pages by Category -->
+  <div class="space-y-8">
+    <% @grouped_pages.each do |category, pages| %>
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b">
+          <h2 class="text-xl font-semibold text-black">
+            <%= category %>
+          </h2>
+        </div>
+        
+        <div class="p-6">
+          <% if category == 'Blog Posts' %>
+            <!-- Blog posts in a grid layout -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <% pages.each do |page| %>
+                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <% if page.featured_image_url.present? %>
+                    <img src="<%= page.featured_image_url %>" 
+                         alt="<%= page.title %>" 
+                         class="w-full h-40 object-cover rounded mb-3">
+                  <% end %>
+                  
+                  <h3 class="text-lg font-semibold text-black mb-2">
+                    <%= link_to page.title, school_page_path(@school, page), 
+                                class: "hover:text-blue-600 transition-colors" %>
+                  </h3>
+                  
+                  <p class="text-sm text-gray-600 mb-3">
+                    <%= page.generate_meta_description %>
+                  </p>
+                  
+                  <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span><%= page.published_at&.strftime('%B %d, %Y') %></span>
+                    <span>By <%= page.author || 'Staff' %></span>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <!-- Other pages in a simple list -->
+            <div class="space-y-4">
+              <% pages.each do |page| %>
+                <div class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-black mb-1">
+                      <%= link_to page.title, school_page_path(@school, page),
+                                  class: "hover:text-blue-600 transition-colors" %>
+                    </h3>
+                    <p class="text-sm text-gray-600">
+                      <%= page.generate_meta_description %>
+                    </p>
+                  </div>
+                  
+                  <div class="text-sm text-gray-500 ml-4">
+                    <%= page.published_at&.strftime('%b %d, %Y') %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Empty state if no pages -->
+  <% if @grouped_pages.empty? %>
+    <div class="text-center py-12">
+      <div class="text-gray-400 mb-4">
+        <%= heroicon('document-text', css_class: 'w-16 h-16 mx-auto') %>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-600 mb-2">No Pages Available</h3>
+      <p class="text-gray-500">
+        This school hasn't published any additional pages yet. Please check back later.
+      </p>
+    </div>
+  <% end %>
+
+</div>

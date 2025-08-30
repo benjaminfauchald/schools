@@ -1,0 +1,29 @@
+<%#
+Override for Administrate Pages form to use generic "Show School" text
+instead of the full resource name
+%>
+
+<%= form_with(
+      model: [namespace, page.resource],
+      url: [namespace, page.resource],
+      local: true
+    ) do |f| %>
+
+  <% page.attributes.each do |field| -%>
+    <div class="field-unit field-unit--<%= field.html_class %>">
+      <%= render_field field, f: f %>
+    </div>
+  <% end -%>
+
+  <div class="form-actions">
+    <%= f.submit "Update Page", class: "btn btn--success" %>
+    
+    <%= link_to "Show School", 
+        [namespace, page.resource], 
+        class: "btn btn--neutral" %>
+        
+    <%= link_to "Back to Pages", 
+        [namespace, :pages], 
+        class: "btn btn--neutral" %>
+  </div>
+<% end %>

@@ -1,5 +1,5 @@
 <!-- School Detail Page -->
-<div class="w-full">
+<div class="w-full" data-controller="school-contact-modal" data-school-contact-modal-school-id-value="<%= @school.id %>">
   
   <!-- Navigation -->
   <div class="mb-6">
@@ -15,7 +15,8 @@
     <!-- Hero Section -->
     <%= render Schools::HeroComponent.new(
           hero_data: @merged_data.hero_data,
-          contact_info: @merged_data.contact_info
+          contact_info: @merged_data.contact_info,
+          school: @school
         ) %>
 
     <!-- Contact & Location -->
@@ -54,11 +55,250 @@
           fee_bands: @merged_data.fee_bands || []
         ) %>
 
+    <!-- School Pages -->
+    <% if @school.pages.published.any? %>
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <%= render Schools::SectionHeaderComponent.new(
+              title: "School Pages",
+              icon: "document-text",
+              subtitle: "Learn more about our school through our pages and blog posts"
+            ) %>
+
+        <div class="px-6 pb-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- Dynamic School Pages -->
+            <% featured_pages = @school.pages.published.order(:sort_order, :created_at).limit(2) %>
+            <% if featured_pages.any? %>
+              <% featured_pages.each_with_index do |page, index| %>
+                <% 
+                  # Dynamic styling based on index
+                  gradient_classes = case index
+                  when 0
+                    "from-blue-50 to-indigo-50 border-blue-200"
+                  else
+                    "from-green-50 to-emerald-50 border-green-200"
+                  end
+                  
+                  text_color_classes = case index
+                  when 0
+                    "text-blue-600 hover:text-blue-800"
+                  else
+                    "text-green-600 hover:text-green-800"
+                  end
+                  
+                  icon_color_classes = case index
+                  when 0
+                    "text-blue-600"
+                  else
+                    "text-green-600"
+                  end
+                  
+                  # Dynamic icon based on page type
+                  icon_name = case page.page_type.downcase
+                  when 'about_us'
+                    'information-circle'
+                  when 'sports'
+                    'trophy'
+                  when 'academics'
+                    'academic-cap'
+                  when 'activities'
+                    'star'
+                  else
+                    'document-text'
+                  end
+                %>
+                <div class="bg-gradient-to-br <%= gradient_classes %> border rounded-lg p-6">
+                  <div class="flex items-center mb-3">
+                    <%= heroicon(icon_name, css_class: "w-6 h-6 #{icon_color_classes} mr-2") %>
+                    <h3 class="text-lg font-semibold text-black"><%= page.title %></h3>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-4">
+                    <%= truncate(page.generate_meta_description, length: 80) %>
+                  </p>
+                  <%= link_to "Read More", school_page_path(@school, page),
+                              class: "inline-flex items-center #{text_color_classes} font-medium transition-colors" %>
+                </div>
+              <% end %>
+            <% else %>
+              <!-- Fallback when no pages exist -->
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center mb-3">
+                  <%= heroicon('information-circle', css_class: 'w-6 h-6 text-gray-600 mr-2') %>
+                  <h3 class="text-lg font-semibold text-black">Information Coming Soon</h3>
+                </div>
+                <p class="text-sm text-gray-600 mb-4">
+                  We're preparing detailed information about <%= @school.name %>. Check back soon!
+                </p>
+              </div>
+            <% end %>
+
+            <!-- All Pages -->
+            <div class="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-6">
+              <div class="flex items-center mb-3">
+                <%= heroicon('squares-2x2', css_class: 'w-6 h-6 text-purple-600 mr-2') %>
+                <h3 class="text-lg font-semibold text-black">All Pages</h3>
+              </div>
+              <p class="text-sm text-gray-600 mb-4">
+                Browse all our pages including academics, sports, activities, and more.
+              </p>
+              <div class="text-sm text-purple-600 mb-4">
+                <%= pluralize(@school.pages.published.count, 'page') %> available
+              </div>
+              <%= link_to "View All Pages", school_pages_path(@school),
+                          class: "inline-flex items-center text-purple-600 hover:text-purple-800 font-medium transition-colors" %>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    <% end %>
+
     <!-- Photo Gallery -->
     <%= render Schools::PhotoGalleryComponent.new(
           media_items: @merged_data.media_items_array || []
         ) %>
 
+    <!-- Claim This School -->
+    <% if user_signed_in? && current_user.school_owner? %>
+      <% unless current_user.can_edit_school?(@school) || current_user.school_claims.where(school: @school).exists? %>
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-blue-900 mb-2">Own this school?</h3>
+              <p class="text-blue-700">
+                If you represent <%= @school.name %>, you can claim this listing to manage and update the information.
+              </p>
+            </div>
+            <div>
+              <%= link_to new_school_owner_claim_path(school_id: @school.id), 
+                  class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" do %>
+                Claim This School
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% elsif !user_signed_in? %>
+      <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-green-900 mb-2">School Owner?</h3>
+            <p class="text-green-700">
+              If you represent this school, sign up to claim and manage this listing.
+            </p>
+          </div>
+          <div>
+            <%= link_to new_user_registration_path, 
+                class: "bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" do %>
+              Sign Up to Claim
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+
+  <!-- Contact School Modal -->
+  <div data-school-contact-modal-target="modal" class="fixed inset-0 z-50 hidden overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.75);">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <!-- Background overlay -->
+      <div class="fixed inset-0" 
+           data-action="click->school-contact-modal#closeModal"></div>
+      
+      <!-- Modal panel -->
+      <div class="relative bg-white rounded-lg text-left shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <!-- Modal Header -->
+        <div class="bg-orange-600 px-6 py-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg leading-6 font-medium text-white">
+              Contact <%= @school.name %>
+            </h3>
+            <button type="button" 
+                    class="text-orange-200 hover:text-white transition-colors"
+                    data-action="click->school-contact-modal#closeModal">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="px-6 py-6 pb-8">
+          <p class="text-sm text-gray-600 mb-6">
+            Send a message to <%= @school.name %> and they'll get back to you soon!
+          </p>
+          
+          <%= form_with url: school_school_inquiries_path(@school), 
+                        method: :post,
+                        data: { 
+                          "school-contact-modal-target" => "form",
+                          "action" => "submit->school-contact-modal#submitForm"
+                        },
+                        local: false,
+                        html: { novalidate: true },
+                        class: "space-y-4" do |form| %>
+            
+            <!-- Name Field -->
+            <div>
+              <%= form.label :name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_field :name, 
+                                  required: true,
+                                  class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500",
+                                  placeholder: "Your full name" %>
+            </div>
+
+            <!-- Email Field -->
+            <div>
+              <%= form.label :email, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.email_field :email, 
+                                   required: true,
+                                   class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500",
+                                   placeholder: "your.email@example.com" %>
+            </div>
+
+            <!-- Phone Field (Optional) -->
+            <div>
+              <%= form.label :phone, "Phone (optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.telephone_field :phone, 
+                                       class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500",
+                                       placeholder: "+66 xxx xxx xxx" %>
+            </div>
+
+            <!-- Number of Children -->
+            <div>
+              <%= form.label :children_count, "Number of children to enroll", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.number_field :children_count, 
+                                    required: true,
+                                    min: 1,
+                                    max: 20,
+                                    value: 1,
+                                    class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500" %>
+            </div>
+
+            <!-- Message Field -->
+            <div>
+              <%= form.label :message, "Message to school", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_area :message, 
+                                 required: true,
+                                 rows: 4,
+                                 maxlength: 2000,
+                                 class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 resize-none",
+                                 placeholder: "Hi! I'm interested in enrolling my child at your school. Could you please provide more information about..." %>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-6 pb-2">
+              <%= form.submit "Send Message", 
+                              data: { "school-contact-modal-target" => "submitButton" },
+                              class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
   </div>
   
 </div>

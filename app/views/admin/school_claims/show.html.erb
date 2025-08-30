@@ -1,0 +1,357 @@
+<%#
+# Show
+#
+# This view is the template for the show page.
+# It renders the attributes' values and the edit and delete action links.
+%>
+
+<% content_for(:title) { t("administrate.actions.show_resource", name: page.page_title) } %>
+
+<header class="main-content__header" role="banner">
+  <%= link_to :back, class: "back-link" do %>
+    ←
+    <%= t("administrate.actions.back") %>
+  <% end %>
+
+  <h1 class="main-content__page-title">
+    <%= content_for(:title) %>
+  </h1>
+
+  <%= link_to(
+    t("administrate.actions.edit"),
+    [:edit, namespace, page.resource],
+    class: "button",
+  ) %>
+</header>
+
+<section class="main-content__body">
+  <!-- Claim Status and Actions -->
+  <div class="claim-status-section">
+    <div class="claim-status-header">
+      <h2>Claim Status</h2>
+      <div class="status-badge status-<%= page.resource.status %>">
+        <%= page.resource.status.capitalize %>
+      </div>
+    </div>
+    
+    <% if page.resource.pending? %>
+      <div class="claim-actions">
+        <h3>Admin Actions</h3>
+        <div class="action-buttons">
+          <%= form_with url: approve_admin_school_claim_path(page.resource), method: :patch, local: true, class: "approval-form" do |f| %>
+            <div class="notes-field">
+              <%= f.label :admin_notes, "Admin Notes (optional)", class: "field-label" %>
+              <%= f.text_area :admin_notes, 
+                  placeholder: "Add notes about the approval...", 
+                  class: "admin-notes-textarea",
+                  rows: 3 %>
+            </div>
+            <div class="action-button-group">
+              <%= f.submit "✓ Approve Claim", 
+                  class: "button button--approve", 
+                  onclick: "return confirm('Are you sure you want to approve this claim?')" %>
+            </div>
+          <% end %>
+
+          <%= form_with url: reject_admin_school_claim_path(page.resource), method: :patch, local: true, class: "rejection-form" do |f| %>
+            <div class="notes-field">
+              <%= f.label :admin_notes, "Rejection Reason (required)", class: "field-label required" %>
+              <%= f.text_area :admin_notes, 
+                  placeholder: "Please provide a reason for rejection...", 
+                  class: "admin-notes-textarea",
+                  rows: 3,
+                  required: true %>
+            </div>
+            <div class="action-button-group">
+              <%= f.submit "✗ Reject Claim", 
+                  class: "button button--reject", 
+                  onclick: "return confirm('Are you sure you want to reject this claim? This will notify the user.')" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% elsif page.resource.approved? %>
+      <div class="claim-result approved">
+        <h3>✓ Claim Approved</h3>
+        <p>This claim was approved and the user now has management access to the school.</p>
+        <% if page.resource.admin_notes.present? %>
+          <p class="admin-notes"><strong>Admin Notes:</strong> <%= page.resource.admin_notes %></p>
+        <% end %>
+      </div>
+    <% elsif page.resource.rejected? %>
+      <div class="claim-result rejected">
+        <h3>✗ Claim Rejected</h3>
+        <% if page.resource.admin_notes.present? %>
+          <p class="admin-notes"><strong>Rejection Reason:</strong> <%= page.resource.admin_notes %></p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Claim Details -->
+  <div class="claim-details-section">
+    <h2>Claim Details</h2>
+    <div class="claim-info-grid">
+      <div class="claim-info-item">
+        <h4>School</h4>
+        <p><%= link_to page.resource.school.name, admin_school_path(page.resource.school), class: "resource-link" %></p>
+        <% if page.resource.school.display_address.present? %>
+          <p class="school-address"><%= page.resource.school.display_address %></p>
+        <% end %>
+      </div>
+      
+      <div class="claim-info-item">
+        <h4>User</h4>
+        <p><%= link_to page.resource.user.email, admin_user_path(page.resource.user), class: "resource-link" %></p>
+        <p class="user-role">Role: <%= page.resource.user.role.humanize %></p>
+      </div>
+      
+      <% if page.resource.evidence_url.present? %>
+        <div class="claim-info-item">
+          <h4>Evidence</h4>
+          <p><%= link_to page.resource.evidence_url, page.resource.evidence_url, target: "_blank", class: "evidence-link" %>
+            <small>(opens in new tab)</small>
+          </p>
+        </div>
+      <% end %>
+      
+      <div class="claim-info-item">
+        <h4>Submitted</h4>
+        <p><%= page.resource.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+        <% if page.resource.pending? %>
+          <p class="days-pending">
+            <%= pluralize(page.resource.days_pending.to_i, 'day') %> pending
+            <% if page.resource.stale? %>
+              <span class="stale-warning">⚠️ Stale</span>
+            <% end %>
+          </p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standard Administrate Fields -->
+  <div class="attributes-section">
+    <h2>All Attributes</h2>
+    <dl>
+      <% page.attributes.each do |attribute| -%>
+        <dt class="attribute-label" id="<%= attribute.name %>">
+        <%= t(
+          "helpers.label.#{resource_name}.#{attribute.name}",
+          default: attribute.name.titleize,
+        ) %>
+        </dt>
+
+        <dd class="attribute-data attribute-data--<%=attribute.html_class%>"
+            ><%= render_field attribute, page: page %></dd>
+      <% end -%>
+    </dl>
+  </div>
+</section>
+
+<style>
+.claim-status-section, .claim-details-section, .attributes-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.claim-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.status-approved {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.claim-actions {
+  margin-top: 1.5rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.approval-form, .rejection-form {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.approval-form {
+  border-color: #28a745;
+  background: #f8fff8;
+}
+
+.rejection-form {
+  border-color: #dc3545;
+  background: #fff8f8;
+}
+
+.notes-field {
+  margin-bottom: 1rem;
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.field-label.required::after {
+  content: " *";
+  color: #dc3545;
+}
+
+.admin-notes-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.button--approve {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.button--approve:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.button--reject {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.button--reject:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.claim-result {
+  padding: 1rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
+.claim-result.approved {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.claim-result.rejected {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.claim-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.claim-info-item h4 {
+  margin: 0 0 0.5rem 0;
+  color: #495057;
+  font-weight: 600;
+}
+
+.claim-info-item p {
+  margin: 0.25rem 0;
+}
+
+.resource-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.resource-link:hover {
+  text-decoration: underline;
+}
+
+.evidence-link {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.evidence-link:hover {
+  text-decoration: underline;
+}
+
+.school-address, .user-role {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.days-pending {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.stale-warning {
+  color: #856404;
+  background: #fff3cd;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.admin-notes {
+  background: #f8f9fa;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .claim-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

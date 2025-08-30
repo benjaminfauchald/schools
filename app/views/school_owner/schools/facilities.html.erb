@@ -1,0 +1,205 @@
+<% content_for :title, "Campus Facilities - #{@school.name}" %>
+
+<div class="max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <%= link_to school_owner_school_path(@school), class: "inline-flex items-center text-blue-600 hover:text-blue-800 mb-4" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back to School Overview
+    <% end %>
+    
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Campus Facilities</h1>
+        <p class="mt-1 text-sm text-gray-600">Modern facilities supporting student learning and development at <%= @school.name %></p>
+      </div>
+      
+      <div class="flex space-x-3">
+        <%= link_to school_owner_school_path(@school), 
+            class: "inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+          View School
+        <% end %>
+        
+        <%= link_to academic_programs_school_owner_school_path(@school), 
+            class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+          Manage Programs
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <%= form_with url: update_facilities_school_owner_school_path(@school), method: :patch, local: true, class: "space-y-8" do |form| %>
+    
+    <!-- Error Messages -->
+    <% if @school.errors.any? %>
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+            <div class="mt-2 text-sm text-red-700">
+              <ul class="list-disc space-y-1 pl-5">
+                <% @school.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Group facilities by category -->
+    <% current_facilities = @school.facilities.pluck(:slug) %>
+    <% 
+      facility_categories = {
+        "Academic Facilities" => {
+          icon: "academic-cap",
+          color: "blue",
+          facilities: @facility_terms.select { |f| f.metadata&.dig('category') == 'Academic' }
+        },
+        "Sports & Recreation" => {
+          icon: "sparkles",
+          color: "green", 
+          facilities: @facility_terms.select { |f| f.metadata&.dig('category') == 'Sports' }
+        },
+        "Arts & Culture" => {
+          icon: "color-swatch",
+          color: "purple",
+          facilities: @facility_terms.select { |f| f.metadata&.dig('category') == 'Arts' }
+        },
+        "Dining & Nutrition" => {
+          icon: "cake",
+          color: "orange",
+          facilities: @facility_terms.select { |f| f.metadata&.dig('category') == 'Dining' }
+        },
+        "Technology" => {
+          icon: "desktop-computer",
+          color: "indigo",
+          facilities: @facility_terms.select { |f| f.metadata&.dig('category') == 'Technology' }
+        },
+        "Health & Wellness" => {
+          icon: "heart",
+          color: "red",
+          facilities: @facility_terms.select { |f| f.metadata&.dig('category') == 'Health' }
+        },
+        "Campus Services" => {
+          icon: "office-building",
+          color: "gray",
+          facilities: @facility_terms.select { |f| f.metadata&.dig('category') == 'Services' }
+        },
+        "Other Facilities" => {
+          icon: "dots-horizontal",
+          color: "gray",
+          facilities: @facility_terms.select { |f| f.metadata&.dig('category').nil? || !['Academic', 'Sports', 'Arts', 'Dining', 'Technology', 'Health', 'Services'].include?(f.metadata&.dig('category')) }
+        }
+      }
+    %>
+
+    <% facility_categories.each do |category_name, category_info| %>
+      <% next if category_info[:facilities].empty? %>
+      
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <div class="flex items-center mb-6">
+          <div class="w-8 h-8 bg-<%= category_info[:color] %>-100 rounded-lg flex items-center justify-center mr-3">
+            <% case category_info[:icon] %>
+            <% when "academic-cap" %>
+              <svg class="w-5 h-5 text-<%= category_info[:color] %>-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+              </svg>
+            <% when "sparkles" %>
+              <svg class="w-5 h-5 text-<%= category_info[:color] %>-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"></path>
+              </svg>
+            <% when "color-swatch" %>
+              <svg class="w-5 h-5 text-<%= category_info[:color] %>-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM7 3H5a2 2 0 00-2 2v12a4 4 0 004 4h2a2 2 0 002-2V5a2 2 0 00-2-2z"></path>
+              </svg>
+            <% when "cake" %>
+              <svg class="w-5 h-5 text-<%= category_info[:color] %>-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.546 2.546 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zM3 9h18v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+              </svg>
+            <% when "desktop-computer" %>
+              <svg class="w-5 h-5 text-<%= category_info[:color] %>-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+            <% when "heart" %>
+              <svg class="w-5 h-5 text-<%= category_info[:color] %>-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+              </svg>
+            <% when "office-building" %>
+              <svg class="w-5 h-5 text-<%= category_info[:color] %>-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+            <% else %>
+              <svg class="w-5 h-5 text-<%= category_info[:color] %>-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+              </svg>
+            <% end %>
+          </div>
+          <div>
+            <h2 class="text-lg font-medium text-gray-900"><%= category_name %></h2>
+            <p class="text-sm text-gray-600"><%= category_info[:facilities].size %> <%= category_info[:facilities].size == 1 ? 'facility' : 'facilities' %></p>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% category_info[:facilities].each do |term| %>
+            <div class="relative flex items-start">
+              <div class="flex items-center h-5">
+                <%= check_box_tag "facility[]", term.slug, current_facilities.include?(term.slug), 
+                    class: "h-4 w-4 text-#{category_info[:color]}-600 border-gray-300 rounded focus:ring-#{category_info[:color]}-500" %>
+              </div>
+              <div class="ml-3 text-sm">
+                <%= label_tag "facility_#{term.slug}", term.label, class: "font-medium text-gray-700" %>
+                <% if term.description.present? %>
+                  <p class="text-gray-500"><%= truncate(term.description, length: 80) %></p>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Form Actions -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">
+            Changes will be visible to parents and students immediately on your school's public page.
+          </p>
+          <p class="text-xs text-gray-500 mt-1">
+            Select all facilities that are available at your campus.
+          </p>
+        </div>
+        
+        <div class="flex space-x-3">
+          <%= link_to school_owner_school_path(@school), 
+              class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+            Cancel
+          <% end %>
+          
+          <%= form.submit "Save Campus Facilities", 
+              class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
+      </div>
+    </div>
+
+  <% end %>
+</div>
