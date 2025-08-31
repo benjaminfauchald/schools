@@ -61,6 +61,11 @@ gem 'administrate'
 gem 'devise'
 gem 'view_component'
 
+# Vector database and AI integration
+gem 'ruby-openai'
+gem 'httparty'
+gem 'neighbor'
+
 #gem 'iso3166'
 gem 'countries'
 

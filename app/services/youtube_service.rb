@@ -272,4 +272,83 @@ class YoutubeService
       "#{count} views"
     end
   end
+  
+  # Fetch videos and extract transcripts for a place
+  def fetch_and_process_transcripts(place, youtube_url, options = {})
+    max_results = options[:max_results] || MAX_RESULTS
+    extract_transcripts = options.fetch(:extract_transcripts, true)
+    
+    # Fetch videos from channel
+    videos_result = fetch_channel_videos(youtube_url, max_results: max_results)
+    return videos_result unless videos_result[:success]
+    
+    videos = videos_result[:videos]
+    
+    result = {
+      success: true,
+      place_id: place.id,
+      place_name: place.name,
+      channel_id: videos_result[:channel_id],
+      total_videos: videos.length,
+      processed_videos: 0,
+      transcript_extraction_queued: false
+    }
+    
+    if extract_transcripts && videos.any?
+      # Queue transcript extraction job
+      YoutubeTranscriptExtractionJob.perform_later(
+        place.id,
+        videos,
+        {
+          delay: options[:api_delay] || 2, # Seconds between API calls
+          force_refresh: options[:force_refresh] || false,
+          store_results: true
+        }
+      )
+      
+      result[:transcript_extraction_queued] = true
+      result[:message] = "Queued #{videos.length} videos for transcript extraction"
+      
+      Rails.logger.info "Queued transcript extraction for #{videos.length} videos from #{place.name}"
+    end
+    
+    result
+  end
+  
+  # Extract video ID from various YouTube URL formats
+  def self.extract_video_id(url)
+    return url if url.match(/^[a-zA-Z0-9_-]{11}$/) # Already a video ID
+    
+    patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/
+    ]
+    
+    patterns.each do |pattern|
+      match = url.match(pattern)
+      return match[1] if match
+    end
+    
+    nil
+  end
+  
+  # Check if a place has YouTube content ready for processing
+  def channel_stats(place)
+    return { success: false, error: "Place has no YouTube URL" } if place.youtube_url.blank?
+    
+    videos_result = fetch_channel_videos(place.youtube_url, max_results: 5)
+    return videos_result unless videos_result[:success]
+    
+    existing_transcripts = place.transcripts.count
+    processed_transcripts = place.transcripts.processed.count
+    
+    {
+      success: true,
+      channel_has_videos: videos_result[:videos].any?,
+      sample_videos: videos_result[:videos].first(3),
+      existing_transcripts: existing_transcripts,
+      processed_transcripts: processed_transcripts,
+      processing_completion: existing_transcripts > 0 ? (processed_transcripts.to_f / existing_transcripts * 100).round(1) : 0
+    }
+  end
 end

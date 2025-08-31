@@ -7,6 +7,11 @@ class Place < ApplicationRecord
   has_many :events, dependent: :destroy
   has_many :travel_times, dependent: :destroy
   
+  # Vector database content associations
+  has_many :transcripts, dependent: :destroy
+  has_many :transcript_segments, through: :transcripts
+  has_many :document_contents, dependent: :destroy
+  
   # Validations
   validates :place_id, presence: true, uniqueness: true
   validates :lat, :lng, presence: true, numericality: true
@@ -185,6 +190,43 @@ class Place < ApplicationRecord
   
   def phone_display
     formatted_phone_number.presence || international_phone_number
+  end
+  
+  # Content management methods for vector database
+  def content_summary
+    {
+      transcripts_count: transcripts.processed.count,
+      transcript_segments_count: transcript_segments.with_embeddings.count,
+      documents_count: document_contents.completed.count,
+      total_content_items: transcripts.count + document_contents.count
+    }
+  end
+  
+  def has_content_for_blog_generation?
+    transcripts.processed.exists? || document_contents.completed.exists?
+  end
+  
+  def content_readiness_percentage
+    total_items = transcripts.count + document_contents.count
+    return 0 if total_items == 0
+    
+    processed_items = transcripts.processed.count + document_contents.completed.count
+    (processed_items.to_f / total_items * 100).round(1)
+  end
+  
+  def latest_content_activity
+    latest_transcript = transcripts.order(updated_at: :desc).first
+    latest_document = document_contents.order(updated_at: :desc).first
+    
+    if latest_transcript && latest_document
+      [latest_transcript.updated_at, latest_document.updated_at].max
+    elsif latest_transcript
+      latest_transcript.updated_at
+    elsif latest_document
+      latest_document.updated_at
+    else
+      nil
+    end
   end
   
   private

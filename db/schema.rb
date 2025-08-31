@@ -10,12 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_31_171255) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
   enable_extension "postgis"
+  enable_extension "vector"
 
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
@@ -79,6 +80,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
     t.index ["changed_fields"], name: "index_audit_logs_on_changed_fields", using: :gin
     t.index ["created_at"], name: "index_audit_logs_on_created_at"
     t.index ["user_id"], name: "index_audit_logs_on_user_id"
+  end
+
+  create_table "document_contents", force: :cascade do |t|
+    t.bigint "place_id", null: false
+    t.string "title", null: false
+    t.string "content_type", null: false
+    t.text "processed_text"
+    t.json "metadata"
+    t.string "processing_status", default: "pending"
+    t.vector "embedding", limit: 1536
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["content_type"], name: "index_document_contents_on_content_type"
+    t.index ["embedding"], name: "index_document_contents_on_embedding", opclass: :vector_cosine_ops, using: :hnsw
+    t.index ["place_id"], name: "index_document_contents_on_place_id"
+    t.index ["processing_status"], name: "index_document_contents_on_processing_status"
   end
 
   create_table "events", force: :cascade do |t|
@@ -196,6 +213,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
     t.json "website_crawl_data"
     t.json "website_structured_data"
     t.text "website_crawling_error"
+    t.string "youtube_url"
     t.index ["api_status"], name: "index_places_on_api_status"
     t.index ["business_status"], name: "index_places_on_business_status"
     t.index ["id", "lat", "lng"], name: "index_places_on_id_lat_lng"
@@ -490,6 +508,43 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
     t.index ["vocabulary_id"], name: "index_terms_on_vocabulary_id"
   end
 
+  create_table "transcript_segments", force: :cascade do |t|
+    t.bigint "transcript_id", null: false
+    t.text "text", null: false
+    t.string "language", default: "en"
+    t.integer "offset_ms", null: false
+    t.integer "duration_ms", null: false
+    t.integer "sequence_number", null: false
+    t.vector "embedding", limit: 1536
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.float "confidence"
+    t.json "raw_segment_data"
+    t.index ["embedding"], name: "index_transcript_segments_on_embedding", opclass: :vector_cosine_ops, using: :hnsw
+    t.index ["offset_ms"], name: "index_transcript_segments_on_offset_ms"
+    t.index ["transcript_id", "sequence_number"], name: "index_transcript_segments_on_transcript_id_and_sequence_number", unique: true
+    t.index ["transcript_id"], name: "index_transcript_segments_on_transcript_id"
+  end
+
+  create_table "transcripts", force: :cascade do |t|
+    t.bigint "place_id", null: false
+    t.string "video_title", null: false
+    t.string "video_url"
+    t.string "youtube_video_id"
+    t.string "primary_language", default: "en"
+    t.json "available_languages"
+    t.text "full_transcript_text"
+    t.vector "embedding", limit: 1536
+    t.integer "total_duration_ms"
+    t.integer "segment_count"
+    t.datetime "processed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["embedding"], name: "index_transcripts_on_embedding", opclass: :vector_cosine_ops, using: :hnsw
+    t.index ["place_id", "youtube_video_id"], name: "index_transcripts_on_place_id_and_youtube_video_id", unique: true
+    t.index ["place_id"], name: "index_transcripts_on_place_id"
+  end
+
   create_table "travel_times", force: :cascade do |t|
     t.bigint "place_id", null: false
     t.string "origin_hash", null: false
@@ -533,6 +588,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "document_contents", "places"
   add_foreign_key "events", "places"
   add_foreign_key "magic_link_tokens", "users"
   add_foreign_key "media_items", "places"
@@ -549,5 +605,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
   add_foreign_key "temp_claims", "schools"
   add_foreign_key "terms", "terms", column: "parent_id"
   add_foreign_key "terms", "vocabularies"
+  add_foreign_key "transcript_segments", "transcripts"
+  add_foreign_key "transcripts", "places"
   add_foreign_key "travel_times", "places"
 end
