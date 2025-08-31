@@ -346,15 +346,15 @@ class YoutubeTranscriptService
   def parse_transcript_segment(segment_data, index)
     # Handle different possible segment formats from Supadata
     if segment_data.is_a?(Hash)
-      # Supadata format usually has 'text', 'start', 'duration'
-      start_time = segment_data['start'] || segment_data[:start] || 0
+      # Supadata format has 'text', 'offset', 'duration' (offset is start time in ms)
+      start_time = segment_data['offset'] || segment_data['start'] || segment_data[:start] || segment_data[:offset] || 0
       duration = segment_data['duration'] || segment_data[:duration] || 0
       
       {
         sequence_number: index,
         text: segment_data['text'] || segment_data[:text] || '',
-        offset_ms: parse_timestamp_to_ms(start_time),
-        duration_ms: parse_timestamp_to_ms(duration),
+        offset_ms: start_time.is_a?(Numeric) ? start_time.to_i : parse_timestamp_to_ms(start_time),
+        duration_ms: duration.is_a?(Numeric) ? duration.to_i : parse_timestamp_to_ms(duration),
         confidence: segment_data['confidence'] || segment_data[:confidence],
         raw_data: segment_data
       }
