@@ -1,6 +1,7 @@
 require 'net/http'
 require 'uri'
 require 'json'
+require 'timeout'
 
 class YoutubeService
   API_BASE_URL = 'https://www.googleapis.com/youtube/v3'
@@ -232,13 +233,25 @@ class YoutubeService
     uri = URI(url)
     uri.query = URI.encode_www_form(params)
     
-    response = Net::HTTP.get_response(uri)
-    
-    unless response.is_a?(Net::HTTPSuccess)
-      raise "API request failed: #{response.code} #{response.message}"
+    begin
+      # Add timeout handling
+      response = Timeout::timeout(30) do
+        Net::HTTP.get_response(uri)
+      end
+      
+      unless response.is_a?(Net::HTTPSuccess)
+        raise "API request failed: #{response.code} #{response.message}"
+      end
+      
+      JSON.parse(response.body)
+    rescue Timeout::Error => e
+      raise "Request timeout: #{e.message}"
+    rescue Net::TimeoutError => e
+      raise "Network timeout: #{e.message}"
+    rescue => e
+      Rails.logger.error "YouTube API request error: #{e.class} - #{e.message}"
+      raise e
     end
-    
-    JSON.parse(response.body)
   end
   
   # Parse YouTube duration format (PT4M13S) to human readable

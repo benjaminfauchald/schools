@@ -1,6 +1,7 @@
 require 'net/http'
 require 'uri'
 require 'json'
+require 'timeout'
 
 class YoutubeTranscriptService
   API_BASE_URL = 'https://api.supadata.ai/v1'
@@ -251,37 +252,52 @@ class YoutubeTranscriptService
     uri = URI(url)
     uri.query = URI.encode_www_form(params) if params
     
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true if uri.scheme == 'https'
-    
-    request = Net::HTTP::Get.new(uri)
-    request['x-api-key'] = @api_key  # Supadata uses x-api-key header
-    
-    Rails.logger.info "Making GET request to #{uri}"
-    
-    response = http.request(request)
-    
-    Rails.logger.info "Response: #{response.code} - #{response.body[0..500]}..."
-    
-    unless response.is_a?(Net::HTTPSuccess)
-      error_message = "API request failed: #{response.code} #{response.message}"
+    begin
+      Rails.logger.info "Making GET request to #{uri}"
       
-      # Try to parse error response
-      begin
-        error_body = JSON.parse(response.body)
-        error_message += " - #{error_body['error'] || error_body['message']}" if error_body.is_a?(Hash)
-      rescue JSON::ParserError
-        error_message += " - #{response.body.truncate(200)}"
+      # Add timeout handling for the HTTP request
+      response = Timeout::timeout(30) do
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true if uri.scheme == 'https'
+        http.read_timeout = 30
+        http.open_timeout = 10
+        
+        request = Net::HTTP::Get.new(uri)
+        request['x-api-key'] = @api_key  # Supadata uses x-api-key header
+        
+        http.request(request)
       end
       
-      raise error_message
-    end
-    
-    # Try to parse as JSON, if it fails return as string
-    begin
-      JSON.parse(response.body)
-    rescue JSON::ParserError
-      response.body
+      Rails.logger.info "Response: #{response.code} - #{response.body[0..500]}..."
+      
+      unless response.is_a?(Net::HTTPSuccess)
+        error_message = "API request failed: #{response.code} #{response.message}"
+        
+        # Try to parse error response
+        begin
+          error_body = JSON.parse(response.body)
+          error_message += " - #{error_body['error'] || error_body['message']}" if error_body.is_a?(Hash)
+        rescue JSON::ParserError
+          error_message += " - #{response.body.truncate(200)}"
+        end
+        
+        raise error_message
+      end
+      
+      # Try to parse as JSON, if it fails return as string
+      begin
+        JSON.parse(response.body)
+      rescue JSON::ParserError
+        response.body
+      end
+      
+    rescue Timeout::Error => e
+      raise "Request timeout: #{e.message}"
+    rescue Net::TimeoutError => e
+      raise "Network timeout: #{e.message}"
+    rescue => e
+      Rails.logger.error "Supadata API request error: #{e.class} - #{e.message}"
+      raise e
     end
   end
   
