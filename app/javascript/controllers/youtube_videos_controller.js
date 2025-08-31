@@ -5,7 +5,8 @@ export default class extends Controller {
   static values = { 
     schoolId: Number,
     fetchUrl: String,
-    toggleUrl: String
+    toggleUrl: String,
+    transcriptUrl: String
   }
 
   connect() {
@@ -97,30 +98,45 @@ export default class extends Controller {
           </div>
           
           <!-- Action Buttons -->
-          <div class="flex items-center justify-between">
-            <!-- View on YouTube -->
-            <a href="https://www.youtube.com/watch?v=${video.video_id}" 
-               target="_blank"
-               class="inline-flex items-center text-xs text-gray-600 hover:text-red-600 transition-colors">
-              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-              </svg>
-              View
-            </a>
+          <div class="flex flex-col space-y-2">
+            <!-- Top row: View and Visibility -->
+            <div class="flex items-center justify-between">
+              <!-- View on YouTube -->
+              <a href="https://www.youtube.com/watch?v=${video.video_id}" 
+                 target="_blank"
+                 class="inline-flex items-center text-xs text-gray-600 hover:text-red-600 transition-colors">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+                View
+              </a>
+              
+              <!-- Toggle Visibility -->
+              <button type="button"
+                      class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded transition-colors ${video.visible ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}"
+                      data-action="click->youtube-videos#toggleVisibility"
+                      data-video-key="${video.video_key}"
+                      data-current-visibility="${video.visible}">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  ${video.visible ? 
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>' :
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>'
+                  }
+                </svg>
+                ${video.visible ? 'Hide' : 'Show'}
+              </button>
+            </div>
             
-            <!-- Toggle Visibility -->
+            <!-- Bottom row: Get Transcript Button -->
             <button type="button"
-                    class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded transition-colors ${video.visible ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}"
-                    data-action="click->youtube-videos#toggleVisibility"
-                    data-video-key="${video.video_key}"
-                    data-current-visibility="${video.visible}">
-              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                ${video.visible ? 
-                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>' :
-                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>'
-                }
+                    class="w-full inline-flex items-center justify-center px-2 py-1.5 text-xs font-medium rounded transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200"
+                    data-action="click->youtube-videos#extractTranscript"
+                    data-video-id="${video.video_id}"
+                    data-video-title="${this.escapeHtml(video.title)}">
+              <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
-              ${video.visible ? 'Hide' : 'Show'}
+              GET TRANSCRIPT
             </button>
           </div>
         </div>
@@ -169,6 +185,77 @@ export default class extends Controller {
       // Re-enable button
       button.disabled = false
       button.classList.remove('opacity-50', 'cursor-not-allowed')
+    }
+  }
+  
+  async extractTranscript(event) {
+    event.preventDefault()
+    
+    const button = event.currentTarget
+    const videoId = button.dataset.videoId
+    const videoTitle = button.dataset.videoTitle
+    
+    // Disable button during request and show loading state
+    button.disabled = true
+    button.classList.add('opacity-50', 'cursor-not-allowed')
+    const originalContent = button.innerHTML
+    button.innerHTML = `
+      <svg class="w-3 h-3 mr-1.5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      EXTRACTING...
+    `
+    
+    try {
+      const url = this.transcriptUrlValue.replace(':video_id', videoId)
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        }
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Update button to show success state
+        button.innerHTML = `
+          <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          EXTRACTING...
+        `
+        button.classList.remove('bg-blue-100', 'text-blue-700', 'hover:bg-blue-200', 'border-blue-200')
+        button.classList.add('bg-green-100', 'text-green-700', 'border-green-200')
+        
+        // Show success message
+        this.showTemporaryMessage(`✅ Transcript extraction started for "${videoTitle}". Processing in background...`, 'success')
+      } else {
+        // Restore original button state on error
+        button.innerHTML = originalContent
+        button.disabled = false
+        button.classList.remove('opacity-50', 'cursor-not-allowed')
+        
+        if (response.status === 409) {
+          // Transcript already exists
+          this.showTemporaryMessage(`ℹ️ Transcript already exists for this video`, 'info')
+        } else {
+          this.showTemporaryMessage(data.message || 'Failed to start transcript extraction', 'error')
+        }
+      }
+    } catch (error) {
+      console.error('Error extracting transcript:', error)
+      
+      // Restore original button state on error
+      button.innerHTML = originalContent
+      button.disabled = false
+      button.classList.remove('opacity-50', 'cursor-not-allowed')
+      
+      this.showTemporaryMessage('Network error occurred while starting transcript extraction', 'error')
     }
   }
 

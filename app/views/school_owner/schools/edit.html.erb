@@ -831,7 +831,8 @@
                      data-controller="youtube-videos"
                      data-youtube-videos-school-id-value="<%= @school.id %>"
                      data-youtube-videos-fetch-url-value="<%= fetch_videos_school_owner_school_path(@school) %>"
-                     data-youtube-videos-toggle-url-value="<%= toggle_video_visibility_school_owner_school_path(@school) %>">
+                     data-youtube-videos-toggle-url-value="<%= toggle_video_visibility_school_owner_school_path(@school) %>"
+                     data-youtube-videos-transcript-url-value="<%= extract_transcript_school_owner_school_path(@school, ':video_id') %>">
                   
                   <div class="flex items-center mb-6">
                     <svg class="w-6 h-6 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

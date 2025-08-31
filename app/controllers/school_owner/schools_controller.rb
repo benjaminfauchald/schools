@@ -1,5 +1,5 @@
 class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
-  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :import_website_data, :import_status]
+  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :import_website_data, :import_status, :extract_transcript]
   
   def index
     @schools = current_user.owned_schools.includes(:place)
@@ -342,6 +342,93 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     
     respond_to do |format|
       format.json { render json: status }
+    end
+  end
+  
+  def extract_transcript
+    @school = current_school
+    video_id = params[:video_id]
+    
+    unless video_id.present?
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Video ID is required.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    unless @school.place.present?
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'School must have an associated place for transcript storage.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    # Check if transcript already exists
+    existing_transcript = @school.place.transcripts.find_by(youtube_video_id: video_id)
+    if existing_transcript
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: false, 
+            message: 'Transcript already exists for this video.',
+            transcript_id: existing_transcript.id,
+            processed: existing_transcript.processed?
+          }, 
+          status: :conflict 
+        }
+      end
+      return
+    end
+    
+    # Verify the video exists in the YouTube channel
+    youtube_videos = @school.fetch_youtube_videos
+    unless youtube_videos[:success]
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Failed to fetch YouTube videos.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    video = youtube_videos[:videos].find { |v| v[:video_id] == video_id }
+    unless video
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Video not found in the channel.' }, status: :not_found }
+      end
+      return
+    end
+    
+    # Start transcript extraction
+    begin
+      youtube_url = "https://www.youtube.com/watch?v=#{video_id}"
+      
+      # Queue the transcript extraction job
+      YoutubeTranscriptExtractionJob.perform_later(@school.place.id, youtube_url, {
+        video_title: video[:title],
+        video_description: video[:description],
+        duration: video[:duration],
+        published_at: video[:published_at]
+      })
+      
+      create_audit_log(@school, 'transcript_extraction', ['youtube_transcript', video_id])
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true, 
+            message: 'Transcript extraction started in background.',
+            video_id: video_id,
+            video_title: video[:title],
+            estimated_time: '1-2 minutes'
+          } 
+        }
+      end
+      
+    rescue => e
+      Rails.logger.error "Failed to start transcript extraction for video #{video_id}: #{e.message}"
+      
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Failed to start transcript extraction.' }, status: :internal_server_error }
+      end
     end
   end
   

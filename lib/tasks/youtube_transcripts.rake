@@ -1,5 +1,5 @@
 namespace :youtube do
-  desc "Extract transcripts for a specific place by ID"
+  desc "Extract transcripts for a specific place by ID (also searches schools)"
   task :extract_transcripts, [:place_id, :max_results] => :environment do |t, args|
     place_id = args[:place_id]
     max_results = (args[:max_results] || 10).to_i
@@ -7,6 +7,7 @@ namespace :youtube do
     if place_id.blank?
       puts "❌ Please provide a place ID: rails youtube:extract_transcripts[123]"
       puts "   Optional: rails youtube:extract_transcripts[123,20] (to process 20 videos)"
+      puts "   Use rails youtube:list_places to see available places and schools"
       exit
     end
     
@@ -16,14 +17,31 @@ namespace :youtube do
       exit
     end
     
-    if place.youtube_url.blank?
-      puts "❌ Place '#{place.name}' has no YouTube URL"
-      puts "   Please add a YouTube channel URL to this place first"
+    # Check if place has YouTube URL, if not check associated school
+    youtube_url = place.youtube_url
+    source_type = "place"
+    
+    if youtube_url.blank? && place.school.present?
+      youtube_url = place.school.youtube_url
+      source_type = "school"
+    end
+    
+    if youtube_url.blank?
+      puts "❌ No YouTube URL found for place '#{place.name}'"
+      if place.school.present?
+        puts "   Checked both place and associated school: #{place.school.name}"
+      end
+      puts "   Please add a YouTube channel URL to the place or school first"
       exit
     end
     
     puts "🎬 Processing YouTube transcripts for: #{place.name}"
-    puts "   YouTube URL: #{place.youtube_url}"
+    if source_type == "school"
+      puts "   YouTube URL source: School (#{place.school.name})"
+    else
+      puts "   YouTube URL source: Place"
+    end
+    puts "   YouTube URL: #{youtube_url}"
     puts "   Max videos: #{max_results}"
     puts ""
     
@@ -145,25 +163,60 @@ namespace :youtube do
     end
   end
   
-  desc "List all places with YouTube URLs"
+  desc "List all places and schools with YouTube URLs"
   task :list_places => :environment do
     places_with_youtube = Place.where.not(youtube_url: [nil, ''])
+    schools_with_youtube = School.where.not(youtube_url: [nil, ''])
     
-    if places_with_youtube.empty?
-      puts "❌ No places found with YouTube URLs"
-      puts "   Add YouTube channel URLs to places to enable transcript extraction"
+    total_count = places_with_youtube.count + schools_with_youtube.count
+    
+    if total_count == 0
+      puts "❌ No places or schools found with YouTube URLs"
+      puts "   Add YouTube channel URLs to places or schools to enable transcript extraction"
+      puts ""
+      puts "💡 Quick setup:"
+      puts "   1. Find a school: School.first"
+      puts "   2. Add YouTube URL: school.update(youtube_url: 'https://youtube.com/@channelname')"
+      puts "   3. Run: rails youtube:extract_transcripts[place_id]"
     else
-      puts "🎬 Places with YouTube Channels (#{places_with_youtube.count}):"
-      puts "=" * 60
+      puts "🎬 Places and Schools with YouTube Channels (#{total_count} total):"
+      puts "=" * 70
       
-      places_with_youtube.each do |place|
-        transcript_count = place.transcripts.count
-        processed_count = place.transcripts.processed.count
-        
-        puts "ID: #{place.id} - #{place.name}"
-        puts "   YouTube: #{place.youtube_url}"
-        puts "   Transcripts: #{processed_count}/#{transcript_count} processed"
+      if places_with_youtube.any?
         puts ""
+        puts "📍 PLACES (#{places_with_youtube.count}):"
+        places_with_youtube.each do |place|
+          transcript_count = place.transcripts.count
+          processed_count = place.transcripts.processed.count
+          
+          puts "  Place ID: #{place.id} - #{place.name}"
+          puts "    YouTube: #{place.youtube_url}"
+          puts "    Transcripts: #{processed_count}/#{transcript_count} processed"
+          puts "    Extract: rails youtube:extract_transcripts[#{place.id}]"
+          puts ""
+        end
+      end
+      
+      if schools_with_youtube.any?
+        puts ""
+        puts "🏫 SCHOOLS (#{schools_with_youtube.count}):"
+        schools_with_youtube.each do |school|
+          place = school.place
+          if place
+            transcript_count = place.transcripts.count
+            processed_count = place.transcripts.processed.count
+            
+            puts "  School ID: #{school.id} (Place ID: #{place.id}) - #{school.name}"
+            puts "    YouTube: #{school.youtube_url}"
+            puts "    Transcripts: #{processed_count}/#{transcript_count} processed"
+            puts "    Extract: rails youtube:extract_transcripts[#{place.id}]"
+          else
+            puts "  School ID: #{school.id} - #{school.name}"
+            puts "    YouTube: #{school.youtube_url}"
+            puts "    ⚠️  No associated place found - cannot extract transcripts"
+          end
+          puts ""
+        end
       end
     end
   end

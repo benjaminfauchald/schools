@@ -37,6 +37,7 @@ Rails.application.routes.draw do
         patch :toggle_video_visibility
         post :import_website_data
         get :import_status
+        post 'extract_transcript/:video_id', action: :extract_transcript, as: :extract_transcript
       end
       resources :pages, except: [:show] do
         collection do
