@@ -246,8 +246,6 @@ class YoutubeService
       JSON.parse(response.body)
     rescue Timeout::Error => e
       raise "Request timeout: #{e.message}"
-    rescue Net::TimeoutError => e
-      raise "Network timeout: #{e.message}"
     rescue => e
       Rails.logger.error "YouTube API request error: #{e.class} - #{e.message}"
       raise e

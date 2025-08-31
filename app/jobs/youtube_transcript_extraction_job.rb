@@ -1,8 +1,10 @@
+require 'timeout'
+
 class YoutubeTranscriptExtractionJob < ApplicationJob
   queue_as :default
   
   # Retry configuration for API failures
-  retry_on Net::TimeoutError, wait: :polynomially_longer, attempts: 3
+  retry_on Timeout::Error, wait: :polynomially_longer, attempts: 3
   retry_on StandardError, wait: 30.seconds, attempts: 2
   
   def perform(place_id, video_data_or_list, options = {})
