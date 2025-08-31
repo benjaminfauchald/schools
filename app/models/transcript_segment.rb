@@ -2,7 +2,12 @@ class TranscriptSegment < ApplicationRecord
   belongs_to :transcript
   
   # Neighbor gem for vector operations
-  has_neighbors :embedding
+  # Conditionally load has_neighbors to prevent errors during initialization
+  begin
+    has_neighbors :embedding if defined?(Neighbor)
+  rescue => e
+    Rails.logger.warn "Neighbor gem not properly loaded: #{e.message}"
+  end
   
   # Validations
   validates :text, presence: true

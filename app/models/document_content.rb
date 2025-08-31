@@ -2,7 +2,12 @@ class DocumentContent < ApplicationRecord
   belongs_to :place
   
   # Neighbor gem for vector operations
-  has_neighbors :embedding
+  # Conditionally load has_neighbors to prevent errors during initialization
+  begin
+    has_neighbors :embedding if defined?(Neighbor)
+  rescue => e
+    Rails.logger.warn "Neighbor gem not properly loaded: #{e.message}"
+  end
   
   # Active Storage for file uploads
   has_one_attached :file

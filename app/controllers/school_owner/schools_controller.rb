@@ -364,7 +364,16 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     end
     
     # Check if transcript already exists
-    existing_transcript = @school.place.transcripts.find_by(youtube_video_id: video_id)
+    begin
+      existing_transcript = @school.place.transcripts.find_by(youtube_video_id: video_id)
+    rescue => e
+      Rails.logger.error "Error checking existing transcript: #{e.message}"
+      Rails.logger.error e.backtrace.first(5).join("\n")
+      respond_to do |format|
+        format.json { render json: { success: false, message: "Database error: #{e.message}" }, status: :internal_server_error }
+      end
+      return
+    end
     if existing_transcript
       respond_to do |format|
         format.json { 
