@@ -418,7 +418,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
         published_at: video[:published_at]
       })
       
-      create_audit_log(@school, 'transcript_extraction', ['youtube_transcript', video_id])
+      create_audit_log(@school, 'create', ['youtube_transcript', video_id])
       
       respond_to do |format|
         format.json { 
