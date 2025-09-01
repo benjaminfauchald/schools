@@ -60,6 +60,7 @@ gem 'rgeo-activerecord'
 gem 'administrate'
 gem 'devise'
 gem 'view_component'
+gem 'foreman'
 
 #gem 'iso3166'
 gem 'countries'
@@ -76,6 +77,9 @@ group :development, :test do
   
   # Fake data generation for testing
   gem "faker"
+  
+  # Load environment variables from .env file
+  gem 'dotenv-rails'
 end
 
 group :development do

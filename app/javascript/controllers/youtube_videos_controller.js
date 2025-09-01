@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["videosContainer", "videoGrid", "loadingState", "errorState", "emptyState"]
+  static targets = ["videosContainer", "videoGrid", "loadingState", "errorState", "emptyState", "refreshButton", "cacheInfo", "cacheAge"]
   static values = { 
     schoolId: Number,
     fetchUrl: String,
@@ -12,11 +12,12 @@ export default class extends Controller {
     this.loadVideos()
   }
 
-  async loadVideos() {
+  async loadVideos(forceRefresh = false) {
     this.showLoadingState()
     
     try {
-      const response = await fetch(this.fetchUrlValue, {
+      const url = forceRefresh ? `${this.fetchUrlValue}?refresh=true` : this.fetchUrlValue
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -29,7 +30,12 @@ export default class extends Controller {
 
       if (data.success) {
         this.renderVideos(data.videos)
+        this.updateCacheInfo(data)
         this.showVideosContainer()
+        
+        if (data.was_refreshed) {
+          this.showTemporaryMessage('Videos refreshed successfully!', 'success')
+        }
       } else {
         this.showErrorState(data.message || 'Failed to load videos')
       }
@@ -110,17 +116,18 @@ export default class extends Controller {
             
             <!-- Toggle Visibility -->
             <button type="button"
-                    class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded transition-colors ${video.visible ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}"
+                    class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded transition-colors ${video.visible ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}"
                     data-action="click->youtube-videos#toggleVisibility"
                     data-video-key="${video.video_key}"
-                    data-current-visibility="${video.visible}">
+                    data-current-visibility="${video.visible}"
+                    title="${video.visible ? 'Click to hide this video' : 'Click to show this video'}">
               <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 ${video.visible ? 
-                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>' :
-                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>'
+                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>' :
+                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>'
                 }
               </svg>
-              ${video.visible ? 'Hide' : 'Show'}
+              ${video.visible ? 'Showing' : 'Hidden'}
             </button>
           </div>
         </div>
@@ -190,25 +197,26 @@ export default class extends Controller {
     // Update button
     if (button) {
       button.dataset.currentVisibility = isVisible
-      button.className = `inline-flex items-center px-2 py-1 text-xs font-medium rounded transition-colors ${isVisible ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`
+      button.className = `inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded transition-colors ${isVisible ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}`
+      button.title = isVisible ? 'Click to hide this video' : 'Click to show this video'
       
       const icon = button.querySelector('svg')
       const text = button.querySelector('svg + *') || button.lastChild
       
       if (icon) {
         icon.innerHTML = isVisible ? 
-          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>' :
-          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>'
+          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>' :
+          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>'
       }
       
       // Update button text
       if (text && text.nodeType === Node.TEXT_NODE) {
-        text.textContent = isVisible ? 'Hide' : 'Show'
+        text.textContent = isVisible ? 'Showing' : 'Hidden'
       } else {
         // Find text node
         const textNodes = Array.from(button.childNodes).filter(node => node.nodeType === Node.TEXT_NODE)
         if (textNodes.length > 0) {
-          textNodes[textNodes.length - 1].textContent = isVisible ? 'Hide' : 'Show'
+          textNodes[textNodes.length - 1].textContent = isVisible ? 'Showing' : 'Hidden'
         }
       }
     }
@@ -243,6 +251,65 @@ export default class extends Controller {
     this.hideAllStates()
     if (this.hasVideosContainerTarget) {
       this.videosContainerTarget.classList.remove('hidden')
+    }
+    
+    // Show refresh button and cache info when videos are displayed
+    if (this.hasRefreshButtonTarget) {
+      this.refreshButtonTarget.classList.remove('hidden')
+    }
+    if (this.hasCacheInfoTarget) {
+      this.cacheInfoTarget.classList.remove('hidden')
+    }
+  }
+
+  async refreshVideos(event) {
+    event.preventDefault()
+    
+    const button = event.currentTarget
+    const originalContent = button.innerHTML
+    
+    // Disable button and show loading state
+    button.disabled = true
+    button.innerHTML = `
+      <svg class="w-3 h-3 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      Refreshing...
+    `
+    
+    try {
+      await this.loadVideos(true) // Force refresh
+    } finally {
+      // Restore button state
+      button.disabled = false
+      button.innerHTML = originalContent
+    }
+  }
+
+  updateCacheInfo(data) {
+    if (!this.hasCacheAgeTarget) return
+    
+    let ageText = 'Updated recently'
+    if (data.cache_age_days > 0) {
+      if (data.cache_age_days === 1) {
+        ageText = 'Updated 1 day ago'
+      } else if (data.cache_age_days < 7) {
+        ageText = `Updated ${data.cache_age_days} days ago`
+      } else {
+        const weeks = Math.floor(data.cache_age_days / 7)
+        ageText = weeks === 1 ? 'Updated 1 week ago' : `Updated ${weeks} weeks ago`
+      }
+    }
+    
+    this.cacheAgeTarget.textContent = ageText
+    
+    // Add warning if data is old
+    if (data.cache_age_days >= 7) {
+      this.cacheAgeTarget.parentElement.classList.add('text-amber-600')
+      this.cacheAgeTarget.parentElement.classList.remove('text-gray-500')
+    } else {
+      this.cacheAgeTarget.parentElement.classList.remove('text-amber-600')
+      this.cacheAgeTarget.parentElement.classList.add('text-gray-500')
     }
   }
 

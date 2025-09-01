@@ -118,6 +118,9 @@ GEM
       responders
       warden (~> 1.2.3)
     dotenv (3.1.8)
+    dotenv-rails (3.1.8)
+      dotenv (= 3.1.8)
+      railties (>= 6.1)
     down (5.4.2)
       addressable (~> 2.8)
     drb (2.2.3)
@@ -144,6 +147,8 @@ GEM
     ffi (1.17.2-x86_64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
+    foreman (0.90.0)
+      thor (~> 1.4)
     fugit (1.11.2)
       et-orbi (~> 1, >= 1.2.11)
       raabro (~> 1.4)
@@ -483,8 +488,10 @@ DEPENDENCIES
   countries
   debug
   devise
+  dotenv-rails
   down (~> 5.0)
   faker
+  foreman
   image_processing (~> 1.2)
   importmap-rails
   jbuilder

@@ -10,12 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_01_121059) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
   enable_extension "postgis"
+  enable_extension "vector"
 
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
@@ -80,6 +81,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
     t.index ["created_at"], name: "index_audit_logs_on_created_at"
     t.index ["user_id"], name: "index_audit_logs_on_user_id"
   end
+
+# Could not dump table "document_contents" because of following StandardError
+#   Unknown type 'vector(1536)' for column 'embedding'
+
 
   create_table "events", force: :cascade do |t|
     t.bigint "place_id", null: false
@@ -196,6 +201,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
     t.json "website_crawl_data"
     t.json "website_structured_data"
     t.text "website_crawling_error"
+    t.string "youtube_url"
     t.index ["api_status"], name: "index_places_on_api_status"
     t.index ["business_status"], name: "index_places_on_business_status"
     t.index ["id", "lat", "lng"], name: "index_places_on_id_lat_lng"
@@ -490,6 +496,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
     t.index ["vocabulary_id"], name: "index_terms_on_vocabulary_id"
   end
 
+# Could not dump table "transcript_segments" because of following StandardError
+#   Unknown type 'vector(1536)' for column 'embedding'
+
+
+# Could not dump table "transcripts" because of following StandardError
+#   Unknown type 'vector(1536)' for column 'embedding'
+
+
   create_table "travel_times", force: :cascade do |t|
     t.bigint "place_id", null: false
     t.string "origin_hash", null: false
@@ -531,8 +545,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
     t.index ["code"], name: "index_vocabularies_on_code", unique: true
   end
 
+  create_table "youtube_videos", force: :cascade do |t|
+    t.string "video_id"
+    t.text "title"
+    t.text "description"
+    t.string "thumbnail_url"
+    t.string "duration"
+    t.integer "view_count"
+    t.datetime "published_at"
+    t.json "video_data"
+    t.boolean "visible"
+    t.integer "sort_order"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "place_id", null: false
+    t.index ["place_id", "sort_order"], name: "index_youtube_videos_on_place_id_and_sort_order"
+    t.index ["place_id", "video_id"], name: "index_youtube_videos_on_place_id_and_video_id", unique: true
+    t.index ["place_id", "visible"], name: "index_youtube_videos_on_place_id_and_visible"
+    t.index ["place_id"], name: "index_youtube_videos_on_place_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "document_contents", "places"
   add_foreign_key "events", "places"
   add_foreign_key "magic_link_tokens", "users"
   add_foreign_key "media_items", "places"
@@ -549,5 +584,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_183423) do
   add_foreign_key "temp_claims", "schools"
   add_foreign_key "terms", "terms", column: "parent_id"
   add_foreign_key "terms", "vocabularies"
+  add_foreign_key "transcript_segments", "transcripts"
+  add_foreign_key "transcripts", "places"
   add_foreign_key "travel_times", "places"
+  add_foreign_key "youtube_videos", "places"
 end

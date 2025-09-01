@@ -6,6 +6,7 @@ class Place < ApplicationRecord
   has_many :media_items, dependent: :destroy
   has_many :events, dependent: :destroy
   has_many :travel_times, dependent: :destroy
+  has_many :youtube_videos, dependent: :destroy
   
   # Validations
   validates :place_id, presence: true, uniqueness: true
@@ -151,6 +152,15 @@ class Place < ApplicationRecord
       lng, lat, origin_lng, origin_lat
     )
     result&.to_f
+  end
+  
+  # YouTube video methods
+  def visible_youtube_videos
+    youtube_videos.visible.ordered
+  end
+  
+  def has_youtube_videos?
+    youtube_videos.any?
   end
   
   # Class method to check Google Maps API compliance percentage

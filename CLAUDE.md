@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+DONT KILL OR START RAILS DEVELOPMENT SERVER JUST ASK YOUR TO RESTART SERVER
+DO NOT pkill -f "rails server" or kill any rails server!
+
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
