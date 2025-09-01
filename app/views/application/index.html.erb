@@ -132,7 +132,7 @@
       document.getElementById('map').innerHTML = '<div class="flex items-center justify-center h-full bg-red-50 text-red-600">Google Maps API authentication failed. Check console for details.</div>';
     };
   </script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap&libraries=marker"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap&libraries=geometry,places<%= ENV['GOOGLE_MAPS_MAP_ID'].present? ? ',marker' : '' %>&loading=async"></script>
   
   <script>
     let map;
@@ -256,7 +256,9 @@
         scaleControl: true,
         streetViewControl: true,
         rotateControl: false,
-        fullscreenControl: true
+        fullscreenControl: true<% if ENV['GOOGLE_MAPS_MAP_ID'].present? %>,
+        mapId: '<%= ENV['GOOGLE_MAPS_MAP_ID'] %>'
+        <% end %>
       });
 
       // Initialize bounds for auto-scaling
@@ -265,7 +267,8 @@
 
       // Add home marker if location is available
       if (homeLocation) {
-        // Create home marker using PinElement (works without Map ID)
+        <% if ENV['GOOGLE_MAPS_MAP_ID'].present? %>
+        // Create home marker using PinElement (with Map ID)
         const homePin = new google.maps.marker.PinElement({
           background: '#10b981',
           borderColor: '#ffffff',
@@ -280,6 +283,24 @@
           title: 'Your Home',
           content: homePin.element
         });
+        <% else %>
+        // Create home marker using legacy API (no Map ID)
+        const homeMarker = new google.maps.Marker({
+          position: { lat: homeLocation.lat, lng: homeLocation.lng },
+          map: map,
+          title: 'Your Home',
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="10" cy="10" r="10" fill="#10b981" stroke="white" stroke-width="2"/>
+                <text x="10" y="13" text-anchor="middle" font-size="10" fill="white">🏠</text>
+              </svg>
+            `),
+            scaledSize: new google.maps.Size(20, 20),
+            anchor: new google.maps.Point(10, 10)
+          }
+        });
+        <% end %>
         
         // Add home location to bounds
         bounds.extend({ lat: homeLocation.lat, lng: homeLocation.lng });
@@ -300,7 +321,8 @@
       places.forEach(function(place) {
         const position = { lat: place.lat, lng: place.lng };
         
-        // Create place marker using PinElement (works without Map ID)
+        // Create place marker - use advanced markers if Map ID is available, otherwise legacy markers
+        <% if ENV['GOOGLE_MAPS_MAP_ID'].present? %>
         const placePin = new google.maps.marker.PinElement({
           background: '#2563eb',
           borderColor: '#ffffff',
@@ -309,13 +331,29 @@
           scale: 1.0
         });
         
-        // Create marker using AdvancedMarkerElement
         const marker = new google.maps.marker.AdvancedMarkerElement({
           position: position,
           map: map,
           title: place.name,
           content: placePin.element
         });
+        <% else %>
+        const marker = new google.maps.Marker({
+          position: position,
+          map: map,
+          title: place.name,
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="12" fill="#2563eb" stroke="white" stroke-width="2"/>
+                <text x="12" y="16" text-anchor="middle" font-size="12" fill="white">🏫</text>
+              </svg>
+            `),
+            scaledSize: new google.maps.Size(24, 24),
+            anchor: new google.maps.Point(12, 12)
+          }
+        });
+        <% end %>
 
         // Extend bounds to include this marker
         bounds.extend(position);
@@ -347,7 +385,8 @@
         });
       }
 
-      // Optional: Add custom styling
+      // Optional: Add custom styling (only when Map ID is not present)
+      <% unless ENV['GOOGLE_MAPS_MAP_ID'].present? %>
       const styles = [
         {
           featureType: 'poi',
@@ -362,6 +401,7 @@
       ];
       
       map.setOptions({ styles: styles });
+      <% end %>
     }
 
     function createInfoWindowContent(place) {

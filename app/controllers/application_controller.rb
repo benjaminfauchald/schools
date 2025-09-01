@@ -2,6 +2,9 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
+  # Include Puppeteer location backdoor for testing
+  include PuppeteerLocationBackdoor
+
   # Add helper methods for location calculations
   helper_method :calculate_distance, :format_distance
 

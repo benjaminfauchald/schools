@@ -5,7 +5,6 @@ export default class extends Controller {
   static values = { schoolId: Number }
 
   connect() {
-    console.log("School contact modal controller connected!")
     this.boundHandleEscape = this.handleEscape.bind(this)
   }
 
@@ -14,13 +13,10 @@ export default class extends Controller {
   }
 
   openModal() {
-    console.log("Opening modal...")
-    
     // Find the modal in the document
     const modal = document.querySelector('[data-school-contact-modal-target="modal"]')
     
     if (modal) {
-      console.log("Found modal, opening...")
       modal.classList.remove("hidden")
       document.body.classList.add("overflow-hidden")
       document.addEventListener("keydown", this.boundHandleEscape)

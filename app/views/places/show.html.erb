@@ -236,10 +236,13 @@
     const map = new google.maps.Map(document.getElementById('place-map'), {
       zoom: 15,
       center: { lat: place.lat, lng: place.lng },
-      mapTypeId: google.maps.MapTypeId.ROADMAP
+      mapTypeId: google.maps.MapTypeId.ROADMAP<% if ENV['GOOGLE_MAPS_MAP_ID'].present? %>,
+      mapId: '<%= ENV['GOOGLE_MAPS_MAP_ID'] %>'
+      <% end %>
     });
 
-    // Create place marker using PinElement (works without Map ID)
+    // Create place marker - use advanced markers if Map ID is available, otherwise legacy markers
+    <% if ENV['GOOGLE_MAPS_MAP_ID'].present? %>
     const placePin = new google.maps.marker.PinElement({
       background: '#2563eb',
       borderColor: '#ffffff',
@@ -254,6 +257,23 @@
       title: place.name,
       content: placePin.element
     });
+    <% else %>
+    const marker = new google.maps.Marker({
+      position: { lat: place.lat, lng: place.lng },
+      map: map,
+      title: place.name,
+      icon: {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+          <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="16" fill="#2563eb" stroke="white" stroke-width="2"/>
+            <text x="16" y="21" text-anchor="middle" font-size="16" fill="white">🏫</text>
+          </svg>
+        `),
+        scaledSize: new google.maps.Size(32, 32),
+        anchor: new google.maps.Point(16, 16)
+      }
+    });
+    <% end %>
 
     const infoWindow = new google.maps.InfoWindow({
       content: `
@@ -278,7 +298,7 @@
     } else {
       // Load Google Maps API if not already loaded
       const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initPlaceMap&libraries=marker';
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initPlaceMap&libraries=geometry,places<%= ENV['GOOGLE_MAPS_MAP_ID'].present? ? ',marker' : '' %>&loading=async';
       script.async = true;
       script.defer = true;
       document.head.appendChild(script);

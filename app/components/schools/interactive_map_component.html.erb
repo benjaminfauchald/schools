@@ -124,21 +124,17 @@
   };
   
   function initMap_<%= map_id.gsub('-', '_') %>() {
-    console.log('initMap function called for <%= map_id %>');
     const instance = mapInstance_<%= map_id.gsub('-', '_') %>;
     
     if (instance.initialized) {
-      console.log('Map already initialized, skipping');
       return;
     }
     instance.initialized = true;
-    console.log('Starting map initialization');
     
     // Hide loading indicator
     const loadingElement = document.getElementById('map-loading');
     if (loadingElement) {
       loadingElement.style.display = 'none';
-      console.log('Map loading indicator hidden');
     }
     
     // Initialize map
@@ -154,14 +150,17 @@
         mapTypeControl: true,
         streetViewControl: true,
         fullscreenControl: true,
+        <% if ENV['GOOGLE_MAPS_MAP_ID'].present? %>
+        mapId: '<%= ENV['GOOGLE_MAPS_MAP_ID'] %>'
+        <% else %>
         styles: [
           {
             featureType: 'poi.school',
             stylers: [{ visibility: 'on' }, { color: '#4285f4' }]
           }
         ]
+        <% end %>
       });
-      console.log('Map created successfully');
     } catch (error) {
       console.error('Error creating map:', error);
       return;
@@ -172,7 +171,8 @@
     instance.directionsRenderer = new google.maps.DirectionsRenderer();
     instance.directionsRenderer.setMap(instance.map);
     
-    // Create school marker using PinElement (works without Map ID)
+    // Create school marker - use advanced markers if Map ID is available, otherwise legacy markers
+    <% if ENV['GOOGLE_MAPS_MAP_ID'].present? %>
     const schoolPin = new google.maps.marker.PinElement({
       background: '#2563eb',
       borderColor: '#ffffff',
@@ -181,13 +181,29 @@
       scale: 1.2
     });
     
-    // Add school marker using AdvancedMarkerElement with PinElement
     instance.schoolMarker = new google.maps.marker.AdvancedMarkerElement({
       position: instance.schoolPosition,
       map: instance.map,
       title: instance.schoolName,
       content: schoolPin.element
     });
+    <% else %>
+    instance.schoolMarker = new google.maps.Marker({
+      position: instance.schoolPosition,
+      map: instance.map,
+      title: instance.schoolName,
+      icon: {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+          <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="16" fill="#2563eb" stroke="white" stroke-width="2"/>
+            <text x="16" y="20" text-anchor="middle" font-size="16" fill="white">🎓</text>
+          </svg>
+        `),
+        scaledSize: new google.maps.Size(32, 32),
+        anchor: new google.maps.Point(16, 16)
+      }
+    });
+    <% end %>
     
     // School info window
     const schoolInfoWindow = new google.maps.InfoWindow({
@@ -202,9 +218,18 @@
       `
     });
     
-    instance.schoolMarker.addListener('click', () => {
-      schoolInfoWindow.open(instance.map, instance.schoolMarker);
-    });
+    // Add click listener with error protection
+    try {
+      instance.schoolMarker.addListener('click', () => {
+        try {
+          schoolInfoWindow.open(instance.map, instance.schoolMarker);
+        } catch (error) {
+          console.log('Info window error:', error.message);
+        }
+      });
+    } catch (error) {
+      console.log('Event listener error:', error.message);
+    }
     
     // Show basic map functionality first
     updateTravelInfo('Map ready', 'Click "Get Directions" to calculate travel time', '--', 'ready');
@@ -216,25 +241,27 @@
   function getUserLocation_<%= map_id.gsub('-', '_') %>() {
     const instance = mapInstance_<%= map_id.gsub('-', '_') %>;
     
-    if (navigator.geolocation) {
-      // Check if location is in cookie (from onboarding)
-      const locationCookie = getCookie('user_location');
-      if (locationCookie) {
-        try {
-          const location = JSON.parse(decodeURIComponent(locationCookie));
-          instance.userPosition = {
-            lat: parseFloat(location.lat),
-            lng: parseFloat(location.lng)
-          };
-          addUserMarker_<%= map_id.gsub('-', '_') %>();
-          updateTravelInfo('Location ready', 'Click "Get Directions" for route details', '--', 'ready');
-          // Automatically calculate route when location is available from cookie
-          setTimeout(() => calculateRoute_<%= map_id.gsub('-', '_') %>(), 500);
-          return;
-        } catch (e) {
-          console.log('Error parsing location cookie:', e);
-        }
+    // Check if location is in cookie first (works in all environments)
+    const locationCookie = getCookie('user_location');
+    if (locationCookie) {
+      try {
+        const location = JSON.parse(decodeURIComponent(locationCookie));
+        instance.userPosition = {
+          lat: parseFloat(location.lat),
+          lng: parseFloat(location.lng)
+        };
+        addUserMarker_<%= map_id.gsub('-', '_') %>();
+        updateTravelInfo('Location ready', 'Click "Get Directions" for route details', '--', 'ready');
+        // Automatically calculate route when location is available from cookie
+        setTimeout(() => calculateRoute_<%= map_id.gsub('-', '_') %>(), 500);
+        return;
+      } catch (e) {
+        console.log('Error parsing location cookie:', e);
       }
+    }
+    
+    // Fall back to browser geolocation if available
+    if (navigator.geolocation) {
       
       // Fall back to browser geolocation
       updateTravelInfo('Getting location...', 'Allow location access for directions', '--', 'loading');
@@ -251,8 +278,37 @@
           setTimeout(() => calculateRoute_<%= map_id.gsub('-', '_') %>(), 500);
         },
         function(error) {
-          console.log('Geolocation error:', error);
-          updateTravelInfo('Location access needed', 'Enable location to see directions and travel time', '--', 'error');
+          // Handle geolocation errors gracefully without console noise
+          let errorMessage = 'Location access needed';
+          let errorDetails = 'Enable location to see directions and travel time';
+          
+          // Only log actual errors, not user permission denials or timeouts
+          if (error.code !== error.PERMISSION_DENIED && error.code !== error.TIMEOUT) {
+            console.log('Geolocation error:', error.code, error.message);
+          }
+          
+          switch(error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = 'Location access denied';
+              errorDetails = 'Please allow location access for directions';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = 'Location unavailable';
+              errorDetails = 'Unable to determine your location';
+              break;
+            case error.TIMEOUT:
+              errorMessage = 'Map ready';
+              errorDetails = 'Click "Get Directions" button for route calculations';
+              break;
+            default:
+              errorMessage = 'Location error';
+              errorDetails = 'Unable to get your location';
+              break;
+          }
+          
+          // Don't show timeout as an error - just show ready state
+          const state = error.code === error.TIMEOUT ? 'ready' : 'error';
+          updateTravelInfo(errorMessage, errorDetails, '--', state);
         },
         {
           timeout: 10000,
@@ -269,7 +325,8 @@
     
     if (!instance.userPosition) return;
     
-    // Create user marker using PinElement (works without Map ID)
+    // Create user marker - use advanced markers if Map ID is available, otherwise legacy markers
+    <% if ENV['GOOGLE_MAPS_MAP_ID'].present? %>
     const userPin = new google.maps.marker.PinElement({
       background: '#10b981',
       borderColor: '#ffffff',
@@ -278,13 +335,29 @@
       scale: 1.0
     });
     
-    // Add user marker using AdvancedMarkerElement with PinElement
     instance.userMarker = new google.maps.marker.AdvancedMarkerElement({
       position: instance.userPosition,
       map: instance.map,
       title: 'Your Location',
       content: userPin.element
     });
+    <% else %>
+    instance.userMarker = new google.maps.Marker({
+      position: instance.userPosition,
+      map: instance.map,
+      title: 'Your Location',
+      icon: {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+          <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="12" fill="#10b981" stroke="white" stroke-width="2"/>
+            <text x="12" y="16" text-anchor="middle" font-size="12" fill="white">📍</text>
+          </svg>
+        `),
+        scaledSize: new google.maps.Size(24, 24),
+        anchor: new google.maps.Point(12, 12)
+      }
+    });
+    <% end %>
     
     // Fit map to show both locations
     const bounds = new google.maps.LatLngBounds();
@@ -294,13 +367,18 @@
   }
   
   function updateTravelInfo(status, details, time, state) {
-    const statusEl = document.getElementById('travel-status');
-    const detailsEl = document.getElementById('travel-details');
-    const timeEl = document.getElementById('travel-time');
-    
-    if (statusEl) statusEl.textContent = status;
-    if (detailsEl) detailsEl.textContent = details;
-    if (timeEl) timeEl.textContent = time;
+    try {
+      const statusEl = document.getElementById('travel-status');
+      const detailsEl = document.getElementById('travel-details');
+      const timeEl = document.getElementById('travel-time');
+      
+      if (statusEl) statusEl.textContent = status;
+      if (detailsEl) detailsEl.textContent = details;
+      if (timeEl) timeEl.textContent = time;
+    } catch (error) {
+      // Silently handle DOM access errors
+      console.log('Travel info update error:', error.message);
+    }
   }
   
   function calculateRoute_<%= map_id.gsub('-', '_') %>() {
@@ -313,6 +391,11 @@
     
     updateTravelInfo('Calculating route...', 'Getting directions and travel time', '--', 'loading');
     
+    // Add timeout protection for directions request
+    const directionsTimeout = setTimeout(() => {
+      updateTravelInfo('Route timeout', 'Unable to calculate route - service timeout', '--', 'error');
+    }, 15000);
+    
     instance.directionsService.route({
       origin: instance.userPosition,
       destination: instance.schoolPosition,
@@ -320,21 +403,65 @@
       avoidTolls: false,
       avoidHighways: false
     }, function(result, status) {
-      if (status === 'OK') {
-        instance.directionsRenderer.setDirections(result);
-        
-        const route = result.routes[0];
-        const leg = route.legs[0];
-        
-        // Update travel info
-        updateTravelInfo('Ready to navigate', `${leg.distance.text} via ${route.summary}`, leg.duration.text, 'success');
-        document.getElementById('travel-distance').textContent = leg.distance.text;
-        
-        // Show route panel (without detailed directions)
-        document.getElementById(instance.directionsPanelId).classList.remove('hidden');
-      } else {
-        console.error('Directions request failed:', status);
-        updateTravelInfo('Route calculation failed', 'Unable to calculate route. Try again later.', '--', 'error');
+      // Clear the timeout
+      clearTimeout(directionsTimeout);
+      try {
+        if (status === 'OK' && result && result.routes && result.routes.length > 0) {
+          instance.directionsRenderer.setDirections(result);
+          
+          const route = result.routes[0];
+          const leg = route.legs[0];
+          
+          if (leg && leg.distance && leg.duration) {
+            // Update travel info
+            updateTravelInfo('Ready to navigate', `${leg.distance.text} via ${route.summary || 'suggested route'}`, leg.duration.text, 'success');
+            
+            // Update travel distance display safely
+            const travelDistanceEl = document.getElementById('travel-distance');
+            if (travelDistanceEl) {
+              travelDistanceEl.textContent = leg.distance.text;
+            }
+            
+            // Show route panel (without detailed directions) - only if it exists
+            const directionsPanel = document.getElementById(instance.directionsPanelId);
+            if (directionsPanel) {
+              directionsPanel.classList.remove('hidden');
+            }
+          } else {
+            updateTravelInfo('Route incomplete', 'Route data is missing some information', '--', 'error');
+          }
+        } else {
+          // Handle specific direction service errors
+          let errorMessage = 'Route calculation failed';
+          switch(status) {
+            case 'NOT_FOUND':
+              errorMessage = 'Location not found';
+              break;
+            case 'ZERO_RESULTS':
+              errorMessage = 'No route available';
+              break;
+            case 'MAX_WAYPOINTS_EXCEEDED':
+              errorMessage = 'Too many waypoints';
+              break;
+            case 'INVALID_REQUEST':
+              errorMessage = 'Invalid route request';
+              break;
+            case 'OVER_QUERY_LIMIT':
+              errorMessage = 'Query limit exceeded';
+              break;
+            case 'REQUEST_DENIED':
+              errorMessage = 'Route request denied';
+              break;
+            case 'UNKNOWN_ERROR':
+            default:
+              errorMessage = 'Route calculation failed';
+              break;
+          }
+          updateTravelInfo(errorMessage, 'Unable to calculate route at this time', '--', 'error');
+        }
+      } catch (error) {
+        console.error('Error processing directions result:', error);
+        updateTravelInfo('Route processing error', 'An error occurred while processing the route', '--', 'error');
       }
     });
   }
@@ -370,15 +497,24 @@
   window.initMap_<%= map_id.gsub('-', '_') %> = initMap_<%= map_id.gsub('-', '_') %>;
   
   // Initialize immediately if Google Maps is already loaded
-  if (typeof google !== 'undefined' && google.maps) {
-    console.log('Google Maps already available, initializing map');
-    setTimeout(() => initMap_<%= map_id.gsub('-', '_') %>(), 100);
-  } else {
-    console.log('Waiting for Google Maps to load via callback');
+  try {
+    if (typeof google !== 'undefined' && google.maps) {
+      setTimeout(() => {
+        try {
+          initMap_<%= map_id.gsub('-', '_') %>();
+        } catch (error) {
+          console.error('Map initialization error:', error);
+          updateTravelInfo('Map error', 'Unable to initialize map', '--', 'error');
+        }
+      }, 100);
+    }
+  } catch (error) {
+    console.error('Google Maps check error:', error);
+    updateTravelInfo('Map loading error', 'Error checking Google Maps availability', '--', 'error');
   }
 </script>
 
 <!-- Load Google Maps API -->
 <script async defer 
-        src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap_<%= map_id.gsub('-', '_') %>&libraries=geometry,places,marker">
+        src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap_<%= map_id.gsub('-', '_') %>&libraries=geometry,places<%= ENV['GOOGLE_MAPS_MAP_ID'].present? ? ',marker' : '' %>&loading=async">
 </script>

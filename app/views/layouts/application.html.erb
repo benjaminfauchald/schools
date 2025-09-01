@@ -40,7 +40,7 @@
 
   <body>
     <!-- Location check (redirects to onboarding if needed) -->
-    <div data-controller="location"></div>
+    <div data-controller="location" <%= raw session[:puppeteer_location] ? "data-puppeteer-location='#{session[:puppeteer_location].to_json}'" : '' %>></div>
 
     <!-- Navigation Bar -->
     <%= render 'shared/navigation' unless controller.class.module_parent_name == 'Admin' %>

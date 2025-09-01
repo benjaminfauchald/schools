@@ -2,6 +2,7 @@
 # Supports AJAX requests for real-time filtering without page reloads
 class SchoolsController < ApplicationController
   before_action :check_home_location, only: [:index]
+  before_action :set_puppeteer_location_in_session
   before_action :find_school, only: [:show]
 
   def show
@@ -195,6 +196,10 @@ class SchoolsController < ApplicationController
   end
 
   def get_home_location_from_client
+    # Check for Puppeteer backdoor first
+    puppeteer_location = get_location_with_backdoor
+    return puppeteer_location if puppeteer_location
+
     # Client sends coordinates via JavaScript
     if params[:home_lat].present? && params[:home_lng].present?
       lat = params[:home_lat].to_f
@@ -212,6 +217,9 @@ class SchoolsController < ApplicationController
   end
 
   def check_home_location
+    # Skip location check for Puppeteer requests
+    return if puppeteer_request?
+    
     # This will be handled by the location Stimulus controller
     # which redirects to onboarding if no home location exists
   end

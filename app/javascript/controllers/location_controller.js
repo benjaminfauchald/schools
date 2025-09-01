@@ -8,19 +8,24 @@ export default class extends Controller {
   }
 
   connect() {
-    console.log("Location controller connected")
     this.checkHomeLocation()
   }
 
   checkHomeLocation() {
+    // First check if server provided Puppeteer location
+    const puppeteerLocation = this.getPuppeteerLocation()
+    if (puppeteerLocation) {
+      this.hasLocationValue = true
+      this.enableAppFeatures()
+      return
+    }
+
     const homeLocation = this.getStoredLocation()
     
     if (!homeLocation) {
-      console.log("No home location found, redirecting to onboarding")
       // Redirect to onboarding page instead of showing modal
       window.location.href = '/onboarding'
     } else {
-      console.log("Home location exists:", homeLocation)
       this.hasLocationValue = true
       // Enable app features
       this.enableAppFeatures()
@@ -209,6 +214,27 @@ export default class extends Controller {
     } catch (error) {
       console.error("Error reading stored location:", error)
     }
+    return null
+  }
+
+  getPuppeteerLocation() {
+    // Check if server set a Puppeteer location in a data attribute or global variable
+    // This would be set server-side for headless browser testing
+    const puppeteerData = document.querySelector('[data-puppeteer-location]')
+    if (puppeteerData) {
+      try {
+        const locationData = JSON.parse(puppeteerData.getAttribute('data-puppeteer-location'))
+        return locationData
+      } catch (error) {
+        console.error("Error parsing Puppeteer location data:", error)
+      }
+    }
+
+    // Also check for a global variable that might be set by the server
+    if (window.puppeteerLocation) {
+      return window.puppeteerLocation
+    }
+
     return null
   }
 
