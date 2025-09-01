@@ -1,0 +1,180 @@
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+  <%= render Schools::SectionHeaderComponent.new(
+        title: "Video Gallery",
+        icon: "play",
+        subtitle: "Campus videos and virtual tours"
+      ) %>
+
+  <div class="px-6 pb-6">
+    
+    <!-- Video Count Summary -->
+    <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">
+            Campus Videos
+          </h3>
+          <p class="text-sm text-blue-600 dark:text-blue-400 mt-1">
+            Explore our facilities and campus life through video
+          </p>
+        </div>
+        <div class="text-right">
+          <div class="text-2xl font-bold text-blue-700 dark:text-blue-300">
+            <%= video_count %>
+          </div>
+          <div class="text-sm text-blue-600 dark:text-blue-400">
+            <%= video_count == 1 ? 'video' : 'videos' %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <% videos.each_with_index do |video, index| %>
+        <div class="group relative aspect-video overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700 cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200"
+             onclick="openVideoModal(<%= index %>)">
+          
+          <!-- Video Thumbnail -->
+          <img src="<%= youtube_thumbnail_url(video) %>" 
+               alt="<%= video_title(video) %>"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+               loading="<%= index < 4 ? 'eager' : 'lazy' %>">
+          
+          <!-- Play Button Overlay -->
+          <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-opacity duration-200 flex items-center justify-center">
+            <div class="bg-red-600 hover:bg-red-700 rounded-full p-3 group-hover:scale-110 transition-transform duration-200 shadow-lg">
+              <%= helpers.heroicon('play', css_class: 'w-6 h-6 text-white fill-current') %>
+            </div>
+          </div>
+          
+          <!-- Video number badge -->
+          <div class="absolute top-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+            <%= index + 1 %>
+          </div>
+          
+          <!-- Video duration badge (if available) -->
+          <% if video[:duration] || video['duration'] %>
+            <div class="absolute bottom-2 right-2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded">
+              <%= video[:duration] || video['duration'] %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- View All Button -->
+    <% if videos.count > 8 %>
+      <div class="mt-6 text-center">
+        <button onclick="openVideoModal(0)" 
+                class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+          <%= helpers.heroicon('play', css_class: 'w-4 h-4 mr-2') %>
+          View All <%= videos.count %> Videos
+        </button>
+      </div>
+    <% end %>
+
+  </div>
+</div>
+
+<!-- Video Modal -->
+<div id="<%= modal_id %>" class="fixed inset-0 z-50 hidden">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black bg-opacity-90 transition-opacity" onclick="closeVideoModal()"></div>
+  
+  <!-- Modal Content -->
+  <div class="relative h-full flex items-center justify-center p-4">
+    <!-- Close Button -->
+    <button onclick="closeVideoModal()" 
+            class="absolute top-4 right-4 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 text-white transition-all duration-200">
+      <%= helpers.heroicon('x-mark', css_class: 'w-6 h-6') %>
+    </button>
+    
+    <!-- Video Counter -->
+    <div class="absolute top-4 left-4 z-10 bg-black bg-opacity-60 text-white px-3 py-2 rounded-lg text-sm">
+      <span id="current-video-number">1</span> / <%= videos.count %>
+    </div>
+    
+    <!-- Navigation Arrows -->
+    <% if videos.count > 1 %>
+      <button onclick="previousVideo()" 
+              class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-3 text-white transition-all duration-200">
+        <%= helpers.heroicon('chevron-left', css_class: 'w-6 h-6') %>
+      </button>
+      
+      <button onclick="nextVideo()" 
+              class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-3 text-white transition-all duration-200">
+        <%= helpers.heroicon('chevron-right', css_class: 'w-6 h-6') %>
+      </button>
+    <% end %>
+    
+    <!-- Main Video Display -->
+    <div class="w-full max-w-6xl max-h-full flex items-center justify-center">
+      <div class="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
+        <iframe id="modal-video" 
+                src="" 
+                class="w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+    
+    <!-- Video Info -->
+    <div class="absolute bottom-4 left-4 right-4 z-10 bg-black bg-opacity-60 text-white p-4 rounded-lg max-w-6xl mx-auto">
+      <h3 id="modal-video-title" class="text-lg font-semibold mb-2"></h3>
+      <p id="modal-video-description" class="text-sm text-gray-300"></p>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Video Modal -->
+<script>
+  const videos = <%= raw videos.to_json %>;
+  let currentVideoIndex = 0;
+  
+  function openVideoModal(index) {
+    currentVideoIndex = index;
+    updateModalVideo();
+    document.getElementById('<%= modal_id %>').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  }
+  
+  function closeVideoModal() {
+    // Stop the video by clearing the iframe src
+    document.getElementById('modal-video').src = '';
+    document.getElementById('<%= modal_id %>').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+  
+  function nextVideo() {
+    currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+    updateModalVideo();
+  }
+  
+  function previousVideo() {
+    currentVideoIndex = (currentVideoIndex - 1 + videos.length) % videos.length;
+    updateModalVideo();
+  }
+  
+  function updateModalVideo() {
+    const video = videos[currentVideoIndex];
+    const videoId = video.video_id || video['video_id'];
+    const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+    
+    document.getElementById('modal-video').src = embedUrl;
+    document.getElementById('modal-video-title').textContent = video.title || video['title'] || 'Video';
+    document.getElementById('modal-video-description').textContent = video.description || video['description'] || '';
+    document.getElementById('current-video-number').textContent = currentVideoIndex + 1;
+  }
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('<%= modal_id %>').classList.contains('hidden')) {
+      if (e.key === 'Escape') closeVideoModal();
+      else if (e.key === 'ArrowRight') nextVideo();
+      else if (e.key === 'ArrowLeft') previousVideo();
+    }
+  });
+</script>

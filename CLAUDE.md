@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+DONT KILL OR START RAILS DEVELOPMENT SERVER JUST ASK YOUR TO RESTART SERVER
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
