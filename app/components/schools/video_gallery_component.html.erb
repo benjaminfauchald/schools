@@ -29,11 +29,12 @@
       </div>
     </div>
 
-    <!-- Video Grid -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-      <% videos.each_with_index do |video, index| %>
-        <div class="group relative aspect-video overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700 cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200"
-             onclick="openVideoModal(<%= index %>)">
+    <!-- Video Grid or Error Message -->
+    <% if videos.any? %>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <% videos.each_with_index do |video, index| %>
+          <div class="group relative aspect-video overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700 cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200"
+               onclick="openVideoModal(<%= index %>)">
           
           <!-- Video Thumbnail -->
           <img src="<%= youtube_thumbnail_url(video) %>" 
@@ -59,9 +60,23 @@
               <%= video[:duration] || video['duration'] %>
             </div>
           <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <!-- No Videos Available Message -->
+      <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+        <div class="mx-auto max-w-md">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">Videos temporarily unavailable</h3>
+          <p class="mt-1 text-sm text-gray-500">
+            We're working to restore access to our video content. Please check back later.
+          </p>
         </div>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
 
     <!-- View All Button -->
     <% if videos.count > 8 %>
@@ -78,58 +93,96 @@
 </div>
 
 <!-- Video Modal -->
-<div id="<%= modal_id %>" class="fixed inset-0 z-[9999] hidden" style="background: rgba(0, 0, 0, 0.8);">
+<div id="<%= modal_id %>" class="fixed inset-0 z-[9999] hidden bg-black bg-opacity-90" role="dialog" aria-modal="true">
   
-  <!-- Close Button - Make it super visible -->
-  <div class="absolute top-4 right-4 z-[10002]">
-    <button onclick="closeVideoModal()" 
-            class="bg-red-600 hover:bg-red-700 text-white rounded-full shadow-2xl border-4 border-white flex items-center justify-center transition-all duration-200 transform hover:scale-110"
-            style="width: 60px; height: 60px; position: fixed; top: 20px; right: 20px;">
-      <span class="text-2xl font-bold leading-none">×</span>
-    </button>
-  </div>
-  
-  <!-- Clickable Backdrop -->
+  <!-- Backdrop -->
   <div class="absolute inset-0" onclick="closeVideoModal()"></div>
 
   <!-- Modal Content -->
-  <div class="relative h-full flex items-center justify-center p-4" onclick="event.stopPropagation()">
-    
-    <!-- Video Counter -->
-    <div class="absolute top-4 left-4 z-10 bg-black bg-opacity-60 text-white px-3 py-2 rounded-lg text-sm">
-      <span id="current-video-number">1</span> / <%= videos.count %>
-    </div>
-    
-    <!-- Navigation Arrows -->
-    <% if videos.count > 1 %>
-      <button onclick="previousVideo()" 
-              class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-3 text-white transition-all duration-200">
-        <%= helpers.heroicon('chevron-left', css_class: 'w-6 h-6') %>
-      </button>
+  <div class="absolute inset-0 overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-6 sm:p-8">
       
-      <button onclick="nextVideo()" 
-              class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-3 text-white transition-all duration-200">
-        <%= helpers.heroicon('chevron-right', css_class: 'w-6 h-6') %>
-      </button>
-    <% end %>
-    
-    <!-- Main Video Display -->
-    <div class="w-full max-w-5xl max-h-[80vh] flex items-center justify-center px-4">
-      <div class="w-full bg-black rounded-lg overflow-hidden shadow-2xl" style="aspect-ratio: 16/9;">
-        <iframe id="modal-video" 
-                src="" 
-                class="w-full h-full border-0"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-        </iframe>
+      <div class="relative w-full max-w-6xl bg-gray-900 rounded-lg shadow-xl" onclick="event.stopPropagation()" style="width: 75vw; max-width: 1050px;">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-700">
+          <!-- Video Counter -->
+          <div class="flex items-center text-white">
+            <svg class="w-5 h-5 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <span class="text-sm font-medium">
+              Video <span id="current-video-number">1</span> of <%= videos.count %>
+            </span>
+          </div>
+          
+          <!-- Close Button -->
+          <button onclick="closeVideoModal()" 
+                  class="rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+                  aria-label="Close modal">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Video Container -->
+        <div class="relative bg-black rounded-lg overflow-hidden">
+          <!-- Navigation Buttons -->
+          <% if videos.count > 1 %>
+            <button onclick="previousVideo()" 
+                    class="absolute left-6 top-1/2 z-10 transform -translate-y-1/2 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-4 text-white transition-all shadow-lg"
+                    aria-label="Previous video">
+              <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            <button onclick="nextVideo()" 
+                    class="absolute right-6 top-1/2 z-10 transform -translate-y-1/2 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-4 text-white transition-all shadow-lg"
+                    aria-label="Next video">
+              <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          <% end %>
+          
+          <!-- Video Player - Full Width -->
+          <div class="w-full" style="aspect-ratio: 16/9; min-height: 450px;">
+            <iframe id="modal-video" 
+                    src="" 
+                    class="w-full h-full"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+
+        <!-- Video Information -->
+        <div class="p-6 border-t border-gray-700">
+          <h3 id="modal-video-title" class="text-xl font-semibold text-white mb-3"></h3>
+          <p id="modal-video-description" class="text-gray-300 text-base mb-4 leading-relaxed"></p>
+          
+          <!-- Keyboard Shortcuts -->
+          <div class="flex items-center space-x-6 text-sm text-gray-400">
+            <div class="flex items-center">
+              <kbd class="px-3 py-2 bg-gray-800 rounded text-sm font-medium">ESC</kbd>
+              <span class="ml-2">Close</span>
+            </div>
+            <% if videos.count > 1 %>
+              <div class="flex items-center">
+                <kbd class="px-3 py-2 bg-gray-800 rounded text-sm font-medium">←</kbd>
+                <span class="ml-2">Previous</span>
+              </div>
+              <div class="flex items-center">
+                <kbd class="px-3 py-2 bg-gray-800 rounded text-sm font-medium">→</kbd>
+                <span class="ml-2">Next</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
       </div>
-    </div>
-    
-    <!-- Video Info -->
-    <div class="absolute bottom-8 left-4 right-4 z-10 bg-black bg-opacity-80 text-white p-4 rounded-lg max-w-4xl mx-auto">
-      <h3 id="modal-video-title" class="text-lg font-semibold mb-2 text-white"></h3>
-      <p id="modal-video-description" class="text-sm text-gray-200"></p>
     </div>
   </div>
 </div>

@@ -172,21 +172,21 @@
     instance.directionsRenderer = new google.maps.DirectionsRenderer();
     instance.directionsRenderer.setMap(instance.map);
     
-    // Add school marker
-    instance.schoolMarker = new google.maps.Marker({
+    // Create school marker using PinElement (works without Map ID)
+    const schoolPin = new google.maps.marker.PinElement({
+      background: '#2563eb',
+      borderColor: '#ffffff',
+      glyphColor: '#ffffff',
+      glyph: '🎓',
+      scale: 1.2
+    });
+    
+    // Add school marker using AdvancedMarkerElement with PinElement
+    instance.schoolMarker = new google.maps.marker.AdvancedMarkerElement({
       position: instance.schoolPosition,
       map: instance.map,
       title: instance.schoolName,
-      icon: {
-        url: 'data:image/svg+xml;base64,' + btoa(`
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="16" cy="16" r="14" fill="#2563eb" stroke="white" stroke-width="2"/>
-            <path d="M16 8l2 6h6l-4.5 3.5 1.5 6-5-3.5-5 3.5 1.5-6L8 14h6l2-6z" fill="white"/>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(32, 32),
-        anchor: new google.maps.Point(16, 16)
-      }
+      content: schoolPin.element
     });
     
     // School info window
@@ -269,21 +269,21 @@
     
     if (!instance.userPosition) return;
     
-    // Add user marker
-    instance.userMarker = new google.maps.Marker({
+    // Create user marker using PinElement (works without Map ID)
+    const userPin = new google.maps.marker.PinElement({
+      background: '#10b981',
+      borderColor: '#ffffff',
+      glyphColor: '#ffffff',
+      glyph: '📍',
+      scale: 1.0
+    });
+    
+    // Add user marker using AdvancedMarkerElement with PinElement
+    instance.userMarker = new google.maps.marker.AdvancedMarkerElement({
       position: instance.userPosition,
       map: instance.map,
       title: 'Your Location',
-      icon: {
-        url: 'data:image/svg+xml;base64,' + btoa(`
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" fill="#10b981" stroke="white" stroke-width="2"/>
-            <circle cx="12" cy="12" r="3" fill="white"/>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(24, 24),
-        anchor: new google.maps.Point(12, 12)
-      }
+      content: userPin.element
     });
     
     // Fit map to show both locations
@@ -380,5 +380,5 @@
 
 <!-- Load Google Maps API -->
 <script async defer 
-        src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap_<%= map_id.gsub('-', '_') %>&libraries=geometry,places">
+        src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap_<%= map_id.gsub('-', '_') %>&libraries=geometry,places,marker">
 </script>

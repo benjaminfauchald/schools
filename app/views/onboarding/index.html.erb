@@ -208,7 +208,7 @@
         document.getElementById('onboarding-map').innerHTML = '<div class="flex items-center justify-center h-full bg-red-50 text-red-600">Google Maps API authentication failed. Please check console for details.</div>';
       };
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initOnboardingMap&libraries=places"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initOnboardingMap&libraries=places,marker"></script>
     
     <!-- Flowbite JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
@@ -333,8 +333,13 @@
       }
 
       function showMap() {
-        alert('Map functionality requires full page reload. For now, please use address input or clear localStorage to reset.');
-        // In a real implementation, you would initialize Google Maps here
+        hideAllSteps();
+        document.querySelector('[data-onboarding-location-target="mapStep"]').classList.remove('hidden');
+        
+        // Initialize map if not already done
+        if (!map) {
+          initializeMap();
+        }
       }
 
       function saveLocationAndComplete() {
@@ -363,6 +368,7 @@
       function hideAllSteps() {
         document.getElementById('address-step').classList.add('hidden');
         document.getElementById('confirm-step').classList.add('hidden');
+        document.querySelector('[data-onboarding-location-target="mapStep"]').classList.add('hidden');
       }
 
       function showError(message) {
@@ -391,6 +397,105 @@
         const button = document.getElementById('geocode-button');
         button.disabled = false;
         button.innerHTML = 'Find Location';
+      }
+
+      function initializeMap() {
+        const mapElement = document.getElementById('onboarding-map');
+        if (!mapElement) return;
+        
+        // Default to Bangkok coordinates
+        const defaultCenter = { lat: 13.7563, lng: 100.5018 };
+        
+        map = new google.maps.Map(mapElement, {
+          zoom: 11,
+          center: defaultCenter,
+          mapTypeControl: true,
+          streetViewControl: true,
+          fullscreenControl: true
+        });
+        
+        geocoder = new google.maps.Geocoder();
+        
+        // Add click listener to map
+        map.addListener('click', function(event) {
+          placeMarkerAtLocation(event.latLng);
+        });
+        
+        // Try to get user's current location if available
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function(position) {
+              const userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+              };
+              map.setCenter(userLocation);
+              map.setZoom(15);
+            },
+            function(error) {
+              console.log('Geolocation failed:', error);
+            }
+          );
+        }
+      }
+      
+      function placeMarkerAtLocation(location) {
+        // Remove existing marker
+        if (marker) {
+          marker.map = null;
+        }
+        
+        // Create home marker using PinElement (works without Map ID)
+        const homePin = new google.maps.marker.PinElement({
+          background: '#dc2626',
+          borderColor: '#ffffff',
+          glyphColor: '#ffffff',
+          glyph: '🏠',
+          scale: 1.3
+        });
+        
+        // Create marker using AdvancedMarkerElement
+        marker = new google.maps.marker.AdvancedMarkerElement({
+          position: location,
+          map: map,
+          title: 'Your Home Location',
+          content: homePin.element,
+          gmpDraggable: true
+        });
+        
+        // Add drag listener
+        marker.addListener('dragend', function(event) {
+          updateLocationFromCoordinates(event.latLng);
+        });
+        
+        // Update location display
+        updateLocationFromCoordinates(location);
+      }
+      
+      function updateLocationFromCoordinates(location) {
+        if (!geocoder) return;
+        
+        geocoder.geocode({ location: location }, function(results, status) {
+          if (status === 'OK' && results[0]) {
+            selectedLocation = {
+              lat: location.lat(),
+              lng: location.lng(),
+              formatted_address: results[0].formatted_address,
+              source: 'map'
+            };
+            
+            const mapAddressEl = document.querySelector('[data-onboarding-location-target="mapAddress"]');
+            const confirmButton = document.querySelector('[data-onboarding-location-target="confirmMapButton"]');
+            
+            if (mapAddressEl) {
+              mapAddressEl.textContent = results[0].formatted_address;
+            }
+            
+            if (confirmButton) {
+              confirmButton.disabled = false;
+            }
+          }
+        });
       }
 
       window.initOnboardingMap = function() {

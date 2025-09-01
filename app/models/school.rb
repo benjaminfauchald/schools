@@ -234,12 +234,26 @@ class School < ApplicationRecord
   end
   
   def visible_youtube_videos
-    return [] unless has_youtube_channel?
+    return [] unless place.present?
     
-    result = fetch_youtube_videos
-    return [] unless result[:success]
-    
-    result[:videos].select { |video| video_visible?(video) }
+    # Return database videos instead of API videos
+    place.visible_youtube_videos.map do |video|
+      # Convert to hash format for compatibility with existing UI
+      {
+        video_id: video.video_id,
+        title: video.title,
+        description: video.description,
+        thumbnail_url: video.hq_thumbnail_url,
+        duration: video.duration_display,
+        view_count: video.view_count,
+        published_at: video.published_at
+      }.merge(video.video_data || {})
+    end
+  end
+  
+  def youtube_videos_from_database
+    return [] unless place.present?
+    place.youtube_videos.ordered
   end
   
   def video_visible?(video)

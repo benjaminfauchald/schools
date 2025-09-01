@@ -132,7 +132,7 @@
       document.getElementById('map').innerHTML = '<div class="flex items-center justify-center h-full bg-red-50 text-red-600">Google Maps API authentication failed. Check console for details.</div>';
     };
   </script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap&libraries=marker"></script>
   
   <script>
     let map;
@@ -265,13 +265,20 @@
 
       // Add home marker if location is available
       if (homeLocation) {
-        const homeMarker = new google.maps.Marker({
+        // Create home marker using PinElement (works without Map ID)
+        const homePin = new google.maps.marker.PinElement({
+          background: '#10b981',
+          borderColor: '#ffffff',
+          glyphColor: '#ffffff',
+          glyph: '🏠',
+          scale: 0.8
+        });
+        
+        const homeMarker = new google.maps.marker.AdvancedMarkerElement({
           position: { lat: homeLocation.lat, lng: homeLocation.lng },
           map: map,
           title: 'Your Home',
-          icon: {
-            url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
-          }
+          content: homePin.element
         });
         
         // Add home location to bounds
@@ -293,12 +300,21 @@
       places.forEach(function(place) {
         const position = { lat: place.lat, lng: place.lng };
         
-        // Create marker
-        const marker = new google.maps.Marker({
+        // Create place marker using PinElement (works without Map ID)
+        const placePin = new google.maps.marker.PinElement({
+          background: '#2563eb',
+          borderColor: '#ffffff',
+          glyphColor: '#ffffff',
+          glyph: '🏫',
+          scale: 1.0
+        });
+        
+        // Create marker using AdvancedMarkerElement
+        const marker = new google.maps.marker.AdvancedMarkerElement({
           position: position,
           map: map,
           title: place.name,
-          animation: google.maps.Animation.DROP
+          content: placePin.element
         });
 
         // Extend bounds to include this marker

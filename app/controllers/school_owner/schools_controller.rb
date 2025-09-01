@@ -208,17 +208,89 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       return
     end
     
+    # Check if we should force refresh from API
+    force_refresh = params[:refresh] == 'true'
+    
+    # Check if videos need automatic refresh (older than 7 days)
+    videos_need_refresh = @school.place.youtube_videos.any? && 
+                         @school.place.youtube_videos.maximum(:updated_at) < 7.days.ago
+    
+    # Serve from database if we have videos and don't need refresh
+    if @school.place.youtube_videos.any? && !force_refresh && !videos_need_refresh
+      videos_with_visibility = @school.place.youtube_videos.ordered.map do |video|
+        {
+          video_id: video.video_id,
+          title: video.title,
+          description: video.description,
+          thumbnail_url: video.hq_thumbnail_url,
+          duration: video.duration_display,
+          view_count: video.view_count,
+          published_at: video.published_at,
+          visible: video.visible,
+          video_key: video.video_key,
+          duration_formatted: video.duration_display,
+          view_count_formatted: video.view_count_display
+        }.merge(video.video_data || {})
+      end
+      
+      last_updated = @school.place.youtube_videos.maximum(:updated_at)
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true, 
+            videos: videos_with_visibility,
+            channel_id: "cached",
+            fetched_at: last_updated,
+            from_database: true,
+            cache_age_days: ((Time.current - last_updated) / 1.day).round,
+            needs_refresh: videos_need_refresh
+          } 
+        }
+      end
+      return
+    end
+    
+    # Fetch from YouTube API and save to database (either no videos or refresh needed)
     result = @school.fetch_youtube_videos
     
     if result[:success]
-      # Add visibility information to each video
-      videos_with_visibility = result[:videos].map do |video|
-        video.merge(
-          visible: @school.video_visible?(video),
-          video_key: @school.generate_video_key(video),
-          duration_formatted: YoutubeService.parse_duration(video[:duration]),
-          view_count_formatted: YoutubeService.format_view_count(video[:view_count])
+      # Save videos to database
+      @school.place.youtube_videos.destroy_all # Clear old videos
+      
+      result[:videos].each_with_index do |video_data, index|
+        # Check if this video should be visible based on existing visibility settings
+        visible = @school.video_visible?(video_data)
+        
+        @school.place.youtube_videos.create!(
+          video_id: video_data[:video_id] || video_data['video_id'],
+          title: video_data[:title] || video_data['title'],
+          description: video_data[:description] || video_data['description'],
+          thumbnail_url: video_data[:thumbnail_url] || video_data['thumbnail_url'] || "https://img.youtube.com/vi/#{video_data[:video_id] || video_data['video_id']}/hqdefault.jpg",
+          duration: video_data[:duration] || video_data['duration'],
+          view_count: video_data[:view_count] || video_data['view_count'],
+          published_at: video_data[:published_at] || video_data['published_at'],
+          video_data: video_data,
+          visible: visible,
+          sort_order: index
         )
+      end
+      
+      # Return the saved videos with visibility information
+      videos_with_visibility = @school.place.youtube_videos.ordered.map do |video|
+        {
+          video_id: video.video_id,
+          title: video.title,
+          description: video.description,
+          thumbnail_url: video.hq_thumbnail_url,
+          duration: video.duration_display,
+          view_count: video.view_count,
+          published_at: video.published_at,
+          visible: video.visible,
+          video_key: video.video_key,
+          duration_formatted: video.duration_display,
+          view_count_formatted: video.view_count_display
+        }.merge(video.video_data || {})
       end
       
       respond_to do |format|
@@ -227,7 +299,12 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
             success: true, 
             videos: videos_with_visibility,
             channel_id: result[:channel_id],
-            fetched_at: result[:fetched_at]
+            fetched_at: result[:fetched_at],
+            from_database: false,
+            saved_count: @school.place.youtube_videos.count,
+            cache_age_days: 0,
+            needs_refresh: false,
+            was_refreshed: force_refresh || videos_need_refresh
           } 
         }
       end
@@ -248,17 +325,8 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       return
     end
     
-    # Find the video by key from fetched videos
-    result = @school.fetch_youtube_videos
-    unless result[:success]
-      respond_to do |format|
-        format.json { render json: { success: false, message: 'Failed to fetch videos.' }, status: :bad_request }
-      end
-      return
-    end
-    
-    video = result[:videos].find { |v| @school.generate_video_key(v) == params[:video_key] }
-    
+    # Find the video in the database
+    video = @school.place.youtube_videos.find_by(video_id: params[:video_key])
     unless video
       respond_to do |format|
         format.json { render json: { success: false, message: 'Video not found.' }, status: :not_found }
@@ -267,9 +335,9 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     end
     
     # Toggle visibility
-    new_visibility = @school.toggle_video_visibility(video)
+    new_visibility = !video.visible
     
-    if @school.save
+    if video.update(visible: new_visibility)
       create_audit_log(@school, 'update', ['video_visibility'])
       
       respond_to do |format|
@@ -283,7 +351,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       end
     else
       respond_to do |format|
-        format.json { render json: { success: false, message: 'Failed to update video visibility.', errors: @school.errors.full_messages } }
+        format.json { render json: { success: false, message: 'Failed to update video visibility.', errors: video.errors.full_messages } }
       end
     end
   end

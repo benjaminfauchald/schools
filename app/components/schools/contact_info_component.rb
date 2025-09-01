@@ -65,7 +65,7 @@ class Schools::ContactInfoComponent < ViewComponent::Base
       }
     end
 
-    if contact_info[:line_id]
+    if contact_info[:line_id].present?
       items << {
         label: 'Line',
         value: "@#{contact_info[:line_id]}",
