@@ -1,4 +1,4 @@
-class AzureOpenAIService
+class AzureOpenaiService
   include HTTParty
   
   def initialize
@@ -237,6 +237,6 @@ class AzureOpenAIService
   end
   
   def azure_openai_deployment
-    ENV['AZURE_OPENAI_DEPLOYMENT']
+    ENV['AZURE_OPENAI_API_DEPLOYMENT'] || ENV['AZURE_OPENAI_DEPLOYMENT']
   end
 end

@@ -203,6 +203,15 @@
               <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
             </a>
 
+            <!-- Ask AI -->
+            <%= link_to ask_ai_school_owner_school_path(@school), 
+                        class: "border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium" do %>
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Ask AI
+            <% end %>
+
             <!-- Data Import -->
             <a href="#data-import" 
                data-section="data-import"
@@ -832,7 +841,8 @@
                      data-youtube-videos-school-id-value="<%= @school.id %>"
                      data-youtube-videos-fetch-url-value="<%= fetch_videos_school_owner_school_path(@school) %>"
                      data-youtube-videos-toggle-url-value="<%= toggle_video_visibility_school_owner_school_path(@school) %>"
-                     data-youtube-videos-transcript-url-value="<%= extract_transcript_school_owner_school_path(@school, ':video_id') %>">
+                     data-youtube-videos-transcript-url-value="<%= extract_transcript_school_owner_school_path(@school, ':video_id') %>"
+                     data-youtube-videos-transcript-status-url-value="<%= transcript_status_school_owner_school_path(@school, ':video_id') %>">
                   
                   <div class="flex items-center mb-6">
                     <svg class="w-6 h-6 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

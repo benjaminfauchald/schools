@@ -6,7 +6,8 @@ export default class extends Controller {
     schoolId: Number,
     fetchUrl: String,
     toggleUrl: String,
-    transcriptUrl: String
+    transcriptUrl: String,
+    transcriptStatusUrl: String
   }
 
   connect() {
@@ -234,6 +235,9 @@ export default class extends Controller {
         
         // Show success message
         this.showTemporaryMessage(`✅ Transcript extraction started for "${videoTitle}". Processing in background...`, 'success')
+        
+        // Start polling for completion
+        this.startTranscriptPolling(videoId, button, videoTitle)
       } else {
         // Restore original button state on error
         button.innerHTML = originalContent
@@ -382,5 +386,63 @@ export default class extends Controller {
     const div = document.createElement('div')
     div.textContent = text
     return div.innerHTML
+  }
+
+  startTranscriptPolling(videoId, button, videoTitle) {
+    let attempts = 0
+    const maxAttempts = 30  // Poll for up to 5 minutes (10-second intervals)
+    
+    const poll = async () => {
+      attempts++
+      
+      try {
+        const url = this.transcriptStatusUrlValue.replace(':video_id', videoId)
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+          if (data.exists && data.processed) {
+            // Transcript is complete!
+            button.innerHTML = `
+              <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              TRANSCRIPT READY
+            `
+            button.classList.remove('bg-green-100', 'text-green-700', 'border-green-200')
+            button.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-200')
+            
+            this.showTemporaryMessage(`🎉 Transcript ready for "${videoTitle}"! ${data.segment_count} segments extracted.`, 'success')
+            return // Stop polling
+          }
+          
+          // Still processing, continue polling if within limits
+          if (attempts < maxAttempts) {
+            setTimeout(poll, 10000) // Poll every 10 seconds
+          } else {
+            // Timeout - stop polling but don't change button state
+            console.warn(`Transcript polling timeout for video ${videoId}`)
+          }
+        } else {
+          console.error('Transcript status check failed:', data.message)
+        }
+      } catch (error) {
+        console.error('Error checking transcript status:', error)
+        // Continue polling unless we've exceeded attempts
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 10000)
+        }
+      }
+    }
+    
+    // Start polling after 15 seconds (give the job time to start)
+    setTimeout(poll, 15000)
   }
 }

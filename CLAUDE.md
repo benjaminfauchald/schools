@@ -371,3 +371,7 @@ end
 
 - Please use normal font black color everywhere on white background unless its a link
 - Style it with CSS so we can change it later if needed
+
+## Development Workflow Memories
+
+- Dont restart rails by yourself ask me to do it, as it might be env changes from the shell i run the server from

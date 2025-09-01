@@ -38,6 +38,9 @@ Rails.application.routes.draw do
         post :import_website_data
         get :import_status
         post 'extract_transcript/:video_id', action: :extract_transcript, as: :extract_transcript
+        get 'transcript_status/:video_id', action: :transcript_status, as: :transcript_status
+        get :ask_ai
+        post :ask_ai
       end
       resources :pages, except: [:show] do
         collection do

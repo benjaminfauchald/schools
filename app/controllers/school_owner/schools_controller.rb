@@ -1,5 +1,5 @@
 class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
-  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :import_website_data, :import_status, :extract_transcript]
+  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :import_website_data, :import_status, :extract_transcript, :transcript_status, :ask_ai]
   
   def index
     @schools = current_user.owned_schools.includes(:place)
@@ -410,13 +410,19 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     begin
       youtube_url = "https://www.youtube.com/watch?v=#{video_id}"
       
-      # Queue the transcript extraction job
-      YoutubeTranscriptExtractionJob.perform_later(@school.place.id, youtube_url, {
-        video_title: video[:title],
-        video_description: video[:description],
+      # Prepare video data structure that the service expects
+      video_data = {
+        video_id: video_id,
+        youtube_video_id: video_id,
+        title: video[:title],
+        description: video[:description],
         duration: video[:duration],
-        published_at: video[:published_at]
-      })
+        published_at: video[:published_at],
+        url: youtube_url
+      }
+      
+      # Queue the transcript extraction job
+      YoutubeTranscriptExtractionJob.perform_later(@school.place.id, video_data, {})
       
       create_audit_log(@school, 'create', ['youtube_transcript', video_id])
       
@@ -437,6 +443,119 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       
       respond_to do |format|
         format.json { render json: { success: false, message: 'Failed to start transcript extraction.' }, status: :internal_server_error }
+      end
+    end
+  end
+  
+  def transcript_status
+    @school = current_school
+    video_id = params[:video_id]
+    
+    unless video_id.present?
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Video ID is required.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    unless @school.place.present?
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'School must have an associated place.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    # Check if transcript exists and its status
+    transcript = @school.place.transcripts.find_by(youtube_video_id: video_id)
+    
+    if transcript
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true,
+            exists: true,
+            processed: transcript.processed?,
+            transcript_id: transcript.id,
+            video_title: transcript.video_title,
+            segment_count: transcript.segment_count,
+            created_at: transcript.created_at,
+            updated_at: transcript.updated_at
+          }
+        }
+      end
+    else
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true,
+            exists: false,
+            processed: false
+          }
+        }
+      end
+    end
+  end
+  
+  def ask_ai
+    @school = current_school
+    
+    # Handle GET request (show the page)
+    if request.get?
+      @content_stats = get_content_stats
+      return
+    end
+    
+    # Handle POST request (answer question)
+    question = params[:question]&.strip
+    
+    unless question.present?
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'Question cannot be empty.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    unless @school.place.present?
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'School must have an associated place.' }, status: :bad_request }
+      end
+      return
+    end
+    
+    begin
+      # Use the SimpleRagService to get an AI response
+      result = SimpleRagService.ask_question(
+        @school.place.id,
+        question,
+        {
+          max_context_tokens: 3000,
+          content_types: ['transcript', 'pdf_document', 'text_document'],
+          style: 'helpful',
+          temperature: 0.3
+        }
+      )
+      
+      # Log the AI interaction
+      create_audit_log(@school, 'create', ['ai_query', question.truncate(50)])
+      
+      respond_to do |format|
+        format.json { 
+          render json: {
+            success: result[:success],
+            answer: result[:answer],
+            sources: result[:sources],
+            context_stats: result[:context_stats],
+            error: result[:error]
+          }
+        }
+      end
+      
+    rescue => e
+      Rails.logger.error "Ask AI error for school #{@school.id}: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      
+      respond_to do |format|
+        format.json { render json: { success: false, message: 'An error occurred while processing your question.' }, status: :internal_server_error }
       end
     end
   end
@@ -582,5 +701,48 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       action: action,
       changed_fields: { updated_fields: changed_fields }
     )
+  end
+
+  def get_content_stats
+    return {} unless @school.place.present?
+    
+    place_id = @school.place.id
+    
+    # Get transcript statistics
+    transcript_count = Transcript.for_place(place_id).processed.count
+    transcript_with_embeddings = Transcript.for_place(place_id).with_embeddings.count
+    
+    # Get document statistics  
+    document_count = DocumentContent.for_place(place_id).completed.count
+    document_with_embeddings = DocumentContent.for_place(place_id).with_embeddings.count
+    
+    # Get segment statistics
+    segment_count = TranscriptSegment.joins(:transcript)
+                                   .where(transcript: { place_id: place_id })
+                                   .count
+    segment_with_embeddings = TranscriptSegment.joins(:transcript)
+                                             .where(transcript: { place_id: place_id })
+                                             .with_embeddings
+                                             .count
+    
+    {
+      transcripts: {
+        total: transcript_count,
+        with_embeddings: transcript_with_embeddings,
+        ready: transcript_with_embeddings > 0
+      },
+      documents: {
+        total: document_count,
+        with_embeddings: document_with_embeddings,
+        ready: document_with_embeddings > 0
+      },
+      segments: {
+        total: segment_count,
+        with_embeddings: segment_with_embeddings,
+        ready: segment_with_embeddings > 0
+      },
+      total_searchable_items: transcript_with_embeddings + document_with_embeddings + segment_with_embeddings,
+      ready_for_ai: (transcript_with_embeddings + document_with_embeddings + segment_with_embeddings) > 0
+    }
   end
 end

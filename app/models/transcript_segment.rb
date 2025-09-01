@@ -18,11 +18,9 @@ class TranscriptSegment < ApplicationRecord
   scope :ordered, -> { order(:sequence_number) }
   scope :with_embeddings, -> { where.not(embedding: nil) }
   
-  # Vector similarity search with place_id isolation
-  def self.similar_to(embedding, place_id, limit = 10)
-    joins(:transcript)
-      .where(transcripts: { place_id: place_id })
-      .where.not(embedding: nil)
+  # Vector similarity search (place_id isolation handled by calling code)
+  def self.similar_to(embedding, limit = 10)
+    where.not(embedding: nil)
       .nearest_neighbors(:embedding, embedding, distance: "cosine")
       .limit(limit)
   end

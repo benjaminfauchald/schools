@@ -35,10 +35,9 @@ class DocumentContent < ApplicationRecord
   scope :for_place, ->(place_id) { where(place_id: place_id) }
   scope :with_embeddings, -> { where.not(embedding: nil) }
   
-  # Vector similarity search with place_id isolation
-  def self.similar_to(embedding, place_id, limit = 10)
-    where(place_id: place_id)
-      .where.not(embedding: nil)
+  # Vector similarity search (place_id isolation handled by calling code)
+  def self.similar_to(embedding, limit = 10)
+    where.not(embedding: nil)
       .nearest_neighbors(:embedding, embedding, distance: "cosine")
       .limit(limit)
   end

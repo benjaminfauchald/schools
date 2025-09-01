@@ -541,3 +541,5 @@
 2025-08-31 02:10:15,419 - INFO - ✅ Successfully crawled http://www.kis.ac.th/ - 5 pages
 2025-08-31 02:10:22,364 - INFO - 🔍 Starting crawl for http://www.kis.ac.th/
 2025-08-31 02:10:22,702 - ERROR - 💥 Exception during crawl: Payment Required: Failed to start crawl. Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value. - No additional error details provided. for http://www.kis.ac.th/
+2025-09-01 01:11:49,892 - INFO - 🔍 Starting crawl for http://www.kis.ac.th/
+2025-09-01 01:11:50,595 - ERROR - 💥 Exception during crawl: Payment Required: Failed to start crawl. Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value. - No additional error details provided. for http://www.kis.ac.th/
