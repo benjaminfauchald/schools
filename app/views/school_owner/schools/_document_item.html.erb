@@ -1,0 +1,148 @@
+<div id="document_<%= document.id %>" class="bg-white border border-gray-200 rounded-lg p-3" data-document-id="<%= document.id %>">
+  <div class="flex items-start justify-between">
+    <!-- Document Info -->
+    <div class="flex items-start space-x-3 flex-1 min-w-0">
+      <!-- File Type Icon -->
+      <div class="flex-shrink-0">
+        <% case document.file_extension %>
+        <% when '.pdf' %>
+          <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+            <path d="M14 2v6h6"/>
+            <text x="12" y="16" font-family="Arial" font-size="6" font-weight="bold" text-anchor="middle" fill="white">PDF</text>
+          </svg>
+        <% when '.doc', '.docx' %>
+          <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+            <path d="M14 2v6h6"/>
+          </svg>
+        <% when '.xls', '.xlsx' %>
+          <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+            <path d="M14 2v6h6"/>
+          </svg>
+        <% when '.ppt', '.pptx' %>
+          <svg class="w-8 h-8 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+            <path d="M14 2v6h6"/>
+          </svg>
+        <% else %>
+          <svg class="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+            <path d="M14 2v6h6"/>
+          </svg>
+        <% end %>
+      </div>
+
+      <!-- Document Details -->
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-gray-900 truncate" title="<%= document.filename %>">
+          <%= document.filename %>
+        </p>
+        <div class="flex items-center text-xs text-gray-500 space-x-2 mt-1">
+          <span><%= document.file_type_display %></span>
+          <span>•</span>
+          <span><%= document.file_size_display %></span>
+          <span>•</span>
+          <span>Uploaded <%= time_ago_in_words(document.created_at) %> ago</span>
+        </div>
+
+        <!-- Processing Status -->
+        <div class="mt-2 flex items-center space-x-2">
+          <span class="<%= document_status_badge_classes(document) %>">
+            <%= document.processing_status_display %>
+          </span>
+
+          <!-- AI Status -->
+          <% if document.ai_enabled? %>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+              AI Enabled
+            </span>
+          <% else %>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+              AI Disabled
+            </span>
+          <% end %>
+
+          <!-- Download Count -->
+          <% if document.download_count > 0 %>
+            <span class="text-xs text-gray-500">
+              <svg class="inline w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-4-4m4 4l4-4m3-6V4a2 2 0 00-2-2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V10a2 2 0 00-2-2h-4a2 2 0 01-4 0z"></path>
+              </svg>
+              <%= document.download_count %> downloads
+            </span>
+          <% end %>
+        </div>
+
+        <!-- Text Preview (if available) -->
+        <% if document.has_extracted_text? %>
+          <div class="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600 max-h-20 overflow-hidden">
+            <%= truncate(document.text_preview(limit: 100), length: 100) %>
+          </div>
+        <% end %>
+
+        <!-- Processing Error -->
+        <% if document.processing_failed? && document.processing_error.present? %>
+          <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">
+            <strong>Processing Error:</strong> <%= truncate(document.processing_error, length: 100) %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex-shrink-0 ml-4">
+      <div class="flex items-center space-x-1">
+        <!-- Download Button -->
+        <a href="<%= download_document_school_owner_school_path(@school, document_id: document.id) %>"
+           target="_blank"
+           class="inline-flex items-center p-1.5 border border-transparent rounded text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+           title="Download">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-4-4m4 4l4-4m3-6V4a2 2 0 00-2-2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V10a2 2 0 00-2-2h-4a2 2 0 01-4 0z"></path>
+          </svg>
+        </a>
+
+        <!-- AI Toggle Button -->
+        <button type="button"
+                data-action="click->document-upload#toggleAI"
+                data-document-id="<%= document.id %>"
+                class="inline-flex items-center p-1.5 border border-transparent rounded text-xs font-medium <%= document.ai_enabled? ? 'text-indigo-700 bg-indigo-100 hover:bg-indigo-200' : 'text-gray-700 bg-gray-100 hover:bg-gray-200' %> focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                title="<%= document.ai_enabled? ? 'Disable AI' : 'Enable AI' %>">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+          </svg>
+        </button>
+
+        <!-- Reprocess Button (if can reprocess) -->
+        <% if document.can_reprocess? %>
+          <button type="button"
+                  data-action="click->document-upload#reprocessDocument"
+                  data-document-id="<%= document.id %>"
+                  class="inline-flex items-center p-1.5 border border-transparent rounded text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  title="Reprocess Document">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+          </button>
+        <% end %>
+
+        <!-- Delete Button -->
+        <button type="button"
+                data-action="click->document-upload#deleteDocument"
+                data-document-id="<%= document.id %>"
+                data-document-name="<%= document.filename %>"
+                class="inline-flex items-center p-1.5 border border-transparent rounded text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                title="Delete Document">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

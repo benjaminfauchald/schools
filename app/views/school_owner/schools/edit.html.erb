@@ -215,6 +215,18 @@
               Data Import
               <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
             </a>
+
+            <!-- Ask AI -->
+            <%= link_to ai_chat_school_owner_school_path(@school), 
+                class: "border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium" do %>
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z"></path>
+              </svg>
+              Ask AI
+              <svg class="text-green-500 ml-auto h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            <% end %>
           </nav>
                 </div>
                 </div>
@@ -845,7 +857,7 @@
 
                   <!-- YouTube Channel Info -->
                   <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between mb-3">
                       <div>
                         <h3 class="text-sm font-medium text-gray-900">Connected YouTube Channel</h3>
                         <p class="text-sm text-gray-600 mt-1"><%= @school.youtube_url %></p>
@@ -858,6 +870,24 @@
                         </svg>
                         View Channel
                       </a>
+                    </div>
+                    
+                    <!-- Bulk Actions -->
+                    <div class="border-t border-gray-200 pt-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-sm text-gray-600">Generate AI transcripts for videos without transcripts</p>
+                          <p class="text-xs text-gray-500 mt-0.5">This may take several minutes to complete</p>
+                        </div>
+                        <button type="button" 
+                                id="generateAllTranscriptsBtn"
+                                class="inline-flex items-center px-4 py-2 border border-blue-300 shadow-sm text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                          </svg>
+                          Generate All Transcripts
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -1297,6 +1327,133 @@
                       </p>
                     </div>
                   <% end %>
+
+                  <!-- Document Upload Section -->
+                  <div class="border-t border-gray-200 pt-6 mt-6">
+                    <div class="flex items-center justify-between mb-4">
+                      <div class="flex items-center space-x-3">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <div>
+                          <h3 class="text-lg font-medium text-gray-900">Document Upload</h3>
+                          <p class="text-sm text-gray-600">Upload PDF, Word, Excel, and PowerPoint documents for AI-powered content generation</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Document Upload Area -->
+                    <div data-controller="document-upload" 
+                         data-document-upload-school-id-value="<%= @school.id %>"
+                         data-document-upload-max-size-value="10485760"
+                         class="space-y-4">
+                      
+                      <!-- Upload Dropzone -->
+                      <div data-document-upload-target="dropzone"
+                           data-action="dragover->document-upload#handleDragOver dragleave->document-upload#handleDragLeave drop->document-upload#handleDrop click->document-upload#openFileDialog"
+                           class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors cursor-pointer">
+                        <input type="file" 
+                               data-document-upload-target="fileInput"
+                               data-action="change->document-upload#handleFileSelect"
+                               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                               multiple
+                               class="hidden">
+                        
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <div class="mt-4">
+                          <p class="text-lg font-medium text-gray-900">Upload Documents</p>
+                          <p class="text-sm text-gray-500 mt-1">Drag and drop files here, or click to browse</p>
+                          <p class="text-xs text-gray-400 mt-2">
+                            Supported formats: PDF, Word (.doc/.docx), Excel (.xls/.xlsx), PowerPoint (.ppt/.pptx)
+                            <br>
+                            Maximum file size: 10 MB per file
+                          </p>
+                        </div>
+                      </div>
+
+                      <!-- Upload Progress -->
+                      <div data-document-upload-target="progressContainer" class="hidden">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div class="flex items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            <div class="flex-1">
+                              <p class="text-sm font-medium text-blue-900">Uploading documents...</p>
+                              <div class="mt-2 bg-blue-200 rounded-full h-2">
+                                <div data-document-upload-target="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                              </div>
+                              <p data-document-upload-target="progressText" class="text-xs text-blue-700 mt-1">0% complete</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Error Messages -->
+                      <div data-document-upload-target="errorContainer" class="hidden">
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <div class="flex">
+                            <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="ml-3">
+                              <h3 class="text-sm font-medium text-red-800">Upload Error</h3>
+                              <div data-document-upload-target="errorMessage" class="mt-2 text-sm text-red-700"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Success Messages -->
+                      <div data-document-upload-target="successContainer" class="hidden">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div class="flex">
+                            <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <div class="ml-3">
+                              <h3 class="text-sm font-medium text-green-800">Upload Successful</h3>
+                              <div data-document-upload-target="successMessage" class="mt-2 text-sm text-green-700"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Documents List -->
+                      <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-4">
+                          <h4 class="text-sm font-medium text-gray-900">Uploaded Documents</h4>
+                          <button type="button"
+                                  data-action="click->document-upload#refreshDocumentList"
+                                  class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-900">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Refresh
+                          </button>
+                        </div>
+                        
+                        <div data-document-upload-target="documentsList" class="space-y-3">
+                          <% if @school.place&.documents&.any? %>
+                            <% @school.place.documents.recent.each do |document| %>
+                              <%= render 'document_item', document: document %>
+                              <%= turbo_stream_from "document_#{document.id}" %>
+                            <% end %>
+                          <% else %>
+                            <div class="text-center py-6">
+                              <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                              </svg>
+                              <p class="text-sm text-gray-500 mt-2">No documents uploaded yet</p>
+                              <p class="text-xs text-gray-400">Upload documents to get started with AI-powered content generation</p>
+                            </div>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Import Status Modal -->

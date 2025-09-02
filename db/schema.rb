@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_01_121059) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_02_172524) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -67,6 +67,37 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_01_121059) do
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
   end
 
+  create_table "ai_conversations", force: :cascade do |t|
+    t.bigint "school_id", null: false
+    t.bigint "user_id", null: false
+    t.string "title"
+    t.string "status", default: "active"
+    t.json "metadata"
+    t.datetime "last_message_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["last_message_at"], name: "index_ai_conversations_on_last_message_at"
+    t.index ["school_id", "user_id"], name: "index_ai_conversations_on_school_id_and_user_id"
+    t.index ["school_id"], name: "index_ai_conversations_on_school_id"
+    t.index ["status"], name: "index_ai_conversations_on_status"
+    t.index ["user_id"], name: "index_ai_conversations_on_user_id"
+  end
+
+  create_table "ai_messages", force: :cascade do |t|
+    t.bigint "ai_conversation_id", null: false
+    t.string "role", null: false
+    t.text "content", null: false
+    t.json "source_references"
+    t.json "metadata"
+    t.string "message_type", default: "text"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ai_conversation_id"], name: "index_ai_messages_on_ai_conversation_id"
+    t.index ["created_at"], name: "index_ai_messages_on_created_at"
+    t.index ["message_type"], name: "index_ai_messages_on_message_type"
+    t.index ["role"], name: "index_ai_messages_on_role"
+  end
+
   create_table "audit_logs", force: :cascade do |t|
     t.string "auditable_type", null: false
     t.bigint "auditable_id", null: false
@@ -83,6 +114,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_01_121059) do
   end
 
 # Could not dump table "document_contents" because of following StandardError
+#   Unknown type 'vector(1536)' for column 'embedding'
+
+
+# Could not dump table "documents" because of following StandardError
 #   Unknown type 'vector(1536)' for column 'embedding'
 
 
@@ -496,13 +531,50 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_01_121059) do
     t.index ["vocabulary_id"], name: "index_terms_on_vocabulary_id"
   end
 
-# Could not dump table "transcript_segments" because of following StandardError
-#   Unknown type 'vector(1536)' for column 'embedding'
+  create_table "transcript_segments", force: :cascade do |t|
+    t.bigint "transcript_id", null: false
+    t.integer "segment_index", null: false
+    t.text "text", null: false
+    t.float "start_time"
+    t.float "end_time"
+    t.string "speaker"
+    t.float "confidence"
+    t.text "embedding"
+    t.json "metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["end_time"], name: "index_transcript_segments_on_end_time"
+    t.index ["speaker"], name: "index_transcript_segments_on_speaker"
+    t.index ["start_time"], name: "index_transcript_segments_on_start_time"
+    t.index ["transcript_id", "segment_index"], name: "index_transcript_segments_on_transcript_id_and_segment_index", unique: true
+    t.index ["transcript_id"], name: "index_transcript_segments_on_transcript_id"
+  end
 
-
-# Could not dump table "transcripts" because of following StandardError
-#   Unknown type 'vector(1536)' for column 'embedding'
-
+  create_table "transcripts", force: :cascade do |t|
+    t.bigint "place_id", null: false
+    t.string "video_id", null: false
+    t.string "video_title"
+    t.text "video_description"
+    t.string "video_url"
+    t.text "full_transcript"
+    t.string "language", default: "en"
+    t.integer "duration_seconds"
+    t.string "status", default: "pending"
+    t.text "processing_error"
+    t.json "metadata"
+    t.text "embedding"
+    t.datetime "processed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "processing_job_id"
+    t.boolean "ai_enabled", default: true, null: false
+    t.index ["ai_enabled"], name: "index_transcripts_on_ai_enabled"
+    t.index ["place_id", "video_id"], name: "index_transcripts_on_place_id_and_video_id", unique: true
+    t.index ["place_id"], name: "index_transcripts_on_place_id"
+    t.index ["processed_at"], name: "index_transcripts_on_processed_at"
+    t.index ["status"], name: "index_transcripts_on_status"
+    t.index ["video_id"], name: "index_transcripts_on_video_id"
+  end
 
   create_table "travel_times", force: :cascade do |t|
     t.bigint "place_id", null: false
@@ -567,7 +639,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_01_121059) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "ai_conversations", "schools"
+  add_foreign_key "ai_conversations", "users"
+  add_foreign_key "ai_messages", "ai_conversations"
   add_foreign_key "document_contents", "places"
+  add_foreign_key "documents", "places", name: "documents_place_id_fkey"
   add_foreign_key "events", "places"
   add_foreign_key "magic_link_tokens", "users"
   add_foreign_key "media_items", "places"

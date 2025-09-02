@@ -79,6 +79,22 @@ module ApplicationHelper
     end
   end
   
+  # Document status badge classes
+  def document_status_badge_classes(document)
+    case document.processing_status
+    when :completed
+      "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"
+    when :failed
+      "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800"
+    when :processing
+      "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
+    when :pending
+      "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800"
+    else
+      "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+    end
+  end
+  
   # Generate meta tags for SEO
   def school_meta_tags(school, merged_data)
     title = school.name

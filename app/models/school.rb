@@ -15,11 +15,13 @@ class School < ApplicationRecord
   has_many :school_claims, dependent: :destroy
   has_many :school_inquiries, dependent: :destroy
   has_many :pages, dependent: :destroy
+  has_many :ai_conversations, dependent: :destroy
   
   # Generic place associations (shared with other place types)
   has_many :media_items, through: :place
   has_many :events, through: :place
   has_many :travel_times, through: :place
+  has_many :transcripts, through: :place
   has_many :audit_logs, as: :auditable, dependent: :destroy
   
   # Taxonomy associations

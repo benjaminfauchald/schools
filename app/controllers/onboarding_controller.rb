@@ -8,9 +8,15 @@ class OnboardingController < ApplicationController
   private
 
   def check_puppeteer_bypass
+    # Debug logging to see what User-Agent we're getting
+    user_agent = request.headers['User-Agent'].to_s
+    Rails.logger.info "[ONBOARDING DEBUG] User-Agent: '#{user_agent}'"
+    Rails.logger.info "[ONBOARDING DEBUG] Puppeteer check result: #{puppeteer_request?}"
+    
     if puppeteer_request?
       Rails.logger.info "[PUPPETEER BACKDOOR] Bypassing onboarding, redirecting to root"
-      set_puppeteer_location_in_session
+      # Set session data so JavaScript can find it
+      session[:puppeteer_location] = { lat: 13.6983415, lng: 100.5260653 }
       redirect_to root_path
     end
   end

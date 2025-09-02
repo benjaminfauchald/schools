@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_many :claimed_schools, through: :school_claims, source: :school
   has_many :audit_logs, dependent: :destroy
   has_many :magic_link_tokens, dependent: :destroy
+  has_many :ai_conversations, dependent: :destroy
 
   # Validations
   validates :role, inclusion: { in: %w[school_owner admin] }

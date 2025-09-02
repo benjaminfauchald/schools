@@ -38,38 +38,9 @@ class Schools::HeroComponent < ViewComponent::Base
   def contact_actions
     actions = []
     
-    # Add claim button for unclaimed schools
+    # Only show claim button for unclaimed schools - no other buttons
     if should_show_claim_button?
       actions << claim_button_action
-    end
-    
-    if contact_info[:phone]
-      actions << {
-        label: 'Call',
-        icon: 'phone',
-        url: "tel:#{contact_info[:phone].gsub(/\D/, '')}",
-        primary: false
-      }
-    end
-    
-    # Contact Us modal button - always show
-    actions << {
-      label: 'Contact',
-      icon: 'chat-bubble-left-ellipsis',
-      url: '#',
-      primary: true,
-      modal: true,
-      contact_button: true
-    }
-    
-    if contact_info[:google_maps_url]
-      actions << {
-        label: 'Directions',
-        icon: 'map-pin',
-        url: contact_info[:google_maps_url],
-        primary: false,
-        external: true
-      }
     end
     
     actions
@@ -77,7 +48,7 @@ class Schools::HeroComponent < ViewComponent::Base
 
   def should_show_claim_button?
     return false unless school
-    return false if school.claimed?
+    return false if school.active_claims?
     
     if helpers.user_signed_in?
       user = helpers.current_user
@@ -85,7 +56,7 @@ class Schools::HeroComponent < ViewComponent::Base
       # Don't show if user can already edit this school or has pending/active claim
       !user.can_edit_school?(school) && !user.school_claims.where(school: school).where(status: ['pending', 'approved'], revoked_at: nil).exists?
     else
-      # Show for anonymous users if school is unclaimed
+      # Show for anonymous users if school has no active claims
       true
     end
   end

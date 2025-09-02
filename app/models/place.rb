@@ -7,6 +7,8 @@ class Place < ApplicationRecord
   has_many :events, dependent: :destroy
   has_many :travel_times, dependent: :destroy
   has_many :youtube_videos, dependent: :destroy
+  has_many :documents, dependent: :destroy
+  has_many :transcripts, dependent: :destroy
   
   # Validations
   validates :place_id, presence: true, uniqueness: true
@@ -161,6 +163,31 @@ class Place < ApplicationRecord
   
   def has_youtube_videos?
     youtube_videos.any?
+  end
+  
+  # Document methods
+  def has_documents?
+    documents.any?
+  end
+  
+  def processed_documents
+    documents.processing_completed.recent
+  end
+  
+  def ai_enabled_documents
+    documents.ai_enabled.processing_completed
+  end
+  
+  def duplicate_document_exists?(checksum)
+    documents.exists?(file_checksum: checksum)
+  end
+  
+  def documents_by_type(extension)
+    documents.where("original_filename ILIKE ?", "%#{extension}")
+  end
+  
+  def document_processing_stats
+    documents.processing_stats
   end
   
   # Class method to check Google Maps API compliance percentage

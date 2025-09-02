@@ -2,7 +2,6 @@
 # Supports AJAX requests for real-time filtering without page reloads
 class SchoolsController < ApplicationController
   before_action :check_home_location, only: [:index]
-  before_action :set_puppeteer_location_in_session
   before_action :find_school, only: [:show]
 
   def show
@@ -196,11 +195,15 @@ class SchoolsController < ApplicationController
   end
 
   def get_home_location_from_client
-    # Check for Puppeteer backdoor first
-    puppeteer_location = get_location_with_backdoor
-    return puppeteer_location if puppeteer_location
+    # Simple Puppeteer coordinate injection - no complex backdoor needed!
+    if puppeteer_request?
+      Rails.logger.info "[SCHOOLS] 🤖 Puppeteer detected - injecting Bangkok coordinates"
+      # Also set session data so JavaScript doesn't redirect to onboarding
+      session[:puppeteer_location] = { lat: 13.6983415, lng: 100.5260653 }
+      return { lat: 13.6983415, lng: 100.5260653 }
+    end
 
-    # Client sends coordinates via JavaScript
+    # Normal flow: Client sends coordinates via JavaScript
     if params[:home_lat].present? && params[:home_lng].present?
       lat = params[:home_lat].to_f
       lng = params[:home_lng].to_f
