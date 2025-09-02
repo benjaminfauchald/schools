@@ -37,6 +37,15 @@ Rails.application.routes.draw do
         patch :toggle_video_visibility
         post :import_website_data
         get :import_status
+        post :upload_document
+        delete :delete_document
+        patch :toggle_document_ai
+        patch :reprocess_document
+        get :download_document
+        get :ai_chat
+        post :ai_chat_message
+        get :ai_suggestions
+        get :ai_analysis
       end
       resources :pages, except: [:show] do
         collection do

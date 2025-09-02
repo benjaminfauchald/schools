@@ -46,6 +46,11 @@ module Schools
     
     # Add forms directory to autoload paths
     config.autoload_paths << Rails.root.join('app', 'forms')
+    
+    # Add Java to PATH for document processing (Apache Tika)
+    if File.exist?('/usr/local/opt/openjdk@21/bin/java')
+      ENV['PATH'] = "/usr/local/opt/openjdk@21/bin:#{ENV['PATH']}"
+    end
 
     # Don't generate system test files.
     config.generators.system_tests = nil

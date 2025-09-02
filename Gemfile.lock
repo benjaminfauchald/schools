@@ -107,6 +107,7 @@ GEM
     countries (8.0.3)
       unaccent (~> 0.3)
     crass (1.0.6)
+    csv (3.3.5)
     date (3.4.1)
     debug (1.11.0)
       irb (~> 1.10)
@@ -154,6 +155,10 @@ GEM
       raabro (~> 1.4)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    httparty (0.23.1)
+      csv
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     image_processing (1.14.0)
@@ -226,11 +231,17 @@ GEM
       net-pop
       net-smtp
     marcel (1.0.4)
+    mime-types (3.7.0)
+      logger
+      mime-types-data (~> 3.2025, >= 3.2025.0507)
+    mime-types-data (3.2025.0826)
     mini_magick (5.3.1)
       logger
     mini_mime (1.1.5)
     minitest (5.25.5)
     msgpack (1.8.0)
+    multi_xml (0.7.2)
+      bigdecimal (~> 3.1)
     multipart-post (2.4.1)
     net-http (0.6.0)
       uri
@@ -278,6 +289,7 @@ GEM
     pg (1.6.1-x86_64-darwin)
     pg (1.6.1-x86_64-linux)
     pg (1.6.1-x86_64-linux-musl)
+    pgvector (0.3.2)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -389,6 +401,12 @@ GEM
       tilt
     securerandom (0.4.1)
     selectize-rails (0.12.6)
+    sentry-rails (5.26.0)
+      railties (>= 5.0)
+      sentry-ruby (~> 5.26.0)
+    sentry-ruby (5.26.0)
+      bigdecimal
+      concurrent-ruby (~> 1.0, >= 1.0.2)
     solid_cable (3.0.12)
       actioncable (>= 7.2)
       activejob (>= 7.2)
@@ -466,6 +484,9 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    yomu2 (0.3.2)
+      json (~> 2.1)
+      mime-types (~> 3.1)
     zeitwerk (2.7.3)
 
 PLATFORMS
@@ -492,6 +513,7 @@ DEPENDENCIES
   down (~> 5.0)
   faker
   foreman
+  httparty (~> 0.21)
   image_processing (~> 1.2)
   importmap-rails
   jbuilder
@@ -501,6 +523,7 @@ DEPENDENCIES
   letter_opener (~> 1.10)
   ostruct (= 0.6.3)
   pg (~> 1.1)
+  pgvector (~> 0.3.2)
   propshaft
   puma (>= 5.0)
   rails (~> 8.0.2, >= 8.0.2.1)
@@ -508,6 +531,8 @@ DEPENDENCIES
   rgeo
   rgeo-activerecord
   rubocop-rails-omakase
+  sentry-rails
+  sentry-ruby
   solid_cable
   solid_cache
   solid_queue
@@ -518,6 +543,7 @@ DEPENDENCIES
   tzinfo-data
   view_component
   web-console
+  yomu2 (~> 0.3.2)
 
 BUNDLED WITH
    2.7.1

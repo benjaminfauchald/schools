@@ -1,8 +1,145 @@
 class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
-  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :import_website_data, :import_status]
+  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :import_website_data, :import_status, :upload_document, :delete_document, :toggle_document_ai, :reprocess_document, :download_document, :ai_chat, :ai_chat_message, :ai_suggestions, :ai_analysis]
   
   def index
     @schools = current_user.owned_schools.includes(:place)
+  end
+  
+  # AI Chat functionality
+  def ai_chat
+    @conversation = get_or_create_conversation
+    @messages = @conversation.ai_messages.recent.includes(:ai_conversation)
+    @suggested_questions = get_suggested_questions if @messages.empty?
+    @school_summary = get_school_summary
+    @completeness_score = calculate_completeness_score
+    
+    respond_to do |format|
+      format.html { render 'school_owner/schools/ai_chat' }
+      format.json { render json: chat_data }
+    end
+  end
+  
+  def ai_chat_message
+    Rails.logger.info "🤖 AI Chat Message Request Started"
+    Rails.logger.info "📝 User Message: #{params[:message]&.truncate(100)}"
+    Rails.logger.info "🏫 School ID: #{@school.id}"
+    Rails.logger.info "👤 User ID: #{current_user.id}"
+    
+    user_message = params[:message]&.strip
+    
+    if user_message.blank?
+      Rails.logger.warn "❌ Empty message received"
+      render json: { success: false, error: 'Message cannot be empty' }, status: :unprocessable_entity
+      return
+    end
+    
+    begin
+      Rails.logger.info "🔄 Getting or creating conversation..."
+      @conversation = get_or_create_conversation
+      Rails.logger.info "💬 Using conversation ID: #{@conversation.id}"
+      
+      # Generate AI response using the service
+      Rails.logger.info "🚀 Initializing AiChatService..."
+      ai_service = AiChatService.new(@conversation)
+      
+      Rails.logger.info "🎯 Calling generate_response..."
+      result = ai_service.generate_response(user_message)
+      
+      Rails.logger.info "📊 AI Service Result: success=#{result[:success]}"
+      if result[:error]
+        Rails.logger.error "🚨 AI Service Error: #{result[:error]}"
+      end
+      
+      if result[:success]
+        Rails.logger.info "✅ AI Response successful, formatting response..."
+        render json: {
+          success: true,
+          user_message: format_message(result[:user_message]),
+          assistant_message: format_message(result[:assistant_message]),
+          context_data: result[:context_data],
+          conversation_id: @conversation.id
+        }
+      else
+        Rails.logger.error "❌ AI Service failed: #{result[:error]}"
+        render json: {
+          success: false,
+          error: result[:error],
+          assistant_message: result[:assistant_message] ? format_message(result[:assistant_message]) : nil
+        }, status: :unprocessable_entity
+      end
+      
+    rescue => e
+      Rails.logger.error "💥 EXCEPTION in ai_chat_message: #{e.class.name}: #{e.message}"
+      Rails.logger.error "📍 Backtrace:"
+      e.backtrace.first(10).each { |line| Rails.logger.error "   #{line}" }
+      
+      render json: {
+        success: false,
+        error: 'Sorry, I encountered an error processing your message. Please try again.',
+        details: Rails.env.development? ? "#{e.class.name}: #{e.message}" : nil
+      }, status: :internal_server_error
+    end
+  end
+  
+  def ai_suggestions
+    begin
+      @conversation = get_or_create_conversation
+      ai_service = AiChatService.new(@conversation)
+      result = ai_service.generate_suggested_questions(limit: 5)
+      
+      if result[:success]
+        render json: {
+          success: true,
+          questions: result[:questions],
+          school_summary: result[:school_summary]
+        }
+      else
+        render json: {
+          success: false,
+          error: result[:error],
+          questions: result[:questions] # fallback questions
+        }, status: :unprocessable_entity
+      end
+      
+    rescue => e
+      Rails.logger.error "AI Suggestions Error: #{e.message}"
+      
+      render json: {
+        success: false,
+        error: 'Unable to generate suggestions at this time',
+        questions: default_suggested_questions
+      }, status: :internal_server_error
+    end
+  end
+  
+  def ai_analysis
+    begin
+      @conversation = get_or_create_conversation
+      ai_service = AiChatService.new(@conversation)
+      result = ai_service.analyze_data_gaps
+      
+      if result[:success]
+        render json: {
+          success: true,
+          analysis: result[:analysis],
+          suggestions: result[:suggestions],
+          message: result[:message] ? format_message(result[:message]) : nil
+        }
+      else
+        render json: {
+          success: false,
+          error: result[:error]
+        }, status: :unprocessable_entity
+      end
+      
+    rescue => e
+      Rails.logger.error "AI Analysis Error: #{e.message}"
+      
+      render json: {
+        success: false,
+        error: 'Unable to analyze school data at this time'
+      }, status: :internal_server_error
+    end
   end
   
   def show
@@ -413,6 +550,273 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     end
   end
   
+  def upload_document
+    @school = current_school
+    
+    unless params[:document].present?
+      respond_to do |format|
+        format.json { render json: { success: false, errors: ['No file provided'] }, status: :bad_request }
+      end
+      return
+    end
+    
+    # Extract file for checksum calculation before creating document
+    uploaded_file = params[:document]
+    
+    begin
+      # Calculate checksum for duplicate detection
+      file_data = uploaded_file.read
+      uploaded_file.rewind # Reset file pointer
+      checksum = Digest::SHA256.hexdigest(file_data)
+      
+      # Check for duplicate
+      if @school.place.duplicate_document_exists?(checksum)
+        respond_to do |format|
+          format.json { 
+            render json: { 
+              success: false, 
+              errors: ['This file has already been uploaded for this school'],
+              duplicate: true 
+            }, status: :unprocessable_entity 
+          }
+        end
+        return
+      end
+      
+      # Create document
+      @document = @school.place.documents.build(
+        filename: uploaded_file.original_filename,
+        ai_enabled: true
+      )
+      @document.file.attach(uploaded_file)
+      
+      if @document.save
+        create_audit_log(@school, 'create', ['document_upload'])
+        
+        respond_to do |format|
+          format.json { 
+            render json: { 
+              success: true, 
+              message: 'Document uploaded successfully and is being processed.',
+              document: document_json(@document)
+            } 
+          }
+        end
+      else
+        respond_to do |format|
+          format.json { 
+            render json: { 
+              success: false, 
+              errors: @document.errors.full_messages 
+            }, status: :unprocessable_entity 
+          }
+        end
+      end
+      
+    rescue => e
+      Rails.logger.error "Failed to upload document: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n") if Rails.env.development?
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: false, 
+            errors: ['Failed to upload document. Please try again.'] 
+          }, status: :internal_server_error 
+        }
+      end
+    end
+  end
+  
+  def delete_document
+    @school = current_school
+    
+    unless params[:document_id].present?
+      respond_to do |format|
+        format.json { render json: { success: false, errors: ['Document ID required'] }, status: :bad_request }
+      end
+      return
+    end
+    
+    @document = @school.place.documents.find_by(id: params[:document_id])
+    
+    unless @document
+      respond_to do |format|
+        format.json { render json: { success: false, errors: ['Document not found'] }, status: :not_found }
+      end
+      return
+    end
+    
+    document_filename = @document.filename
+    
+    if @document.destroy
+      create_audit_log(@school, 'delete', ['document'])
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true, 
+            message: "Document '#{document_filename}' deleted successfully." 
+          } 
+        }
+      end
+    else
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: false, 
+            errors: ['Failed to delete document'] 
+          }, status: :internal_server_error 
+        }
+      end
+    end
+  end
+  
+  def toggle_document_ai
+    @school = current_school
+    
+    unless params[:document_id].present?
+      respond_to do |format|
+        format.json { render json: { success: false, errors: ['Document ID required'] }, status: :bad_request }
+      end
+      return
+    end
+    
+    @document = @school.place.documents.find_by(id: params[:document_id])
+    
+    unless @document
+      respond_to do |format|
+        format.json { render json: { success: false, errors: ['Document not found'] }, status: :not_found }
+      end
+      return
+    end
+    
+    new_ai_status = !@document.ai_enabled?
+    
+    if @document.update(ai_enabled: new_ai_status)
+      # If AI was just enabled and document is processed but has no embedding, reprocess it
+      if new_ai_status && @document.processing_completed? && !@document.has_embedding?
+        @document.reprocess!
+      end
+      
+      create_audit_log(@school, 'update', ['document_ai_settings'])
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true, 
+            ai_enabled: new_ai_status,
+            message: new_ai_status ? 'AI processing enabled' : 'AI processing disabled',
+            document: document_json(@document)
+          } 
+        }
+      end
+    else
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: false, 
+            errors: @document.errors.full_messages 
+          }, status: :unprocessable_entity 
+        }
+      end
+    end
+  end
+  
+  def reprocess_document
+    @school = current_school
+    
+    unless params[:document_id].present?
+      respond_to do |format|
+        format.json { render json: { success: false, errors: ['Document ID required'] }, status: :bad_request }
+      end
+      return
+    end
+    
+    @document = @school.place.documents.find_by(id: params[:document_id])
+    
+    unless @document
+      respond_to do |format|
+        format.json { render json: { success: false, errors: ['Document not found'] }, status: :not_found }
+      end
+      return
+    end
+    
+    unless @document.can_reprocess?
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: false, 
+            errors: ['Document cannot be reprocessed in its current state'] 
+          }, status: :unprocessable_entity 
+        }
+      end
+      return
+    end
+    
+    if @document.reprocess!
+      create_audit_log(@school, 'update', ['document_reprocess'])
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true, 
+            message: 'Document reprocessing started',
+            document: document_json(@document)
+          } 
+        }
+      end
+    else
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: false, 
+            errors: ['Failed to start reprocessing'] 
+          }, status: :internal_server_error 
+        }
+      end
+    end
+  end
+  
+  def download_document
+    @school = current_school
+    
+    unless params[:document_id].present?
+      respond_to do |format|
+        format.json { render json: { success: false, errors: ['Document ID required'] }, status: :bad_request }
+      end
+      return
+    end
+    
+    @document = @school.place.documents.find_by(id: params[:document_id])
+    
+    unless @document
+      respond_to do |format|
+        format.json { render json: { success: false, errors: ['Document not found'] }, status: :not_found }
+        format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school), alert: 'Document not found') }
+      end
+      return
+    end
+    
+    unless @document.file.attached?
+      respond_to do |format|
+        format.json { render json: { success: false, errors: ['File not available'] }, status: :not_found }
+        format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school), alert: 'File not available') }
+      end
+      return
+    end
+    
+    # Increment download counter
+    @document.increment_download_count!
+    create_audit_log(@school, 'download', ['document'])
+    
+    # Redirect to the file
+    respond_to do |format|
+      format.json { render json: { success: true, download_url: @document.download_url } }
+      format.html { redirect_to @document.download_url }
+    end
+  end
+  
   private
   
   def find_photo_by_key(photo_key)
@@ -554,5 +958,125 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       action: action,
       changed_fields: { updated_fields: changed_fields }
     )
+  end
+  
+  def document_json(document)
+    {
+      id: document.id,
+      filename: document.filename,
+      original_filename: document.original_filename,
+      file_type: document.file_type_display,
+      file_size: document.file_size_display,
+      processing_status: document.processing_status,
+      processing_status_display: document.processing_status_display,
+      ai_enabled: document.ai_enabled?,
+      has_text: document.has_extracted_text?,
+      has_embedding: document.has_embedding?,
+      download_count: document.download_count,
+      created_at: document.created_at,
+      updated_at: document.updated_at,
+      can_reprocess: document.can_reprocess?,
+      text_preview: document.text_preview,
+      download_url: document.download_url,
+      preview_url: document.preview_url
+    }
+  end
+  
+  
+  private
+  
+  def get_or_create_conversation
+    @school.ai_conversations
+           .where(user: current_user)
+           .active
+           .recent
+           .first || create_new_conversation
+  end
+  
+  def create_new_conversation
+    @school.ai_conversations.create!(
+      user: current_user,
+      status: 'active',
+      title: "Chat #{Time.current.strftime('%b %d, %Y')}"
+    )
+  end
+  
+  def format_message(message)
+    {
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      message_type: message.message_type,
+      created_at: message.created_at.iso8601,
+      age_display: message.age_display,
+      sources: message.formatted_sources,
+      has_sources: message.has_sources?
+    }
+  end
+  
+  def chat_data
+    {
+      conversation: {
+        id: @conversation.id,
+        title: @conversation.title,
+        status: @conversation.status,
+        message_count: @conversation.message_count
+      },
+      messages: @messages.map { |msg| format_message(msg) },
+      suggested_questions: @suggested_questions || [],
+      school_summary: @school_summary,
+      school: {
+        id: @school.id,
+        name: @school.name,
+        completeness_score: calculate_completeness_score
+      }
+    }
+  end
+  
+  def get_suggested_questions
+    ai_service = AiChatService.new(@conversation)
+    result = ai_service.generate_suggested_questions(limit: 4)
+    result[:success] ? result[:questions] : default_suggested_questions
+  rescue
+    default_suggested_questions
+  end
+  
+  def get_school_summary
+    content_service = ContentRetrievalService.new(@school)
+    content_service.generate_school_summary
+  rescue => e
+    Rails.logger.error "School Summary Error: #{e.message}"
+    { error: 'Unable to generate school summary' }
+  end
+  
+  def calculate_completeness_score
+    content_service = ContentRetrievalService.new(@school)
+    summary = content_service.generate_school_summary
+    summary[:completeness_score] || 0
+  rescue => e
+    Rails.logger.error "Completeness Score Error: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    0
+  end
+  
+  def default_suggested_questions
+    [
+      {
+        text: "Tell me about your facilities and campus features",
+        metadata: { category: 'facilities', priority: 'high', source: 'default' }
+      },
+      {
+        text: "What is the tuition process for 5th grade students?",
+        metadata: { category: 'admissions', priority: 'high', source: 'default' }
+      },
+      {
+        text: "Describe your curriculum and academic programs",
+        metadata: { category: 'academics', priority: 'high', source: 'default' }
+      },
+      {
+        text: "How can I improve my school's profile completeness?",
+        metadata: { category: 'optimization', priority: 'medium', source: 'default' }
+      }
+    ]
   end
 end

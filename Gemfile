@@ -52,6 +52,15 @@ gem 'koala', '~> 3.5'
 # Download and process images
 gem 'down', '~> 5.0'
 
+# Document processing with Apache Tika (yomu2 is a maintained fork)
+gem 'yomu2', '~> 0.3.2'
+
+# Vector database support for AI integration
+gem 'pgvector', '~> 0.3.2'
+
+# HTTP client for API requests
+gem 'httparty', '~> 0.21'
+
 
 
 gem 'rgeo'
@@ -61,6 +70,8 @@ gem 'administrate'
 gem 'devise'
 gem 'view_component'
 gem 'foreman'
+gem "sentry-ruby"
+gem "sentry-rails"
 
 #gem 'iso3166'
 gem 'countries'
