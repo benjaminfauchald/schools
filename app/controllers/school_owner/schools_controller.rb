@@ -885,7 +885,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
           format.json { 
             render json: { 
               success: false, 
-              errors: ['This file has already been uploaded for this school'],
+              errors: ['This file is already uploaded: Delete the existing file and try again if you want to replace it.'],
               duplicate: true 
             }, status: :unprocessable_entity 
           }

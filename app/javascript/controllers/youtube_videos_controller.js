@@ -655,14 +655,8 @@ export default class extends Controller {
       if (data.success) {
         console.log('✅ TOGGLE_AI: Successfully toggled AI status')
         
-        // Update the video card with new transcript status
-        const mockVideo = {
-          video_key: videoKey,
-          video_id: videoKey,
-          transcript_status: data.transcript_status
-        }
-        
-        this.updateVideoStatuses([mockVideo])
+        // Update only the badge, not the entire video status
+        this.updateTranscriptBadgeOnly(videoKey, data.transcript_status)
         
         // Show success message
         const action = data.ai_enabled ? 'enabled' : 'disabled'
@@ -1242,6 +1236,44 @@ export default class extends Controller {
       }
     } else {
       console.log(`🔴 REMOVE: Video card not found for ${videoKey}`)
+    }
+  }
+
+  updateTranscriptBadgeOnly(videoKey, transcriptStatus) {
+    console.log(`🔄 UPDATE_BADGE_ONLY: Updating badge for ${videoKey}`)
+    const container = this.hasVideoGridTarget ? this.videoGridTarget : this.videosContainerTarget
+    if (!container) {
+      console.log('🔴 UPDATE_BADGE_ONLY: No container found')
+      return
+    }
+
+    const videoCard = container.querySelector(`[data-video-key="${videoKey}"]`)
+    if (!videoCard) {
+      console.log(`🔴 UPDATE_BADGE_ONLY: Video card not found for ${videoKey}`)
+      return
+    }
+
+    // Remove the current badge
+    const currentBadge = videoCard.querySelector('.absolute.top-1.left-1')
+    if (currentBadge) {
+      console.log(`🗑️ UPDATE_BADGE_ONLY: Removing current badge for ${videoKey}`)
+      currentBadge.remove()
+    }
+
+    // Create new badge HTML with the updated status
+    const mockVideo = { video_key: videoKey, transcript_status: transcriptStatus }
+    const newBadgeHtml = this.renderTranscriptBadge(mockVideo)
+    
+    if (newBadgeHtml) {
+      const badgeContainer = videoCard.querySelector('.relative.aspect-video')
+      if (badgeContainer) {
+        console.log(`✅ UPDATE_BADGE_ONLY: Inserting new badge for ${videoKey}`)
+        badgeContainer.insertAdjacentHTML('beforeend', newBadgeHtml)
+      } else {
+        console.log(`🔴 UPDATE_BADGE_ONLY: No badge container found for ${videoKey}`)
+      }
+    } else {
+      console.log(`🔴 UPDATE_BADGE_ONLY: No badge HTML generated for ${videoKey}`)
     }
   }
 }

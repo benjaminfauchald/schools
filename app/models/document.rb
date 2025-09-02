@@ -6,7 +6,7 @@ class Document < ApplicationRecord
   
   # Validations
   validates :filename, presence: true
-  validates :file_checksum, presence: true, uniqueness: { scope: :place_id, message: "File already uploaded for this place" }
+  validates :file_checksum, presence: true, uniqueness: { scope: :place_id, message: "This file is already uploaded: Delete the existing file and try again if you want to replace it." }
   validates :file, presence: true, on: :create
   validate :supported_file_type
   

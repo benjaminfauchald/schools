@@ -803,13 +803,13 @@ export default class extends Controller {
             <span class="text-lg flex-shrink-0">${icon}</span>
             <div class="flex-1 min-w-0">
               <div class="flex items-center space-x-2">
-                <div class="text-xs font-medium text-gray-900 truncate">
+                <div class="text-xs font-medium text-gray-900 break-words break-all">
                   ${this.escapeHtml(title)}
                 </div>
                 ${usageBadge}
               </div>
               <div class="text-xs text-gray-500">${typeLabel}</div>
-              ${subtitle ? `<div class="text-xs text-gray-400 mt-1">${subtitle}</div>` : ''}
+              ${subtitle ? `<div class="text-xs text-gray-400 mt-1 break-words">${subtitle}</div>` : ''}
             </div>
           </div>
           ${linkHTML}
