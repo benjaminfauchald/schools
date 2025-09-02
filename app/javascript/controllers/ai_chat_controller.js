@@ -29,32 +29,49 @@ export default class extends Controller {
     this.scrollToBottom()
     this.loadSuggestions()
     this.allSources = new Map() // Track all sources used in conversation
+    this.loadingButtons = new Set() // Track buttons in loading state
     
     // Load existing sources from the JSON script tag
     this.loadExistingSources()
     this.updateSourcesSidebar() // Initialize sidebar
+    
+    // Format existing messages with markdown
+    this.formatExistingMessages()
+    
+    // Load total available sources count
+    this.loadTotalSourcesCount()
   }
 
   // Send a user message to the AI
   async sendMessage(event) {
+    console.log('🔵 sendMessage called')
     event.preventDefault()
     
     const message = this.messageInputTarget.value.trim()
-    if (!message) return
+    console.log('🔵 Message to send:', message)
+    if (!message) {
+      console.log('🔴 No message to send, returning early')
+      return
+    }
 
     // Disable input while processing
+    console.log('🔵 Setting loading to true')
     this.setLoading(true)
     
     // Add user message to UI immediately
+    console.log('🔵 Adding user message to UI')
     this.addUserMessageToUI(message)
     
     // Clear input
     this.messageInputTarget.value = ""
     
     try {
+      console.log('🔵 About to call postMessage')
       const response = await this.postMessage(message)
+      console.log('🔵 postMessage response:', response)
       
       if (response.success) {
+        console.log('🔵 Response successful, adding assistant message')
         // Add assistant message to UI
         this.addAssistantMessageToUI(response.assistant_message)
         
@@ -68,6 +85,7 @@ export default class extends Controller {
           this.refreshSuggestions()
         }
       } else {
+        console.log('🔴 Response failed:', response.error)
         this.showErrorMessage(response.error)
         
         // Add error message to UI if available
@@ -77,21 +95,50 @@ export default class extends Controller {
       }
       
     } catch (error) {
-      console.error('AI Chat Error:', error)
+      console.error('🔴 AI Chat Error:', error)
       this.showErrorMessage('Failed to send message. Please try again.')
     } finally {
+      console.log('🔵 sendMessage finally block - setting loading to false')
       this.setLoading(false)
       this.scrollToBottom()
       this.messageInputTarget.focus()
+      console.log('🔵 sendMessage completed')
     }
   }
 
   // Send a suggested question
-  sendSuggestedQuestion(event) {
+  async sendSuggestedQuestion(event) {
     const message = event.currentTarget.dataset.message
+    const button = event.currentTarget
+    
+    console.log('🔵 sendSuggestedQuestion called', {
+      message: message,
+      button: button,
+      buttonText: button.textContent.trim(),
+      isQuickAction: !this.suggestedQuestionsTarget.contains(button)
+    })
+    
     if (message) {
+      // Add immediate visual feedback to the clicked button
+      console.log('🔵 Setting button loading to true')
+      this.setButtonLoading(button, true)
+      
+      // Set the message and send it
       this.messageInputTarget.value = message
-      this.sendMessage(event)
+      
+      // Call sendMessage and wait for completion
+      try {
+        console.log('🔵 About to call sendMessage')
+        await this.sendMessage(event)
+        console.log('🔵 sendMessage completed successfully')
+      } catch (error) {
+        console.error('🔴 Error sending suggested question:', error)
+      } finally {
+        // Always reset the button after completion
+        console.log('🔵 Finally block - resetting button', button)
+        this.setButtonLoading(button, false)
+        console.log('🔵 Button reset completed')
+      }
     }
   }
 
@@ -130,6 +177,14 @@ export default class extends Controller {
   // Run data analysis
   async runAnalysis(event) {
     if (event) event.preventDefault()
+    
+    // Store button reference FIRST before any DOM changes
+    const clickedButton = event ? event.currentTarget : null
+    const isQuickActionButton = clickedButton && clickedButton !== this.analysisButtonTarget
+    
+    if (isQuickActionButton) {
+      this.setButtonLoading(clickedButton, true)
+    }
     
     // Disable analysis button
     this.analysisButtonTarget.disabled = true
@@ -174,6 +229,11 @@ export default class extends Controller {
         </svg>
         Analyze Data
       `
+      
+      // Reset any Quick Action buttons that might have triggered this
+      if (isQuickActionButton) {
+        this.setButtonLoading(clickedButton, false)
+      }
     }
   }
 
@@ -202,12 +262,14 @@ export default class extends Controller {
 
   addUserMessageToUI(messageText) {
     const messageHTML = this.createUserMessageHTML(messageText)
-    this.messagesContainerTarget.insertAdjacentHTML('beforeend', messageHTML)
+    // Add new messages at the top (newest first)
+    this.messagesContainerTarget.querySelector('.space-y-6').insertAdjacentHTML('afterbegin', messageHTML)
   }
 
   addAssistantMessageToUI(messageData) {
     const messageHTML = this.createAssistantMessageHTML(messageData)
-    this.messagesContainerTarget.insertAdjacentHTML('beforeend', messageHTML)
+    // Add new messages at the top (newest first)
+    this.messagesContainerTarget.querySelector('.space-y-6').insertAdjacentHTML('afterbegin', messageHTML)
     
     // Add sources to sidebar
     if (messageData.sources && messageData.sources.length > 0) {
@@ -268,11 +330,44 @@ export default class extends Controller {
   }
 
   formatMessageContent(content) {
-    // Convert line breaks to HTML and escape HTML
-    return this.escapeHtml(content)
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br>')
-      .replace(/^(.+)$/, '<p>$1</p>')
+    // Basic markdown formatting with softer gray colors
+    let formatted = content
+    
+    // Headers (### becomes h3, ## becomes h2, # becomes h1)
+    formatted = formatted.replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold text-gray-700 mt-4 mb-2">$1</h3>')
+    formatted = formatted.replace(/^## (.+)$/gm, '<h2 class="text-xl font-semibold text-gray-700 mt-4 mb-2">$1</h2>')
+    formatted = formatted.replace(/^# (.+)$/gm, '<h1 class="text-2xl font-semibold text-gray-700 mt-4 mb-2">$1</h1>')
+    
+    // Bold text (**text** becomes <strong>)
+    formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-gray-700">$1</strong>')
+    
+    // Italic text (*text* becomes <em>)
+    formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-gray-600">$1</em>')
+    
+    // Unordered list items (- item becomes <li>)
+    formatted = formatted.replace(/^- (.+)$/gm, '<li class="ml-4 mb-1 text-gray-600">• $1</li>')
+    
+    // Wrap consecutive list items in <ul>
+    formatted = formatted.replace(/(<li[^>]*>.*<\/li>\s*)+/gs, '<ul class="list-none space-y-1 mb-3">$&</ul>')
+    
+    // Code blocks (```code``` becomes <pre><code>)
+    formatted = formatted.replace(/```([^`]+)```/gs, '<pre class="bg-gray-100 p-3 rounded text-sm font-mono overflow-x-auto mb-3 text-gray-700"><code>$1</code></pre>')
+    
+    // Inline code (`code` becomes <code>)
+    formatted = formatted.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-gray-700">$1</code>')
+    
+    // Paragraphs (double line breaks)
+    formatted = formatted.replace(/\n\n/g, '</p><p class="mb-3 text-gray-600">')
+    
+    // Single line breaks
+    formatted = formatted.replace(/\n/g, '<br>')
+    
+    // Wrap in paragraph if not already wrapped
+    if (!formatted.startsWith('<')) {
+      formatted = '<p class="mb-3 text-gray-600">' + formatted + '</p>'
+    }
+    
+    return formatted
   }
 
   formatSources(sources) {
@@ -353,19 +448,37 @@ export default class extends Controller {
   }
 
   updateSourceCount(count) {
+    console.log('🔵 updateSourceCount called with:', count)
+    console.log('🔵 hasSourceCountTarget:', this.hasSourceCountTarget)
+    console.log('🔵 hasSourceCountNumberTarget:', this.hasSourceCountNumberTarget)
+    
     if (this.hasSourceCountTarget && this.hasSourceCountNumberTarget) {
       this.sourceCountNumberTarget.textContent = count
+      console.log('🔵 Updated source count text to:', count)
+      
       if (count > 0) {
         this.sourceCountTarget.style.display = 'block'
+        console.log('🔵 Showing source count box')
       } else {
         this.sourceCountTarget.style.display = 'none'
+        console.log('🔵 Hiding source count box')
       }
+    } else {
+      console.log('🔴 Source count targets not found!')
     }
   }
 
   setLoading(loading) {
+    console.log('🔵 setLoading called', { 
+      loading: loading, 
+      loadingButtonsCount: this.loadingButtons.size 
+    })
+    
     this.sendButtonTarget.disabled = loading
     this.messageInputTarget.disabled = loading
+    
+    // Disable/enable all suggested question buttons
+    this.setSuggestedQuestionsLoading(loading)
     
     if (loading) {
       this.loadingMessageTarget.classList.remove('hidden')
@@ -373,7 +486,98 @@ export default class extends Controller {
     } else {
       this.loadingMessageTarget.classList.add('hidden')
       this.sendButtonTarget.classList.remove('opacity-50', 'cursor-not-allowed')
+      // Reset all suggested question buttons
+      console.log('🔵 About to reset all buttons')
+      this.resetAllSuggestedButtons()
+      // Reset all quick action buttons
+      this.resetAllQuickActionButtons()
+      console.log('🔵 All buttons reset completed')
     }
+  }
+
+  setButtonLoading(button, loading) {
+    console.log('🔵 setButtonLoading called', { 
+      loading: loading, 
+      button: button,
+      buttonText: button.textContent.trim(),
+      hasOriginalContent: button.hasAttribute('data-original-content')
+    })
+    
+    if (loading) {
+      // Track this button as loading
+      this.loadingButtons.add(button)
+      console.log('🔵 Added button to tracking, total:', this.loadingButtons.size)
+      
+      button.disabled = true
+      button.classList.add('opacity-75', 'cursor-not-allowed')
+      
+      // Add a loading spinner to the button
+      const originalContent = button.innerHTML
+      button.setAttribute('data-original-content', originalContent)
+      console.log('🔵 Stored original content:', originalContent.substring(0, 100))
+      
+      button.innerHTML = `
+        <div class="flex items-start">
+          <svg class="w-4 h-4 text-blue-500 mr-3 mt-0.5 flex-shrink-0 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span class="text-gray-600">Sending question...</span>
+        </div>
+      `
+      console.log('🔵 Button loading state applied')
+    } else {
+      // Remove from tracking
+      this.loadingButtons.delete(button)
+      console.log('🔵 Removed button from tracking, remaining:', this.loadingButtons.size)
+      
+      button.disabled = false
+      button.classList.remove('opacity-75', 'cursor-not-allowed')
+      
+      // Restore original content
+      const originalContent = button.getAttribute('data-original-content')
+      console.log('🔵 Restoring original content:', originalContent ? originalContent.substring(0, 100) : 'NONE')
+      
+      if (originalContent) {
+        button.innerHTML = originalContent
+        button.removeAttribute('data-original-content')
+        console.log('🔵 Original content restored')
+      } else {
+        console.log('🔴 No original content found!')
+      }
+    }
+  }
+
+  setSuggestedQuestionsLoading(loading) {
+    const suggestedButtons = this.suggestedQuestionsTarget.querySelectorAll('button')
+    suggestedButtons.forEach(button => {
+      button.disabled = loading
+      if (loading) {
+        button.classList.add('opacity-50', 'cursor-not-allowed')
+      } else {
+        button.classList.remove('opacity-50', 'cursor-not-allowed')
+      }
+    })
+  }
+
+  resetAllSuggestedButtons() {
+    const suggestedButtons = this.suggestedQuestionsTarget.querySelectorAll('button')
+    suggestedButtons.forEach(button => {
+      this.setButtonLoading(button, false)
+    })
+  }
+
+  resetAllQuickActionButtons() {
+    console.log('🔵 resetAllQuickActionButtons called, buttons to reset:', this.loadingButtons.size)
+    
+    // Reset all buttons that are currently being tracked as loading
+    this.loadingButtons.forEach((button, index) => {
+      console.log(`🔵 Resetting button ${index + 1}:`, button.textContent.trim())
+      this.setButtonLoading(button, false)
+    })
+    
+    // Also clear the set
+    this.loadingButtons.clear()
+    console.log('🔵 All loading buttons cleared')
   }
 
   showErrorMessage(message) {
@@ -397,7 +601,8 @@ export default class extends Controller {
   }
 
   scrollToBottom() {
-    this.messagesContainerTarget.scrollTop = this.messagesContainerTarget.scrollHeight
+    // Since messages are now ordered newest first (top), scroll to top for new messages
+    this.messagesContainerTarget.scrollTop = 0
   }
 
   formatTimeDisplay(date) {
@@ -493,13 +698,40 @@ export default class extends Controller {
 
     this.sourcesSidebarTarget.innerHTML = `
       <div class="text-xs text-gray-500 mb-3">
-        ${sortedSources.length} source${sortedSources.length !== 1 ? 's' : ''} referenced
+        ${sortedSources.length} unique source${sortedSources.length !== 1 ? 's' : ''} referenced in conversation
       </div>
       ${sourcesHTML}
     `
-    
-    // Update header source count
-    this.updateSourceCount(sortedSources.length)
+  }
+
+  async loadTotalSourcesCount() {
+    try {
+      // Create URL for sources count endpoint
+      const sourcesCountUrl = this.messagesUrlValue.replace('/ai_chat_message', '/sources_count')
+      
+      const response = await fetch(sourcesCountUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-Token': this.getCSRFToken()
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const totalCount = data.total_sources || 0
+        
+        // Update header with total available sources
+        this.updateSourceCount(totalCount)
+      } else {
+        // Fallback: hide the counter
+        this.updateSourceCount(0)
+      }
+    } catch (error) {
+      console.error('Failed to load total sources count:', error)
+      // Fallback: hide the counter
+      this.updateSourceCount(0)
+    }
   }
 
   createSourceItemHTML(source) {
@@ -614,6 +846,16 @@ export default class extends Controller {
     } catch (error) {
       console.error('Error loading existing sources:', error)
     }
+  }
+
+  formatExistingMessages() {
+    // Find all existing message content elements and format them
+    const messageElements = document.querySelectorAll('[data-ai-chat-target="messageContent"]')
+    messageElements.forEach(element => {
+      const rawContent = element.textContent
+      const formattedContent = this.formatMessageContent(rawContent)
+      element.innerHTML = formattedContent
+    })
   }
 
   getCSRFToken() {

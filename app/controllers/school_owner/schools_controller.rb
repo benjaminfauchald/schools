@@ -1,5 +1,5 @@
 class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
-  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :import_website_data, :import_status, :upload_document, :delete_document, :toggle_document_ai, :reprocess_document, :download_document, :ai_chat, :ai_chat_message, :ai_suggestions, :ai_analysis]
+  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :generate_transcript, :import_website_data, :import_status, :upload_document, :delete_document, :toggle_document_ai, :reprocess_document, :download_document, :ai_chat, :ai_chat_message, :ai_suggestions, :ai_analysis]
   
   def index
     @schools = current_user.owned_schools.includes(:place)
@@ -139,6 +139,99 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
         success: false,
         error: 'Unable to analyze school data at this time'
       }, status: :internal_server_error
+    end
+  end
+
+  def sources_count
+    begin
+      @school = current_school unless @school
+      Rails.logger.info "🔍 Sources count request for school: #{@school.id}"
+      
+      # Count total available sources for this school
+      total_sources = 0
+      
+      # Count documents that are AI-enabled (with error handling)
+      begin
+        if @school.place&.respond_to?(:documents)
+          doc_count = @school.place.documents.where(ai_enabled: true).count
+          total_sources += doc_count
+          Rails.logger.info "📄 Documents: #{doc_count}"
+        end
+      rescue => e
+        Rails.logger.error "Error counting documents: #{e.message}"
+      end
+      
+      # Count videos with completed transcripts (with error handling)
+      begin
+        if @school.place && @school.place.respond_to?(:youtube_videos)
+          # Count videos that have completed transcripts (not individual segments)
+          video_count = @school.place.youtube_videos
+            .joins("INNER JOIN transcripts ON transcripts.place_id = youtube_videos.place_id AND transcripts.video_id = youtube_videos.video_id")
+            .where("transcripts.status = 'completed'")
+            .count
+          total_sources += video_count
+          Rails.logger.info "🎥 Videos with transcripts: #{video_count}"
+        else
+          Rails.logger.info "🎥 No place or YouTube videos available"
+        end
+      rescue => e
+        Rails.logger.error "Error counting video transcripts: #{e.message}"
+      end
+      
+      # Count school data fields (basic profile fields that have content)
+      school_fields = ['about', 'mission', 'vision', 'accreditation']
+      school_fields_count = 0
+      school_fields.each do |field|
+        begin
+          if @school.respond_to?(field) && @school.send(field).present?
+            school_fields_count += 1
+          end
+        rescue => e
+          Rails.logger.error "Error checking field #{field}: #{e.message}"
+        end
+      end
+      total_sources += school_fields_count
+      Rails.logger.info "🏫 School fields: #{school_fields_count}"
+      
+      # Count place data fields from Google Places
+      place_fields_count = 0
+      if @school.place
+        place_fields = ['website', 'phone', 'formatted_address', 'business_status']
+        place_fields.each do |field|
+          begin
+            if @school.place.respond_to?(field) && @school.place.send(field).present?
+              place_fields_count += 1
+            end
+          rescue => e
+            Rails.logger.error "Error checking place field #{field}: #{e.message}"
+          end
+        end
+      end
+      total_sources += place_fields_count
+      Rails.logger.info "📍 Place fields: #{place_fields_count}"
+      
+      Rails.logger.info "✅ Total sources: #{total_sources}"
+      
+      render json: {
+        success: true,
+        total_sources: total_sources,
+        breakdown: {
+          documents: doc_count || 0,
+          videos: video_count || 0,
+          school_fields: school_fields_count || 0,
+          place_fields: place_fields_count || 0
+        }
+      }
+      
+    rescue => e
+      Rails.logger.error "Sources Count Error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      
+      render json: {
+        success: false,
+        error: 'Unable to count sources at this time',
+        total_sources: 0
+      }
     end
   end
   
@@ -345,6 +438,37 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       return
     end
     
+    # Handle lightweight polling requests (just return current transcript status)
+    if params[:poll_only] == 'true'
+      Rails.logger.info "📊 POLL: Polling request for school #{@school.id}"
+      
+      videos_with_status = @school.place.youtube_videos.ordered.map do |video|
+        transcript_status = video.transcript_processing_status
+        Rails.logger.info "📊 POLL: Video #{video.video_id} status: #{transcript_status[:status]}"
+        {
+          video_id: video.video_id,
+          video_key: video.video_key,
+          transcript_status: transcript_status,
+          has_transcript: video.has_transcript?,
+          can_retry_transcript: video.can_retry_transcript?
+        }
+      end
+      
+      processing_count = videos_with_status.count { |v| v[:transcript_status][:status] == 'processing' }
+      Rails.logger.info "📊 POLL: Returning #{videos_with_status.length} videos, #{processing_count} processing"
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true, 
+            videos: videos_with_status,
+            poll_only: true
+          } 
+        }
+      end
+      return
+    end
+    
     # Check if we should force refresh from API
     force_refresh = params[:refresh] == 'true'
     
@@ -355,6 +479,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     # Serve from database if we have videos and don't need refresh
     if @school.place.youtube_videos.any? && !force_refresh && !videos_need_refresh
       videos_with_visibility = @school.place.youtube_videos.ordered.map do |video|
+        transcript_status = video.transcript_processing_status
         {
           video_id: video.video_id,
           title: video.title,
@@ -366,7 +491,11 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
           visible: video.visible,
           video_key: video.video_key,
           duration_formatted: video.duration_display,
-          view_count_formatted: video.view_count_display
+          view_count_formatted: video.view_count_display,
+          transcript_status: transcript_status,
+          has_transcript: video.has_transcript?,
+          can_retry_transcript: video.can_retry_transcript?,
+          transcript_segments_count: video.transcript_segments_count
         }.merge(video.video_data || {})
       end
       
@@ -395,11 +524,12 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       # Save videos to database
       @school.place.youtube_videos.destroy_all # Clear old videos
       
+      created_videos = []
       result[:videos].each_with_index do |video_data, index|
         # Check if this video should be visible based on existing visibility settings
         visible = @school.video_visible?(video_data)
         
-        @school.place.youtube_videos.create!(
+        video = @school.place.youtube_videos.create!(
           video_id: video_data[:video_id] || video_data['video_id'],
           title: video_data[:title] || video_data['title'],
           description: video_data[:description] || video_data['description'],
@@ -411,10 +541,18 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
           visible: visible,
           sort_order: index
         )
+        created_videos << video
+      end
+      
+      # Queue transcript processing for all created videos
+      Rails.logger.info "🎬 Queuing transcript processing for #{created_videos.count} videos"
+      created_videos.each do |video|
+        video.queue_transcript_processing
       end
       
       # Return the saved videos with visibility information
       videos_with_visibility = @school.place.youtube_videos.ordered.map do |video|
+        transcript_status = video.transcript_processing_status
         {
           video_id: video.video_id,
           title: video.title,
@@ -426,7 +564,11 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
           visible: video.visible,
           video_key: video.video_key,
           duration_formatted: video.duration_display,
-          view_count_formatted: video.view_count_display
+          view_count_formatted: video.view_count_display,
+          transcript_status: transcript_status,
+          has_transcript: video.has_transcript?,
+          can_retry_transcript: video.can_retry_transcript?,
+          transcript_segments_count: video.transcript_segments_count
         }.merge(video.video_data || {})
       end
       
@@ -489,6 +631,100 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     else
       respond_to do |format|
         format.json { render json: { success: false, message: 'Failed to update video visibility.', errors: video.errors.full_messages } }
+      end
+    end
+  end
+  
+  def generate_transcript
+    Rails.logger.info "🎬 Generate transcript request - Video: #{params[:video_key]}, School: #{params[:school_id]}, User: #{current_user&.email}"
+    Rails.logger.info "🎬 All params: #{params.inspect}"
+    
+    begin
+      @school = current_school
+      Rails.logger.info "✅ School loaded: #{@school.name} (ID: #{@school.id})"
+      
+      unless params[:video_key].present?
+        Rails.logger.warn "❌ No video key provided"
+        respond_to do |format|
+          format.json { render json: { success: false, message: 'Video key is required.' }, status: :bad_request }
+        end
+        return
+      end
+      
+      # Find the video in the database
+      Rails.logger.info "🔍 Looking for video: #{params[:video_key]} in school's YouTube videos"
+      video = @school.place.youtube_videos.find_by(video_id: params[:video_key])
+      unless video
+        Rails.logger.warn "❌ Video not found: #{params[:video_key]}"
+        respond_to do |format|
+          format.json { render json: { success: false, message: 'Video not found.' }, status: :not_found }
+        end
+        return
+      end
+      
+      Rails.logger.info "✅ Video found: #{video.title} - Status: #{video.transcript_status}"
+      
+      # Check if transcript is already processing or completed
+      if video.transcript_status == 'processing'
+        Rails.logger.info "❌ Transcript already processing"
+        respond_to do |format|
+          format.json { render json: { success: false, message: 'Transcript is already being processed.' }, status: :bad_request }
+        end
+        return
+      end
+      
+      if video.transcript_status == 'completed'
+        Rails.logger.info "❌ Transcript already completed"
+        respond_to do |format|
+          format.json { render json: { success: false, message: 'Transcript already exists for this video.' }, status: :bad_request }
+        end
+        return
+      end
+      
+      # Allow retries for failed transcripts
+      if video.transcript_status == 'failed'
+        Rails.logger.info "🔄 Retrying failed transcript for video: #{video.video_id}"
+      else
+        Rails.logger.info "🆕 Starting new transcript for video: #{video.video_id}"
+      end
+      
+      # Queue transcript processing
+      Rails.logger.info "🚀 Attempting to queue transcript processing for video: #{video.video_id}"
+      result = video.queue_transcript_processing
+      Rails.logger.info "📊 Queue result: #{result}"
+      
+      if result
+        create_audit_log(@school, 'create', ['video_transcript'])
+        Rails.logger.info "✅ Transcript processing queued successfully"
+        
+        respond_to do |format|
+          format.json { 
+            render json: { 
+              success: true,
+              message: 'Transcript generation started. This may take a few minutes.'
+            } 
+          }
+        end
+      else
+        Rails.logger.warn "❌ Failed to queue transcript processing"
+        respond_to do |format|
+          format.json { render json: { success: false, message: 'Failed to start transcript generation. Video may not have captions available.' } }
+        end
+      end
+      
+    rescue => e
+      Rails.logger.error "🚨 Generate transcript error for video #{params[:video_key]}: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: false, 
+            message: 'An error occurred while starting transcript generation. Please try again.',
+            error_details: Rails.env.development? ? e.message : nil
+          }, 
+          status: :internal_server_error 
+        }
       end
     end
   end

@@ -35,6 +35,7 @@ Rails.application.routes.draw do
         patch :toggle_photo_visibility
         get :fetch_videos
         patch :toggle_video_visibility
+        post 'youtube_videos/:video_key/generate_transcript', action: :generate_transcript, as: :generate_video_transcript
         post :import_website_data
         get :import_status
         post :upload_document
@@ -46,6 +47,7 @@ Rails.application.routes.draw do
         post :ai_chat_message
         get :ai_suggestions
         get :ai_analysis
+        get :sources_count
       end
       resources :pages, except: [:show] do
         collection do
