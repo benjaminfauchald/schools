@@ -36,7 +36,19 @@ class CheckTranscriptJobStatusJob < ApplicationJob
         
       when 'failed', 'error'
         Rails.logger.error "❌ Supadata job failed: #{supadata_job_id} - #{status_result[:error]}"
-        transcript.mark_failed!(status_result[:error] || 'Supadata processing failed')
+        error_msg = status_result[:error] || 'Supadata processing failed'
+        
+        # Check if this is a "no transcript" case based on error message
+        if error_msg.match?(/no captions|no speech|video too short|no audio|video not found/i)
+          transcript.mark_no_transcript!(error_msg)
+          Rails.logger.info "📝 Marked as no transcript: #{supadata_job_id} - #{error_msg}"
+        else
+          transcript.mark_failed!(error_msg)
+        end
+        
+      when 'no_transcript', 'no_captions', 'no_speech'
+        Rails.logger.info "📝 Supadata job completed with no transcript: #{supadata_job_id}"
+        transcript.mark_no_transcript!(status_result[:message] || 'No speech content available')
         
       else
         Rails.logger.warn "❓ Unknown Supadata job status: #{status_result[:status]}"

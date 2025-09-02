@@ -1,5 +1,5 @@
 class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
-  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :generate_transcript, :import_website_data, :import_status, :upload_document, :delete_document, :toggle_document_ai, :reprocess_document, :download_document, :ai_chat, :ai_chat_message, :ai_suggestions, :ai_analysis]
+  before_action :set_school, only: [:show, :edit, :update, :academic_programs, :update_academic_programs, :facilities, :update_facilities, :toggle_photo_visibility, :fetch_videos, :toggle_video_visibility, :generate_transcript, :toggle_transcript_ai, :import_website_data, :import_status, :upload_document, :delete_document, :toggle_document_ai, :reprocess_document, :download_document, :ai_chat, :ai_chat_message, :ai_suggestions, :ai_analysis]
   
   def index
     @schools = current_user.owned_schools.includes(:place)
@@ -164,10 +164,10 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       # Count videos with completed transcripts (with error handling)
       begin
         if @school.place && @school.place.respond_to?(:youtube_videos)
-          # Count videos that have completed transcripts (not individual segments)
+          # Count videos that have completed transcripts AND are AI-enabled
           video_count = @school.place.youtube_videos
             .joins("INNER JOIN transcripts ON transcripts.place_id = youtube_videos.place_id AND transcripts.video_id = youtube_videos.video_id")
-            .where("transcripts.status = 'completed'")
+            .where("transcripts.status = 'completed' AND transcripts.ai_enabled = true")
             .count
           total_sources += video_count
           Rails.logger.info "🎥 Videos with transcripts: #{video_count}"
@@ -721,6 +721,80 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
           render json: { 
             success: false, 
             message: 'An error occurred while starting transcript generation. Please try again.',
+            error_details: Rails.env.development? ? e.message : nil
+          }, 
+          status: :internal_server_error 
+        }
+      end
+    end
+  end
+  
+  def toggle_transcript_ai
+    Rails.logger.info "🔄 Toggle transcript AI request - Video: #{params[:video_key]}, School: #{params[:school_id]}"
+    
+    begin
+      @school = current_school
+      
+      unless params[:video_key].present?
+        Rails.logger.warn "❌ No video key provided"
+        respond_to do |format|
+          format.json { render json: { success: false, message: 'Video key is required.' }, status: :bad_request }
+        end
+        return
+      end
+      
+      # Find the video and its transcript
+      video = @school.place.youtube_videos.find_by(video_id: params[:video_key])
+      unless video
+        Rails.logger.warn "❌ Video not found: #{params[:video_key]}"
+        respond_to do |format|
+          format.json { render json: { success: false, message: 'Video not found.' }, status: :not_found }
+        end
+        return
+      end
+      
+      transcript = video.transcript_record
+      unless transcript&.completed?
+        Rails.logger.warn "❌ No completed transcript found for: #{params[:video_key]}"
+        respond_to do |format|
+          format.json { render json: { success: false, message: 'No completed transcript available.' }, status: :bad_request }
+        end
+        return
+      end
+      
+      # Toggle the AI enabled status
+      new_status = !transcript.ai_enabled?
+      transcript.update!(ai_enabled: new_status)
+      
+      action = new_status ? 'enabled' : 'disabled'
+      Rails.logger.info "✅ Transcript AI #{action} for video: #{video.video_id}"
+      
+      # Create audit log
+      create_audit_log(@school, 'update', ["transcript_ai_#{action}"])
+      
+      # Return updated status
+      updated_status = video.transcript_processing_status
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: true,
+            message: "Transcript #{action} for AI use.",
+            ai_enabled: new_status,
+            transcript_status: updated_status
+          } 
+        }
+      end
+      
+    rescue => e
+      Rails.logger.error "🚨 Toggle transcript AI error for video #{params[:video_key]}: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      
+      respond_to do |format|
+        format.json { 
+          render json: { 
+            success: false, 
+            message: 'An error occurred while toggling transcript AI status. Please try again.',
             error_details: Rails.env.development? ? e.message : nil
           }, 
           status: :internal_server_error 

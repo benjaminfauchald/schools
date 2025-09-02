@@ -84,25 +84,40 @@ class YoutubeVideo < ApplicationRecord
   end
   
   def transcript_processing_status
-    case transcript_status
+    transcript = transcript_record
+    base_status = case transcript_status
     when 'completed'
-      { status: 'completed', message: 'Transcript available', badge_class: 'success' }
+      if transcript&.ai_enabled?
+        { status: 'completed', message: 'Transcript used for AI', badge_class: 'success' }
+      else
+        { status: 'completed_disabled', message: 'Transcript not used for AI', badge_class: 'secondary' }
+      end
     when 'processing'
       # Check if processing job is stuck (processing for more than 10 minutes)
-      if transcript_record && transcript_record.updated_at < 10.minutes.ago
+      if transcript && transcript.updated_at < 10.minutes.ago
         { status: 'failed', message: 'Processing timed out', badge_class: 'error' }
       else
-        processing_time = transcript_record ? ((Time.current - transcript_record.updated_at) / 60).round(0) : 0
+        processing_time = transcript ? ((Time.current - transcript.updated_at) / 60).round(0) : 0
         message = processing_time > 0 ? "Processing (#{processing_time}m)..." : "Processing transcript..."
         { status: 'processing', message: message, badge_class: 'warning' }
       end
     when 'failed'
       { status: 'failed', message: 'Transcript failed', badge_class: 'error' }
+    when 'no_transcript'
+      { status: 'no_transcript', message: 'No transcript', badge_class: 'secondary' }
     when 'pending'
       { status: 'pending', message: 'Transcript queued', badge_class: 'info' }
     else
       { status: 'not_started', message: 'No transcript', badge_class: 'secondary' }
     end
+
+    # Add AI enablement info for completed transcripts
+    if transcript&.completed?
+      base_status[:ai_enabled] = transcript.ai_enabled?
+      base_status[:can_toggle] = true
+    end
+
+    base_status
   end
   
   def can_retry_transcript?
@@ -113,6 +128,9 @@ class YoutubeVideo < ApplicationRecord
     if status == 'processing' && transcript_record && transcript_record.updated_at < 10.minutes.ago
       return true
     end
+    
+    # Don't allow retry for videos that legitimately have no transcript
+    return false if status == 'no_transcript'
     
     false
   end

@@ -165,10 +165,80 @@ class Document < ApplicationRecord
   def self.search_by_text(query, limit: 10)
     return none if query.blank?
     
-    where("extracted_text ILIKE ?", "%#{query}%")
+    # Normalize query for better matching
+    normalized_query = normalize_search_query(query)
+    
+    # Extract meaningful keywords from the query
+    keywords = extract_keywords(query)
+    
+    # Build search conditions for both exact and normalized queries
+    search_conditions = []
+    search_params = []
+    
+    # Original query search (for exact phrase matches)
+    search_conditions << "extracted_text ILIKE ?"
+    search_params << "%#{query}%"
+    
+    # Normalized query search (if different from original)
+    if normalized_query != query
+      search_conditions << "extracted_text ILIKE ?"
+      search_params << "%#{normalized_query}%"
+    end
+    
+    # Keyword-based search (more flexible)
+    if keywords.any?
+      # Use OR condition for individual keywords to be more permissive
+      keyword_conditions = keywords.map { "extracted_text ILIKE ?" }.join(" OR ")
+      search_conditions << "(#{keyword_conditions})"
+      search_params.concat(keywords.map { |word| "%#{word}%" })
+      
+      # Also try combinations of keywords
+      if keywords.length >= 2
+        # Try pairs of keywords with AND (more specific matches)
+        keywords.combination(2).each do |word1, word2|
+          search_conditions << "(extracted_text ILIKE ? AND extracted_text ILIKE ?)"
+          search_params.concat(["%#{word1}%", "%#{word2}%"])
+        end
+      end
+    end
+    
+    where(search_conditions.join(" OR "), *search_params)
       .processing_completed
+      .distinct
       .limit(limit)
       .order(:filename)
+  end
+  
+  # Normalize search query to handle punctuation and formatting variations
+  def self.normalize_search_query(query)
+    # Remove common punctuation that might interfere with matching
+    normalized = query.gsub(/[,\.;:!?]/, ' ')
+    # Collapse multiple spaces
+    normalized = normalized.gsub(/\s+/, ' ')
+    # Trim whitespace
+    normalized.strip
+  end
+  
+  # Extract meaningful keywords from a query by removing stop words and cleaning punctuation
+  def self.extract_keywords(query)
+    # Common English stop words to exclude from search
+    stop_words = %w[
+      a an and are as at be been by for from has he in is it its of on that the 
+      to was what will with would who where when why how which this these those
+      about above after against all along among any around before between both 
+      but can could did do does each either even every few first get given go
+    ].to_set
+    
+    # Split query into words and clean them
+    words = query.downcase
+                .gsub(/[^\w\s]/, ' ')  # Replace punctuation with spaces
+                .split(/\s+/)         # Split on whitespace
+                .reject(&:blank?)     # Remove empty strings
+                .reject { |word| stop_words.include?(word) }  # Remove stop words
+                .reject { |word| word.length < 2 }           # Remove single characters
+                .uniq                 # Remove duplicates
+    
+    words
   end
   
   def self.processing_stats

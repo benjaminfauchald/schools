@@ -149,12 +149,15 @@ class ContentRetrievalService
     document_results = @document_search.search_by_text(query, limit: limit)
     
     document_results[:results].map do |doc|
+      # Extract relevant excerpt from the document
+      relevant_excerpt = extract_relevant_document_excerpt(doc.extracted_text, query, max_length: 800)
+      
       {
         type: 'document',
         id: doc.id,
         title: doc.filename,
-        content: doc.extracted_text&.truncate(500),
-        relevance_score: 0.8, # Document matches are generally high relevance
+        content: relevant_excerpt,
+        relevance_score: calculate_document_relevance_score(doc.extracted_text, query),
         metadata: {
           file_type: doc.file_type_display,
           file_size: doc.file_size_display,
@@ -170,7 +173,7 @@ class ContentRetrievalService
     items = []
     query_terms = query.downcase.split
     
-    @place.transcripts.processed.each do |transcript|
+    @place.transcripts.processed.ai_enabled.each do |transcript|
       # Search in full transcript
       if transcript.full_transcript.present? && matches_query?(transcript.full_transcript, query_terms)
         items << {
@@ -610,5 +613,84 @@ class ContentRetrievalService
         description: 'Automated analysis of school profile data completeness'
       }
     ]
+  end
+  
+  # Extract relevant excerpt from document content based on query match
+  def extract_relevant_document_excerpt(text, query, max_length: 800)
+    return text.truncate(max_length) unless text.present? && query.present?
+    
+    # Normalize query for matching
+    query_terms = query.downcase.split(/\s+/)
+    text_lower = text.downcase
+    
+    # Find the position of the best match
+    best_match_pos = nil
+    best_match_score = 0
+    
+    # Try to find exact query match first
+    exact_pos = text_lower.index(query.downcase)
+    if exact_pos
+      best_match_pos = exact_pos
+      best_match_score = 1.0
+    else
+      # Look for partial matches with individual terms
+      query_terms.each do |term|
+        pos = text_lower.index(term)
+        if pos
+          # Count how many other terms appear nearby
+          nearby_text = text_lower[pos, 200] # Check 200 chars around
+          nearby_score = query_terms.count { |t| nearby_text.include?(t) }
+          
+          if nearby_score > best_match_score
+            best_match_pos = pos
+            best_match_score = nearby_score.to_f / query_terms.length
+          end
+        end
+      end
+    end
+    
+    return text.truncate(max_length) unless best_match_pos
+    
+    # Extract context around the match
+    context_size = max_length / 2
+    start_pos = [best_match_pos - context_size, 0].max
+    end_pos = [best_match_pos + context_size, text.length].min
+    
+    excerpt = text[start_pos...end_pos]
+    
+    # Add ellipsis if we're not at the beginning/end
+    excerpt = "...#{excerpt}" if start_pos > 0
+    excerpt = "#{excerpt}..." if end_pos < text.length
+    
+    excerpt
+  end
+  
+  # Calculate relevance score for document matches
+  def calculate_document_relevance_score(text, query)
+    return 0.5 unless text.present? && query.present?
+    
+    text_lower = text.downcase
+    query_lower = query.downcase
+    query_terms = query_lower.split(/\s+/)
+    
+    score = 0.0
+    
+    # Exact phrase match gets highest score
+    if text_lower.include?(query_lower)
+      score += 1.0
+    else
+      # Partial matches
+      matches = query_terms.count { |term| text_lower.include?(term) }
+      score += (matches.to_f / query_terms.length) * 0.8
+    end
+    
+    # Bonus for multiple occurrences
+    query_terms.each do |term|
+      occurrences = text_lower.scan(term).length
+      score += (occurrences - 1) * 0.1 if occurrences > 1
+    end
+    
+    # Cap at 1.0
+    [score, 1.0].min
   end
 end

@@ -11,7 +11,8 @@ class Transcript < ApplicationRecord
     pending: 'pending',
     processing: 'processing', 
     completed: 'completed',
-    failed: 'failed'
+    failed: 'failed',
+    no_transcript: 'no_transcript'
   }
   
   scope :processed, -> { where(status: 'completed') }
@@ -19,10 +20,17 @@ class Transcript < ApplicationRecord
   scope :pending_processing, -> { where(status: ['pending', 'processing']) }
   scope :recent, -> { order(created_at: :desc) }
   scope :by_language, ->(lang) { where(language: lang) }
+  scope :ai_enabled, -> { where(ai_enabled: true) }
+  scope :ai_disabled, -> { where(ai_enabled: false) }
   
   # Check if transcript has been successfully processed
   def processed?
     status == 'completed' && full_transcript.present?
+  end
+
+  # Check if transcript is available for AI use
+  def available_for_ai?
+    processed? && ai_enabled?
   end
   
   # Check if transcript has segments
@@ -151,6 +159,15 @@ class Transcript < ApplicationRecord
       processed_at: Time.current
     )
   end
+
+  # Mark as no transcript (for videos without speech/captions)
+  def mark_no_transcript!(reason)
+    update!(
+      status: 'no_transcript',
+      processing_error: reason,
+      processed_at: Time.current
+    )
+  end
   
   # Class methods for statistics and management
   def self.processing_stats
@@ -160,6 +177,7 @@ class Transcript < ApplicationRecord
       processing: where(status: 'processing').count,
       failed: where(status: 'failed').count,
       pending: where(status: 'pending').count,
+      no_transcript: where(status: 'no_transcript').count,
       with_embeddings: where.not(embedding: [nil, '']).count
     }
   end

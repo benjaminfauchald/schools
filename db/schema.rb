@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_02_143504) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_02_172524) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -567,6 +567,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_02_143504) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "processing_job_id"
+    t.boolean "ai_enabled", default: true, null: false
+    t.index ["ai_enabled"], name: "index_transcripts_on_ai_enabled"
     t.index ["place_id", "video_id"], name: "index_transcripts_on_place_id_and_video_id", unique: true
     t.index ["place_id"], name: "index_transcripts_on_place_id"
     t.index ["processed_at"], name: "index_transcripts_on_processed_at"

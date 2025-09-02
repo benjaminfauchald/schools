@@ -857,7 +857,7 @@
 
                   <!-- YouTube Channel Info -->
                   <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between mb-3">
                       <div>
                         <h3 class="text-sm font-medium text-gray-900">Connected YouTube Channel</h3>
                         <p class="text-sm text-gray-600 mt-1"><%= @school.youtube_url %></p>
@@ -870,6 +870,24 @@
                         </svg>
                         View Channel
                       </a>
+                    </div>
+                    
+                    <!-- Bulk Actions -->
+                    <div class="border-t border-gray-200 pt-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-sm text-gray-600">Generate AI transcripts for videos without transcripts</p>
+                          <p class="text-xs text-gray-500 mt-0.5">This may take several minutes to complete</p>
+                        </div>
+                        <button type="button" 
+                                id="generateAllTranscriptsBtn"
+                                class="inline-flex items-center px-4 py-2 border border-blue-300 shadow-sm text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                          </svg>
+                          Generate All Transcripts
+                        </button>
+                      </div>
                     </div>
                   </div>
 

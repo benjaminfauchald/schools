@@ -98,8 +98,8 @@ class ProcessVideoTranscriptJob < ApplicationJob
       
       Rails.logger.info "🎉 Transcript completed for #{@youtube_video.video_id}: #{segments_data.count} segments"
     else
-      @transcript.mark_failed!("Empty transcript received from API")
-      Rails.logger.warn "⚠️ Empty transcript for #{@youtube_video.video_id}"
+      @transcript.mark_no_transcript!("No speech content detected in video")
+      Rails.logger.warn "📝 No transcript content for #{@youtube_video.video_id}"
     end
   end
   
@@ -127,12 +127,12 @@ class ProcessVideoTranscriptJob < ApplicationJob
     
     case error_message
     when "video_not_found"
-      @transcript.mark_failed!("Video not found or unavailable")
+      @transcript.mark_no_transcript!("Video not found or unavailable")
       Rails.logger.info "📹 Video not found: #{@youtube_video.video_id}"
       
-    when "no_captions_available"
-      @transcript.mark_failed!("No captions available for this video")
-      Rails.logger.info "📝 No captions available: #{@youtube_video.video_id}"
+    when "no_captions_available", "no_speech_detected", "video_too_short", "no_audio_track"
+      @transcript.mark_no_transcript!("No captions or speech available for this video")
+      Rails.logger.info "📝 No transcript content available: #{@youtube_video.video_id} - #{error_message}"
       
     when "rate_limit_exceeded"
       retry_after = result[:retry_after] || 300 # Longer wait for rate limits

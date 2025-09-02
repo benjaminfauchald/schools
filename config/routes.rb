@@ -36,6 +36,7 @@ Rails.application.routes.draw do
         get :fetch_videos
         patch :toggle_video_visibility
         post 'youtube_videos/:video_key/generate_transcript', action: :generate_transcript, as: :generate_video_transcript
+        patch 'youtube_videos/:video_key/toggle_transcript_ai', action: :toggle_transcript_ai, as: :toggle_video_transcript_ai
         post :import_website_data
         get :import_status
         post :upload_document

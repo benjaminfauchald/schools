@@ -16,6 +16,9 @@ export default class extends Controller {
     await this.loadVideos()
     this.startPolling()
     console.log('🔌 CONNECT: Initial load complete, polling started')
+    
+    // Set up the "Generate All Transcripts" button
+    this.setupBulkTranscriptButton()
   }
   
   disconnect() {
@@ -412,9 +415,14 @@ export default class extends Controller {
     
     switch (status.status) {
       case 'completed':
-        badgeClass = 'bg-green-100 text-green-800'
-        icon = '✅'
-        text = 'Transcript'
+        badgeClass = 'bg-green-100 text-green-800 cursor-pointer hover:bg-green-200 border border-green-300'
+        icon = '☑️'
+        text = 'Transcript used for AI'
+        break
+      case 'completed_disabled':
+        badgeClass = 'bg-gray-100 text-gray-600 cursor-pointer hover:bg-gray-200 border border-gray-300'
+        icon = '☐'
+        text = 'Transcript not used for AI'
         break
       case 'processing':
         badgeClass = 'bg-yellow-100 text-yellow-800'
@@ -431,17 +439,31 @@ export default class extends Controller {
         icon = '❌'
         text = 'Failed'
         break
+      case 'no_transcript':
+        badgeClass = 'bg-gray-100 text-gray-600'
+        icon = '🚫'
+        text = 'No Transcript'
+        break
       default:
         console.log(`🔴 BADGE: Unknown status "${status.status}" for video ${video.video_key || video.video_id}`)
         return '' // Don't show badge for not_started
     }
     
+    // Make completed badges clickable for AI toggle
+    const isClickable = status.status === 'completed' || status.status === 'completed_disabled'
+    const clickAction = isClickable ? `data-action="click->youtube-videos#toggleTranscriptAI" data-video-key="${video.video_key}"` : ''
+    
     const badgeHtml = `
-      <div class="absolute top-1 left-1 ${badgeClass} text-xs px-1.5 py-0.5 rounded text-xs font-medium" data-transcript-status="${status.status}">
+      <div class="absolute top-1 left-1 ${badgeClass} text-xs px-1.5 py-0.5 rounded text-xs font-medium z-10" 
+           data-transcript-status="${status.status}" 
+           ${clickAction}
+           ${isClickable ? 'title="Click to toggle AI usage"' : ''}>
         ${icon} ${text}
       </div>
     `
     console.log(`✅ BADGE: Generated badge for ${video.video_key || video.video_id}: ${icon} ${text}`)
+    console.log(`🔧 BADGE: Is clickable: ${isClickable}, Click action: ${clickAction}`)
+    console.log(`🔧 BADGE: Full HTML:`, badgeHtml)
     return badgeHtml
   }
   
@@ -491,6 +513,15 @@ export default class extends Controller {
             Retry
           </button>
         `
+      case 'no_transcript':
+        return `
+          <span class="inline-flex items-center text-xs text-gray-500 font-medium">
+            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636a9 9 0 00-12.728 12.728"></path>
+            </svg>
+            No Speech
+          </span>
+        `
       default:
         // not_started
         return `
@@ -537,6 +568,15 @@ export default class extends Controller {
       if (!response.ok) {
         // Handle HTTP error responses
         let errorMessage = 'Failed to start transcript generation'
+        
+        // Special handling for 404 - video doesn't exist anymore
+        if (response.status === 404) {
+          console.log('🔴 GENERATE: Video not found (404) - removing from UI')
+          this.removeVideoFromUI(videoKey)
+          this.showTemporaryMessage('Video no longer exists. Please refresh the video list.', 'error')
+          return
+        }
+        
         try {
           const errorData = await response.json()
           errorMessage = errorData.message || errorMessage
@@ -574,6 +614,71 @@ export default class extends Controller {
         </svg>
         Get Transcript
       `
+    }
+  }
+  
+  async toggleTranscriptAI(event) {
+    event.preventDefault()
+    
+    const badge = event.currentTarget
+    const videoKey = badge.dataset.videoKey
+    
+    console.log('🔄 TOGGLE_AI: Starting toggle for video:', videoKey)
+    console.log('🔄 TOGGLE_AI: Badge element:', badge)
+    console.log('🔄 TOGGLE_AI: Badge dataset:', badge.dataset)
+    
+    // Store original state for potential rollback
+    const originalClass = badge.className
+    const originalHTML = badge.innerHTML
+    
+    // Show loading state
+    badge.classList.add('opacity-50')
+    badge.innerHTML = `🔄 Updating...`
+    
+    try {
+      const response = await fetch(`/school_owner/schools/${this.schoolIdValue}/youtube_videos/${videoKey}/toggle_transcript_ai`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        console.log('✅ TOGGLE_AI: Successfully toggled AI status')
+        
+        // Update the video card with new transcript status
+        const mockVideo = {
+          video_key: videoKey,
+          video_id: videoKey,
+          transcript_status: data.transcript_status
+        }
+        
+        this.updateVideoStatuses([mockVideo])
+        
+        // Show success message
+        const action = data.ai_enabled ? 'enabled' : 'disabled'
+        this.showTemporaryMessage(`Transcript ${action} for AI use`, 'success')
+      } else {
+        throw new Error(data.message || 'Toggle failed')
+      }
+      
+    } catch (error) {
+      console.error('🚨 TOGGLE_AI: Error toggling transcript AI:', error)
+      
+      // Rollback to original state
+      badge.className = originalClass
+      badge.innerHTML = originalHTML
+      
+      this.showTemporaryMessage('Failed to toggle transcript AI status', 'error')
     }
   }
   
@@ -615,6 +720,15 @@ export default class extends Controller {
       if (!response.ok) {
         // Handle HTTP error responses  
         let errorMessage = 'Failed to retry transcript generation'
+        
+        // Special handling for 404 - video doesn't exist anymore
+        if (response.status === 404) {
+          console.log('🔴 RETRY: Video not found (404) - removing from UI')
+          this.removeVideoFromUI(videoKey)
+          this.showTemporaryMessage('Video no longer exists. Please refresh the video list.', 'error')
+          return
+        }
+        
         try {
           const errorData = await response.json()
           errorMessage = errorData.message || errorMessage
@@ -946,5 +1060,188 @@ export default class extends Controller {
     const div = document.createElement('div')
     div.textContent = text
     return div.innerHTML
+  }
+
+  // Bulk Transcript Generation Methods
+  
+  setupBulkTranscriptButton() {
+    const button = document.getElementById('generateAllTranscriptsBtn')
+    if (button) {
+      button.addEventListener('click', this.generateAllTranscripts.bind(this))
+    }
+  }
+
+  async generateAllTranscripts() {
+    const button = document.getElementById('generateAllTranscriptsBtn')
+    if (!button) return
+
+    console.log('🔵 BULK: Generate all transcripts clicked')
+
+    // Get all videos that don't have transcripts
+    const videosNeedingTranscripts = this.getVideosNeedingTranscripts()
+    console.log(`🔵 BULK: Found ${videosNeedingTranscripts.length} videos needing transcripts`)
+
+    if (videosNeedingTranscripts.length === 0) {
+      this.showTemporaryMessage('All videos already have transcripts or are processing', 'info')
+      return
+    }
+
+    // Confirm with user
+    const confirmed = confirm(`Generate transcripts for ${videosNeedingTranscripts.length} videos? This may take several minutes.`)
+    if (!confirmed) return
+
+    // Set button to loading state
+    this.setBulkButtonLoading(button, true)
+
+    let successCount = 0
+    let failedCount = 0
+    
+    try {
+      // Process videos one by one to avoid overwhelming the server
+      for (const videoKey of videosNeedingTranscripts) {
+        try {
+          console.log(`🔵 BULK: Processing video ${videoKey}`)
+          
+          const response = await fetch(`/school_owner/schools/${this.schoolIdValue}/youtube_videos/${videoKey}/generate_transcript`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            }
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            if (data.success) {
+              successCount++
+              console.log(`✅ BULK: Successfully queued transcript for ${videoKey}`)
+              
+              // Update the UI immediately to show processing
+              this.updateVideoWithProcessingStatus(videoKey)
+            } else {
+              failedCount++
+              console.log(`❌ BULK: Failed to queue transcript for ${videoKey}: ${data.message}`)
+            }
+          } else {
+            // Special handling for 404 - video doesn't exist anymore
+            if (response.status === 404) {
+              console.log(`🔴 BULK: Video not found (404) - removing from UI: ${videoKey}`)
+              this.removeVideoFromUI(videoKey)
+              // Don't count as failed since we cleaned it up
+            } else {
+              failedCount++
+              console.log(`❌ BULK: HTTP error for ${videoKey}: ${response.status}`)
+            }
+          }
+
+          // Add a small delay between requests to be nice to the server
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
+        } catch (error) {
+          failedCount++
+          console.error(`🚨 BULK: Error processing video ${videoKey}:`, error)
+        }
+      }
+
+      // Show results
+      if (successCount > 0) {
+        this.showTemporaryMessage(
+          `Started transcript generation for ${successCount} video${successCount > 1 ? 's' : ''}${failedCount > 0 ? ` (${failedCount} failed)` : ''}`,
+          successCount > failedCount ? 'success' : 'error'
+        )
+        
+        // Start polling if not already running
+        if (!this.pollingInterval && successCount > 0) {
+          this.startPolling()
+        }
+      } else {
+        this.showTemporaryMessage('Failed to start transcript generation for any videos', 'error')
+      }
+
+    } catch (error) {
+      console.error('🚨 BULK: Critical error in bulk transcript generation:', error)
+      this.showTemporaryMessage('An error occurred while generating transcripts', 'error')
+    } finally {
+      this.setBulkButtonLoading(button, false)
+    }
+  }
+
+  getVideosNeedingTranscripts() {
+    const container = this.hasVideoGridTarget ? this.videoGridTarget : this.videosContainerTarget
+    if (!container) return []
+
+    const videoCards = container.querySelectorAll('[data-video-key]')
+    const videosNeeding = []
+
+    videoCards.forEach(card => {
+      const videoKey = card.dataset.videoKey
+      const badge = card.querySelector('.absolute.top-1.left-1')
+      const hasTranscriptButton = card.querySelector('[data-action*="generateTranscript"]')
+      
+      // Need transcript if:
+      // 1. No badge (means no transcript status)
+      // 2. Has a "Get Transcript" button (means not started)
+      // 3. Badge shows "Failed" (can retry)
+      // 4. Exclude "No Transcript" (videos with no speech/captions)
+      const badgeText = badge ? badge.textContent.trim() : ''
+      const isNoTranscript = badgeText.includes('No Transcript')
+      
+      if (!isNoTranscript && (!badge || hasTranscriptButton || badgeText.includes('Failed'))) {
+        videosNeeding.push(videoKey)
+        console.log(`🔍 BULK: Video ${videoKey} needs transcript - badge: ${badgeText || 'none'}, hasButton: ${!!hasTranscriptButton}`)
+      } else if (isNoTranscript) {
+        console.log(`🔍 BULK: Skipping video ${videoKey} - no speech/captions available`)
+      }
+    })
+
+    return videosNeeding
+  }
+
+  setBulkButtonLoading(button, loading) {
+    if (loading) {
+      button.disabled = true
+      button.innerHTML = `
+        <svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Generating Transcripts...
+      `
+      button.classList.add('opacity-75')
+    } else {
+      button.disabled = false
+      button.innerHTML = `
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Generate All Transcripts
+      `
+      button.classList.remove('opacity-75')
+    }
+  }
+
+  removeVideoFromUI(videoKey) {
+    console.log(`🗑️ REMOVE: Removing video ${videoKey} from UI`)
+    const container = this.hasVideoGridTarget ? this.videoGridTarget : this.videosContainerTarget
+    if (!container) {
+      console.log('🔴 REMOVE: No container found')
+      return
+    }
+
+    const videoCard = container.querySelector(`[data-video-key="${videoKey}"]`)
+    if (videoCard) {
+      console.log(`🗑️ REMOVE: Found and removing video card for ${videoKey}`)
+      videoCard.remove()
+      
+      // Check if we need to show empty state
+      const remainingVideos = container.querySelectorAll('[data-video-key]')
+      if (remainingVideos.length === 0) {
+        console.log('🗑️ REMOVE: No videos remaining, showing empty state')
+        this.showEmptyState()
+      }
+    } else {
+      console.log(`🔴 REMOVE: Video card not found for ${videoKey}`)
+    }
   }
 }
