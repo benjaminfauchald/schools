@@ -23,8 +23,10 @@ export default class extends Controller {
     const homeLocation = this.getStoredLocation()
     
     if (!homeLocation) {
-      // Redirect to onboarding page instead of showing modal
-      window.location.href = '/onboarding'
+      // Only redirect if we're not already on the onboarding page
+      if (window.location.pathname !== '/onboarding') {
+        window.location.href = '/onboarding'
+      }
     } else {
       this.hasLocationValue = true
       // Enable app features

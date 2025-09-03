@@ -240,6 +240,15 @@
         // Confirmation buttons
         document.getElementById('confirm-location-button').addEventListener('click', confirmLocation);
         document.getElementById('edit-address-button').addEventListener('click', editAddress);
+        
+        // Map confirmation buttons (need to add these after map is shown)
+        document.addEventListener('click', function(e) {
+          if (e.target.matches('[data-onboarding-location-target="confirmMapButton"]')) {
+            confirmMapLocation();
+          } else if (e.target.matches('[data-action*="backToAddress"]')) {
+            backToAddress();
+          }
+        });
       }
 
       async function geocodeAddress() {
@@ -340,6 +349,18 @@
         if (!map) {
           initializeMap();
         }
+      }
+
+      function confirmMapLocation() {
+        if (selectedLocation) {
+          saveLocationAndComplete();
+        }
+      }
+
+      function backToAddress() {
+        hideAllSteps();
+        document.getElementById('address-step').classList.remove('hidden');
+        clearError();
       }
 
       function saveLocationAndComplete() {
@@ -513,6 +534,8 @@
             
             if (confirmButton) {
               confirmButton.disabled = false;
+              confirmButton.classList.remove('bg-gray-400', 'cursor-not-allowed');
+              confirmButton.classList.add('bg-green-600', 'hover:bg-green-700');
             }
           }
         });
