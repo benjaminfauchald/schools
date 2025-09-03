@@ -1,4 +1,4 @@
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden" 
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden h-full flex flex-col" 
      data-controller="school-contact-form" 
      data-school-contact-form-school-id-value="<%= school.id %>"
      data-school-contact-form-user-signed-in-value="<%= user_signed_in %>"
@@ -10,7 +10,7 @@
         subtitle: "Get in touch directly with #{school.name}"
       ) %>
 
-  <div class="px-6 pb-6">
+  <div class="px-6 pb-6 flex-1">
     <!-- Contact Form -->
     <%= form_with model: [school, school_inquiry], 
                   url: school_school_inquiries_path(school),
@@ -146,37 +146,5 @@
       </div>
     <% end %>
 
-    <!-- Contact Information Display (Secondary) -->
-    <% if contact_info.any? %>
-      <div class="mt-8 pt-6 border-t border-gray-200">
-        <h4 class="text-sm font-medium text-gray-700 mb-3">Direct Contact Information</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
-          <% if contact_info[:phone] %>
-            <div class="flex items-center">
-              <%= helpers.heroicon('phone', css_class: 'w-4 h-4 mr-2 text-gray-400') %>
-              <span><%= contact_info[:phone] %></span>
-            </div>
-          <% end %>
-          
-          <% if contact_info[:email] %>
-            <div class="flex items-center">
-              <%= helpers.heroicon('envelope', css_class: 'w-4 h-4 mr-2 text-gray-400') %>
-              <span><%= contact_info[:email] %></span>
-            </div>
-          <% end %>
-          
-          <% if contact_info[:website] %>
-            <div class="flex items-center">
-              <%= helpers.heroicon('globe', css_class: 'w-4 h-4 mr-2 text-gray-400') %>
-              <%= link_to contact_info[:website], contact_info[:website], target: '_blank', class: 'text-blue-600 hover:text-blue-800' %>
-            </div>
-          <% end %>
-        </div>
-        
-        <p class="text-xs text-gray-500 mt-3 italic">
-          For the best service and faster response, we recommend using the contact form above.
-        </p>
-      </div>
-    <% end %>
   </div>
 </div>
