@@ -101,7 +101,11 @@
           <% end %>
         </h2>
         <p class="text-sm text-blue-700 dark:text-blue-200" data-schools-target="resultsSummary">
-          Showing <%= @filtered_count %> of <%= @total_count %> schools
+          <% if params[:home_lat].present? %>
+            Showing <%= @filtered_count %> of <%= @total_count %> schools
+          <% else %>
+            Loading schools...
+          <% end %>
         </p>
       </div>
       <div class="flex items-center text-sm text-blue-600 dark:text-blue-400">
@@ -115,7 +119,8 @@
   
   <!-- Schools Grid -->
   <div data-schools-target="schoolsList">
-    <% if @schools.any? %>
+    <% if @schools.any? || !params[:home_lat].present? %>
+      <% if @schools.any? %>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
         <% @schools.each do |school| %>
           <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -167,15 +172,32 @@
         <% end %>
       </div>
       
-      <!-- Enhanced Pagination -->
-      <%= render 'shared/enhanced_pagination', 
-            collection: @schools, 
-            total_count: @filtered_count,
-            per_page_options: [25, 50, 100, 200],
-            ajax_target: 'schools' %>
+        <!-- Enhanced Pagination -->
+        <%= render 'shared/enhanced_pagination', 
+              collection: @schools, 
+              total_count: @filtered_count,
+              per_page_options: [25, 50, 100, 200],
+              ajax_target: 'schools' %>
+      <% else %>
+        <!-- Loading State - No location set yet -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-8 text-center">
+          <div class="animate-pulse">
+            <svg class="mx-auto h-12 w-12 text-blue-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <h3 class="text-lg font-medium text-blue-900 dark:text-blue-100 mb-2">
+              Finding schools near you...
+            </h3>
+            <p class="text-blue-700 dark:text-blue-200">
+              Please wait while we load schools in your area.
+            </p>
+          </div>
+        </div>
+      <% end %>
       
     <% else %>
-      <!-- Empty State -->
+      <!-- Empty State - No schools found -->
       <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-8 text-center">
         <svg class="mx-auto h-12 w-12 text-yellow-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />

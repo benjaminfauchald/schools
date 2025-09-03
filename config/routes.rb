@@ -145,6 +145,10 @@ Rails.application.routes.draw do
       get :search, to: 'schools#search'
     end
     
+    member do
+      post :ai_chat
+    end
+    
     # Nested pages routes for school content
     resources :pages, only: [:index, :show], path: 'pages'
     # School inquiry contact form

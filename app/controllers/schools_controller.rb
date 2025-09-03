@@ -121,6 +121,34 @@ class SchoolsController < ApplicationController
     render json: { schools: schools_with_distance }
   end
 
+  def ai_chat
+    find_school
+    
+    message = params[:message]&.strip
+    unless message.present?
+      render json: { error: "Message is required" }, status: :bad_request
+      return
+    end
+    
+    begin
+      # Create school context for AI
+      school_context = build_school_context(@school)
+      
+      # Simple AI response (you can integrate with OpenAI or other AI services)
+      response = generate_ai_response(message, school_context, @school)
+      
+      render json: { 
+        response: response,
+        school_name: @school.name 
+      }
+    rescue => e
+      Rails.logger.error "AI Chat error: #{e.message}"
+      render json: { 
+        error: "Sorry, I'm having trouble processing your request right now. Please try again later." 
+      }, status: :internal_server_error
+    end
+  end
+
   private
 
   def filter_params
@@ -268,5 +296,119 @@ class SchoolsController < ApplicationController
     keywords += %w[school education bangkok thailand international curriculum]
     
     keywords.uniq.join(', ')
+  end
+
+  def build_school_context(school)
+    # Reload school with all associations for comprehensive data
+    school_with_data = School.includes(
+      :place,
+      :current_taggings,
+      :current_terms,
+      :school_fee_schedules,
+      :school_grade_offering,
+      :media_items,
+      current_taggings: { term: :vocabulary },
+      place: :media_items
+    ).find(school.id)
+    
+    merged_data = SchoolDataMerger.new(school_with_data, school_with_data.place, nil).merged_data
+    
+    context = {
+      name: school.name,
+      address: school_with_data.place&.formatted_address,
+      curriculum: merged_data.academic_programs[:curricula]&.map(&:label),
+      languages: merged_data.academic_programs[:languages]&.map(&:label),
+      facilities: merged_data.facilities&.map(&:label),
+      fee_schedules: merged_data.fee_schedules&.map do |fee|
+        {
+          grade_level: fee.grade_level,
+          tuition_fee_thb: fee.tuition_fee_thb,
+          registration_fee_thb: fee.registration_fee_thb
+        }
+      end,
+      grade_offerings: school_with_data.school_grade_offering&.then do |offering|
+        {
+          min_age: offering.min_age,
+          max_age: offering.max_age,
+          grades: offering.grades_display
+        }
+      end
+    }
+    
+    context.compact
+  end
+
+  def generate_ai_response(message, school_context, school)
+    # This is a simple rule-based response system
+    # You can replace this with OpenAI API integration
+    
+    message_lower = message.downcase
+    school_name = school.name
+    
+    # Curriculum questions
+    if message_lower.include?('curriculum') || message_lower.include?('program')
+      curricula = school_context[:curriculum] || []
+      if curricula.any?
+        return "**Academic Programs at #{school_name}:**\n\n#{school_name} offers the following curriculum programs:\n\n#{curricula.map { |c| "• #{c}" }.join("\n")}\n\nEach program is designed to provide students with a comprehensive education that prepares them for higher education and future careers."
+      else
+        return "I don't have detailed curriculum information for #{school_name} at the moment. I'd recommend contacting the school directly for specific program details."
+      end
+    end
+    
+    # Fee questions
+    if message_lower.include?('fee') || message_lower.include?('cost') || message_lower.include?('tuition') || message_lower.include?('price')
+      fees = school_context[:fee_schedules] || []
+      if fees.any?
+        fee_info = fees.map do |fee|
+          "• **#{fee[:grade_level]}**: ฿#{number_with_delimiter(fee[:tuition_fee_thb])} per year"
+        end.join("\n")
+        return "**Tuition Fees at #{school_name}:**\n\n#{fee_info}\n\n*Note: Fees may vary and additional costs for materials, activities, or services may apply. Please contact the school for the most current fee schedule.*"
+      else
+        return "I don't have specific fee information for #{school_name}. Please contact the school directly for detailed tuition and fee information."
+      end
+    end
+    
+    # Facilities questions
+    if message_lower.include?('facilities') || message_lower.include?('facility')
+      facilities = school_context[:facilities] || []
+      if facilities.any?
+        return "**Facilities at #{school_name}:**\n\n#{facilities.map { |f| "• #{f}" }.join("\n")}\n\nThese facilities support student learning and development across various subjects and activities."
+      else
+        return "I don't have detailed facilities information for #{school_name} at the moment. Please contact the school for more information about their campus facilities."
+      end
+    end
+    
+    # Language questions
+    if message_lower.include?('language') || message_lower.include?('english') || message_lower.include?('thai')
+      languages = school_context[:languages] || []
+      if languages.any?
+        return "**Languages at #{school_name}:**\n\n#{languages.map { |l| "• #{l}" }.join("\n")}\n\nThe school provides instruction and support in these languages to help students develop multilingual competencies."
+      else
+        return "I don't have specific language program information for #{school_name}. Please contact the school for details about their language instruction."
+      end
+    end
+    
+    # Age/grade questions
+    if message_lower.include?('age') || message_lower.include?('grade') || message_lower.include?('level')
+      grade_info = school_context[:grade_offerings]
+      if grade_info
+        return "**Grade Levels at #{school_name}:**\n\n• **Age Range**: #{grade_info[:min_age]} to #{grade_info[:max_age]} years old\n• **Grades**: #{grade_info[:grades]}\n\nThe school serves students across these age ranges with age-appropriate curriculum and activities."
+      else
+        return "I don't have specific grade level information for #{school_name}. Please contact the school for details about their age ranges and grade offerings."
+      end
+    end
+    
+    # Location questions
+    if message_lower.include?('location') || message_lower.include?('address') || message_lower.include?('where')
+      address = school_context[:address]
+      if address
+        return "**Location of #{school_name}:**\n\n📍 #{address}\n\nYou can find detailed directions and transportation options on our school page."
+      else
+        return "Please check the school's contact information section for location details."
+      end
+    end
+    
+    # General/default response
+    return "**About #{school_name}:**\n\nI can help you learn more about #{school_name}! I can provide information about:\n\n• **Academic programs** and curriculum\n• **Tuition fees** and costs\n• **Facilities** and campus amenities\n• **Languages** of instruction\n• **Grade levels** and age ranges\n• **Location** and address\n\nWhat specific aspect of #{school_name} would you like to know more about?"
   end
 end
