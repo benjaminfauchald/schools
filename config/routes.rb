@@ -89,6 +89,7 @@ Rails.application.routes.draw do
   }
   namespace :admin do
       root to: "dashboard#index"
+      resources :inquiries, only: [:index, :show, :update]
       resources :places
       resources :points
       resources :schools
