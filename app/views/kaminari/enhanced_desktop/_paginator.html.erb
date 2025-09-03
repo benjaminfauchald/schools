@@ -1,0 +1,55 @@
+<%#
+  Enhanced Desktop Paginator Theme
+  Provides a comprehensive pagination experience with smart navigation
+%>
+
+<%= paginator.render do %>
+  <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+    <!-- First Page (only show if not on first page and more than 5 pages) -->
+    <% if current_page > 1 && total_pages > 5 %>
+      <%= link_to page_path(1), 
+            class: "relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 transition-colors duration-200",
+            title: "First page",
+            'aria-label': "Go to first page" do %>
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M15.79 14.77a.75.75 0 01-1.06.02l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 111.04 1.08L11.832 10l3.938 3.71a.75.75 0 01.02 1.06zm-6 0a.75.75 0 01-1.06.02l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 111.04 1.08L5.832 10l3.938 3.71a.75.75 0 01.02 1.06z" clip-rule="evenodd" />
+        </svg>
+      <% end %>
+    <% end %>
+
+    <!-- Previous Page -->
+    <%= prev_page_tag unless current_page == 1 %>
+
+    <!-- Page Numbers -->
+    <% each_relevant_page do |page| %>
+      <% if page.left_outer? || page.right_outer? || page.inside_window? %>
+        <%= page_tag page %>
+      <% elsif !page.was_truncated? %>
+        <%= gap_tag %>
+      <% end %>
+    <% end %>
+
+    <!-- Next Page -->
+    <%= next_page_tag unless current_page == total_pages %>
+
+    <!-- Last Page (only show if not on last page and more than 5 pages) -->
+    <% if current_page < total_pages && total_pages > 5 %>
+      <%= link_to page_path(total_pages), 
+            class: "relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 transition-colors duration-200",
+            title: "Last page (#{total_pages})",
+            'aria-label': "Go to last page, page #{total_pages}" do %>
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M4.21 14.77a.75.75 0 001.06.02l4.5-4.25a.75.75 0 000-1.08l-4.5-4.25a.75.75 0 10-1.04 1.08L8.168 10l-3.938 3.71a.75.75 0 00-.02 1.06zm6 0a.75.75 0 001.06.02l4.5-4.25a.75.75 0 000-1.08l-4.5-4.25a.75.75 0 10-1.04 1.08L14.168 10l-3.938 3.71a.75.75 0 00-.02 1.06z" clip-rule="evenodd" />
+        </svg>
+      <% end %>
+    <% end %>
+  </nav>
+
+  <!-- Page Information -->
+  <div class="ml-4 flex items-center text-sm text-gray-700">
+    <span>Page</span>
+    <span class="mx-1 font-semibold text-gray-900"><%= current_page %></span>
+    <span>of</span>
+    <span class="ml-1 font-semibold text-gray-900"><%= number_with_delimiter(total_pages) %></span>
+  </div>
+<% end %>

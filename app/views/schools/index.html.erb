@@ -167,24 +167,12 @@
         <% end %>
       </div>
       
-      <!-- Pagination -->
-      <div class="flex items-center justify-between">
-        <div class="flex items-center text-sm text-gray-700 dark:text-gray-300">
-          <span>
-            Showing 
-            <span class="font-medium"><%= (@schools.current_page - 1) * @schools.limit_value + 1 %></span>
-            to 
-            <span class="font-medium"><%= [@schools.current_page * @schools.limit_value, @filtered_count].min %></span>
-            of 
-            <span class="font-medium"><%= @filtered_count %></span>
-            results
-          </span>
-        </div>
-        
-        <div data-schools-target="pagination">
-          <%= paginate @schools %>
-        </div>
-      </div>
+      <!-- Enhanced Pagination -->
+      <%= render 'shared/enhanced_pagination', 
+            collection: @schools, 
+            total_count: @filtered_count,
+            per_page_options: [25, 50, 100, 200],
+            ajax_target: 'schools' %>
       
     <% else %>
       <!-- Empty State -->
@@ -217,6 +205,7 @@
   </div>
 </div>
 
+
 <!-- Custom CSS for slider styling -->
 <style>
   .slider::-webkit-slider-thumb {
@@ -248,3 +237,5 @@
     background: #1d4ed8;
   }
 </style>
+<br>
+<br>

@@ -1,0 +1,172 @@
+<%#
+  Enhanced Pagination Component
+  
+  Parameters:
+  - collection: Kaminari paginated collection (required)
+  - total_count: Total number of items (optional, defaults to collection.total_count)
+  - per_page_options: Array of per-page options (optional, defaults to [25, 50, 100, 200])
+  - container_classes: Additional CSS classes for container (optional)
+  - ajax_target: Stimulus target for AJAX updates (optional)
+%>
+
+<%
+  collection ||= @schools  # Fallback to default
+  total_count ||= collection&.total_count || 0
+  per_page_options ||= [25, 50, 100, 200]
+  container_classes ||= ""
+  ajax_target ||= nil
+  current_per_page = collection&.limit_value || 25
+  current_page = collection&.current_page || 1
+  total_pages = collection&.total_pages || 1
+  
+  # Calculate display range
+  range_start = total_count > 0 ? ((current_page - 1) * current_per_page + 1) : 0
+  range_end = [current_page * current_per_page, total_count].min
+  
+  # Determine if we need pagination controls
+  show_pagination = total_pages > 1
+%>
+
+<div class="<%= container_classes %> bg-white border-t border-gray-200 px-4 py-3 sm:px-6" 
+     <%= "data-#{ajax_target}-target=\"pagination\"" if ajax_target %>
+     data-controller="enhanced-pagination"
+     data-enhanced-pagination-current-page-value="<%= current_page %>"
+     data-enhanced-pagination-total-pages-value="<%= total_pages %>"
+     data-enhanced-pagination-base-url-value="<%= request.base_url + request.path %>">
+  <!-- Mobile View -->
+  <div class="flex flex-1 justify-between items-center sm:hidden">
+    <!-- Mobile Results Info -->
+    <div class="text-sm text-gray-700">
+      <%= total_count > 0 ? "#{range_start}-#{range_end} of #{number_with_delimiter(total_count)}" : "No results" %>
+    </div>
+    
+    <!-- Mobile Navigation -->
+    <% if show_pagination %>
+      <div class="flex items-center space-x-2">
+        <%= paginate collection, theme: 'mobile_enhanced' if collection %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Desktop View -->
+  <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+    <!-- Results Summary & Controls -->
+    <div class="flex items-center space-x-6">
+      <!-- Results Info -->
+      <div class="text-sm text-gray-700">
+        <% if total_count > 0 %>
+          <p class="flex items-center space-x-1">
+            <span>Showing</span>
+            <span class="font-semibold text-gray-900"><%= number_with_delimiter(range_start) %></span>
+            <span>to</span>
+            <span class="font-semibold text-gray-900"><%= number_with_delimiter(range_end) %></span>
+            <span>of</span>
+            <span class="font-semibold text-gray-900"><%= number_with_delimiter(total_count) %></span>
+            <span>results</span>
+          </p>
+        <% else %>
+          <p class="text-gray-500">No results found</p>
+        <% end %>
+      </div>
+
+      <!-- Per Page Selector -->
+      <% if total_count > per_page_options.first %>
+        <div class="flex items-center space-x-2">
+          <label for="per_page_select" class="text-sm text-gray-600">Show:</label>
+          <select 
+            id="per_page_select" 
+            name="per_page"
+            class="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
+            data-enhanced-pagination-target="perPageSelect"
+          >
+            <% per_page_options.each do |option| %>
+              <option value="<%= option %>" <%= 'selected' if current_per_page == option %>>
+                <%= option %>
+              </option>
+            <% end %>
+          </select>
+          <span class="text-sm text-gray-600">per page</span>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="flex items-center space-x-4">
+      <!-- Quick Jump (only show if many pages) -->
+      <% if total_pages > 10 %>
+        <div class="flex items-center space-x-2">
+          <label for="page_jump" class="text-sm text-gray-600">Go to page:</label>
+          <input 
+            type="number" 
+            id="page_jump"
+            class="w-16 rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
+            min="1"
+            max="<%= total_pages %>"
+            placeholder="<%= current_page %>"
+            data-enhanced-pagination-target="pageJump"
+          />
+        </div>
+      <% end %>
+
+      <!-- Page Navigation -->
+      <% if show_pagination %>
+        <div class="flex items-center">
+          <%= paginate collection, theme: 'enhanced_desktop' if collection %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Page Info (always visible) -->
+  <% if show_pagination %>
+    <div class="mt-3 flex justify-center sm:mt-0 sm:hidden">
+      <p class="text-xs text-gray-500">
+        Page <%= current_page %> of <%= number_with_delimiter(total_pages) %>
+      </p>
+    </div>
+  <% end %>
+</div>
+
+<!-- Enhanced Pagination Styles -->
+<style>
+  /* Loading states */
+  .pagination-loading {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .pagination-transitioning * {
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  /* Enhanced hover effects */
+  .pagination-link {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .pagination-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Focus improvements */
+  .pagination-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Mobile improvements */
+  @media (max-width: 640px) {
+    .pagination-mobile {
+      font-size: 0.875rem;
+    }
+  }
+  
+  /* Animation for loading spinner */
+  .pagination-spinner svg {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+</style>

@@ -124,10 +124,11 @@ class SchoolsController < ApplicationController
   private
 
   def filter_params
-    params.permit(:radius, :show_all, :page).tap do |p|
+    params.permit(:radius, :show_all, :page, :per_page).tap do |p|
       p[:radius] = (p[:radius]&.to_i || 50).clamp(1, 100)
       p[:show_all] = p[:show_all] == 'true'
       p[:page] = [p[:page].to_i, 1].max
+      p[:per_page] = [p[:per_page]&.to_i || 25, 200].min.clamp(10, 200) # Allow 10-200 per page
     end
   end
 
@@ -139,12 +140,12 @@ class SchoolsController < ApplicationController
             .select(school_select_fields)
             .order(:name)
             .page(@filter_params[:page])
-            .per(25)
+            .per(@filter_params[:per_page])
     else
       # Filter by distance and calculate distance
       School.with_distance(@home_location[:lat], @home_location[:lng], @filter_params[:radius])
             .page(@filter_params[:page])
-            .per(25)
+            .per(@filter_params[:per_page])
     end
   end
 
