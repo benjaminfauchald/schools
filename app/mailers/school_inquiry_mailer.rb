@@ -5,11 +5,17 @@ class SchoolInquiryMailer < ApplicationMailer
     @inquiry = school_inquiry
     @school = @inquiry.school
     
-    # Recipients: school email if exists, plus benjamin@7peakssoftware.com
+    # Recipients: school email if exists, school owners, plus benjamin@7peakssoftware.com
     recipients = ['benjamin@7peakssoftware.com']
+    
+    # Add school email if exists
     if @school.email.present?
       recipients << @school.email
     end
+    
+    # Add school owners (users with active claims)
+    school_owner_emails = @school.school_claims.active.joins(:user).pluck('users.email')
+    recipients.concat(school_owner_emails)
     
     mail(
       to: recipients.uniq,

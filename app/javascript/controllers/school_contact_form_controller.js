@@ -81,7 +81,8 @@ export default class extends Controller {
         // Save form data to cookies for next time
         this.saveFormDataToCookies()
         
-        this.showMessage(result.message, 'success')
+        // Show success modal instead of inline message
+        this.showSuccessModal(result.message)
         this.formTarget.reset()
       } else {
         const errorMessage = result.errors ? result.errors.join(', ') : 'Failed to send message'
@@ -201,6 +202,78 @@ export default class extends Controller {
       console.error('Error restoring form from session:', error)
       sessionStorage.removeItem('pendingContactForm')
     }
+  }
+
+  // Show success modal
+  showSuccessModal(message) {
+    // Create modal HTML
+    const modalHTML = `
+      <div id="success-modal" class="fixed inset-0 z-50 overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.75);" onclick="if(event.target === this) { this.remove(); document.body.classList.remove('overflow-hidden'); }">
+        <div class="flex items-center justify-center min-h-screen p-4">
+          <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-lg font-semibold text-gray-900">Message Sent Successfully!</h3>
+                </div>
+              </div>
+              <button type="button" onclick="document.getElementById('success-modal').remove(); document.body.classList.remove('overflow-hidden');" 
+                      class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6">
+              <p class="text-gray-700 mb-4">${message}</p>
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p class="text-sm text-blue-800">
+                  <strong>What's next?</strong> The school will review your inquiry and contact you directly via email or phone.
+                </p>
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-gray-200">
+              <button type="button" onclick="document.getElementById('success-modal').remove(); document.body.classList.remove('overflow-hidden');" 
+                      class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                Continue Exploring Schools
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+
+    // Remove any existing modal
+    const existingModal = document.getElementById('success-modal')
+    if (existingModal) {
+      existingModal.remove()
+    }
+
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML)
+    document.body.classList.add('overflow-hidden')
+
+    // Auto-remove modal after 8 seconds
+    setTimeout(() => {
+      const modal = document.getElementById('success-modal')
+      if (modal) {
+        modal.remove()
+        document.body.classList.remove('overflow-hidden')
+      }
+    }, 8000)
+
+    // Also clear any inline messages
+    this.hideAllMessages()
   }
 
   // Load form data from cookies if available
