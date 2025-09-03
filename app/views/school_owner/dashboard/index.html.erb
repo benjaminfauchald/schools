@@ -13,6 +13,29 @@
 
   <!-- Stats Cards -->
   <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <!-- Inquiries -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Inquiries</dt>
+              <dd class="text-lg font-medium text-gray-900"><%= @inquiries.count %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-5 py-3">
+        <%= link_to "Respond to inquiries", school_owner_inquiries_path, 
+            class: "text-sm text-blue-600 hover:text-blue-500" %>
+      </div>
+    </div>
+
     <!-- Owned Schools -->
     <div class="bg-white overflow-hidden shadow rounded-lg">
       <div class="p-5">
@@ -55,29 +78,6 @@
       </div>
       <div class="bg-gray-50 px-5 py-3">
         <%= link_to "View Claims", school_owner_claims_path, 
-            class: "text-sm text-blue-600 hover:text-blue-500" %>
-      </div>
-    </div>
-
-    <!-- Claim New School -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Claim School</dt>
-              <dd class="text-sm text-gray-900">Find your school and claim ownership</dd>
-            </dl>
-          </div>
-        </div>
-      </div>
-      <div class="bg-gray-50 px-5 py-3">
-        <%= link_to "Find Schools", root_path, 
             class: "text-sm text-blue-600 hover:text-blue-500" %>
       </div>
     </div>

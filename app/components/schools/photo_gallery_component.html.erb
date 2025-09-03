@@ -33,7 +33,7 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
       <% photos.each_with_index do |photo, index| %>
         <div class="group relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700 cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200"
-             onclick="openPhotoModal(<%= index %>)">
+             onclick="openPhotoModal_<%= object_id %>(<%= index %>)">
           <img src="<%= photo.url %>" 
                alt="<%= photo.alt_text || 'Campus photo' %>"
                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -57,7 +57,7 @@
     <!-- View All Button -->
     <% if photos.count > 8 %>
       <div class="mt-6 text-center">
-        <button onclick="openPhotoModal(0)" 
+        <button onclick="openPhotoModal_<%= object_id %>(0)" 
                 class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
           <%= helpers.heroicon('photo', css_class: 'w-4 h-4 mr-2') %>
           View All <%= photos.count %> Photos
@@ -71,12 +71,12 @@
 <!-- Photo Modal -->
 <div id="<%= modal_id %>" class="fixed inset-0 z-50 hidden">
   <!-- Backdrop -->
-  <div class="absolute inset-0 bg-black bg-opacity-90 transition-opacity" onclick="closePhotoModal()"></div>
+  <div class="absolute inset-0 bg-black bg-opacity-90 transition-opacity" onclick="closePhotoModal_<%= object_id %>()"></div>
   
   <!-- Modal Content -->
   <div class="relative h-full flex items-center justify-center p-4">
     <!-- Close Button -->
-    <button onclick="closePhotoModal()" 
+    <button onclick="closePhotoModal_<%= object_id %>()" 
             class="absolute top-4 right-4 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 text-white transition-all duration-200">
       <%= helpers.heroicon('x-mark', css_class: 'w-6 h-6') %>
     </button>
@@ -88,12 +88,12 @@
     
     <!-- Navigation Arrows -->
     <% if photos.count > 1 %>
-      <button onclick="previousPhoto()" 
+      <button onclick="previousPhoto_<%= object_id %>()" 
               class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-3 text-white transition-all duration-200">
         <%= helpers.heroicon('chevron-left', css_class: 'w-6 h-6') %>
       </button>
       
-      <button onclick="nextPhoto()" 
+      <button onclick="nextPhoto_<%= object_id %>()" 
               class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-3 text-white transition-all duration-200">
         <%= helpers.heroicon('chevron-right', css_class: 'w-6 h-6') %>
       </button>
@@ -116,45 +116,47 @@
 
 <!-- JavaScript for Photo Modal -->
 <script>
-  const photos = <%= raw photos.map { |p| { url: p.url, alt: p.alt_text } }.to_json %>;
-  let currentPhotoIndex = 0;
-  
-  function openPhotoModal(index) {
-    currentPhotoIndex = index;
-    updateModalPhoto();
-    document.getElementById('<%= modal_id %>').classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
-  }
-  
-  function closePhotoModal() {
-    document.getElementById('<%= modal_id %>').classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
-  }
-  
-  function nextPhoto() {
-    currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
-    updateModalPhoto();
-  }
-  
-  function previousPhoto() {
-    currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
-    updateModalPhoto();
-  }
-  
-  function updateModalPhoto() {
-    const photo = photos[currentPhotoIndex];
-    document.getElementById('modal-photo').src = photo.url;
-    document.getElementById('modal-photo').alt = photo.alt;
-    document.getElementById('modal-photo-alt').textContent = photo.alt || 'Campus photo';
-    document.getElementById('current-photo-number').textContent = currentPhotoIndex + 1;
-  }
-  
-  // Keyboard navigation
-  document.addEventListener('keydown', function(e) {
-    if (!document.getElementById('<%= modal_id %>').classList.contains('hidden')) {
-      if (e.key === 'Escape') closePhotoModal();
-      else if (e.key === 'ArrowRight') nextPhoto();
-      else if (e.key === 'ArrowLeft') previousPhoto();
+  (function() {
+    const photos_<%= object_id %> = <%= raw photos.map { |p| { url: p.url, alt: p.alt_text } }.to_json %>;
+    let currentPhotoIndex_<%= object_id %> = 0;
+    
+    window.openPhotoModal_<%= object_id %> = function(index) {
+      currentPhotoIndex_<%= object_id %> = index;
+      updateModalPhoto_<%= object_id %>();
+      document.getElementById('<%= modal_id %>').classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    };
+    
+    window.closePhotoModal_<%= object_id %> = function() {
+      document.getElementById('<%= modal_id %>').classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    };
+    
+    window.nextPhoto_<%= object_id %> = function() {
+      currentPhotoIndex_<%= object_id %> = (currentPhotoIndex_<%= object_id %> + 1) % photos_<%= object_id %>.length;
+      updateModalPhoto_<%= object_id %>();
+    };
+    
+    window.previousPhoto_<%= object_id %> = function() {
+      currentPhotoIndex_<%= object_id %> = (currentPhotoIndex_<%= object_id %> - 1 + photos_<%= object_id %>.length) % photos_<%= object_id %>.length;
+      updateModalPhoto_<%= object_id %>();
+    };
+    
+    function updateModalPhoto_<%= object_id %>() {
+      const photo = photos_<%= object_id %>[currentPhotoIndex_<%= object_id %>];
+      document.getElementById('modal-photo').src = photo.url;
+      document.getElementById('modal-photo').alt = photo.alt;
+      document.getElementById('modal-photo-alt').textContent = photo.alt || 'Campus photo';
+      document.getElementById('current-photo-number').textContent = currentPhotoIndex_<%= object_id %> + 1;
     }
-  });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      if (!document.getElementById('<%= modal_id %>').classList.contains('hidden')) {
+        if (e.key === 'Escape') window.closePhotoModal_<%= object_id %>();
+        else if (e.key === 'ArrowRight') window.nextPhoto_<%= object_id %>();
+        else if (e.key === 'ArrowLeft') window.previousPhoto_<%= object_id %>();
+      }
+    });
+  })();
 </script>

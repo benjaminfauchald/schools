@@ -1,0 +1,150 @@
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden h-full flex flex-col" 
+     data-controller="school-contact-form" 
+     data-school-contact-form-school-id-value="<%= school.id %>"
+     data-school-contact-form-user-signed-in-value="<%= user_signed_in %>"
+     data-school-contact-form-facebook-authenticated-value="<%= facebook_authenticated %>">
+     
+  <%= render Schools::SectionHeaderComponent.new(
+        title: "Contact School",
+        icon: "chat-bubble-left",
+        subtitle: "Get in touch directly with #{school.name}"
+      ) %>
+
+  <div class="px-6 pb-6 flex-1">
+    <!-- Contact Form -->
+    <%= form_with model: [school, school_inquiry], 
+                  url: school_school_inquiries_path(school),
+                  method: :post,
+                  data: { 
+                    "school-contact-form-target" => "form",
+                    "action" => "submit->school-contact-form#submitForm"
+                  },
+                  local: false,
+                  html: { novalidate: true },
+                  class: "space-y-4" do |form| %>
+      
+      <!-- Form Introduction -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-start">
+          <%= helpers.heroicon('information-circle', css_class: 'w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0') %>
+          <div>
+            <p class="text-sm text-blue-800 leading-relaxed">
+              To ensure quality inquiries and help schools connect with genuine families, 
+              please fill out the form below. You'll need to <strong>sign in with Facebook</strong> before submitting.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Name Field -->
+      <div>
+        <%= form.label :name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.text_field :name, 
+                            required: true,
+                            class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+                            placeholder: "Your full name" %>
+      </div>
+
+      <!-- Email Field -->
+      <div>
+        <%= form.label :email, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.email_field :email, 
+                             required: true,
+                             class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+                             placeholder: "your.email@example.com" %>
+      </div>
+
+      <!-- Phone Field (Optional) -->
+      <div>
+        <%= form.label :phone, "Phone (optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.telephone_field :phone, 
+                                 class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+                                 placeholder: "+66 xxx xxx xxx" %>
+      </div>
+
+      <!-- Number of Children -->
+      <div>
+        <%= form.label :children_count, "Number of children to enroll", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.number_field :children_count, 
+                              required: true,
+                              min: 1,
+                              max: 20,
+                              value: 1,
+                              class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+      </div>
+
+      <!-- Message Field -->
+      <div>
+        <%= form.label :message, "Message to school", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.text_area :message, 
+                           required: true,
+                           rows: 4,
+                           maxlength: 2000,
+                           class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-none",
+                           placeholder: "Hi! I'm interested in enrolling my child at your school. Could you please provide more information about..." %>
+        <div class="text-xs text-gray-500 mt-1">Maximum 2000 characters</div>
+      </div>
+
+      <!-- Authentication Status & Submit Button -->
+      <div class="pt-6 pb-2">
+        <% if facebook_authenticated %>
+          <!-- User is signed in with Facebook - show direct submit button -->
+          <%= form.submit "Send Message to School", 
+                          data: { "school-contact-form-target" => "submitButton" },
+                          class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50" %>
+        <% else %>
+          <!-- User needs Facebook authentication -->
+          <div data-school-contact-form-target="authSection" class="space-y-3">
+            <div class="bg-amber-50 border border-amber-200 rounded-md p-3">
+              <p class="text-sm text-amber-800 text-center">
+                <% if user_signed_in %>
+                  Please sign in with Facebook to send your message
+                <% else %>
+                  Please sign in with Facebook to send your message
+                <% end %>
+              </p>
+            </div>
+            
+            <%= link_to Rails.env.development? ? "/users/auth/facebook/mock" : "/users/auth/facebook", 
+                        method: Rails.env.development? ? :get : :post,
+                        data: { 
+                          "school-contact-form-target" => "facebookButton",
+                          "action" => "click->school-contact-form#handleFacebookAuth"
+                        },
+                        class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 inline-flex items-center justify-center" do %>
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+              Continue with Facebook to Send Message
+            <% end %>
+            
+            <p class="text-xs text-gray-500 text-center">
+              We use Facebook login to verify genuine inquiries and protect schools from spam.
+            </p>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Success/Error Messages -->
+      <div data-school-contact-form-target="messages" class="hidden">
+        <div data-school-contact-form-target="successMessage" class="hidden bg-green-50 border border-green-200 rounded-md p-3">
+          <div class="flex">
+            <%= helpers.heroicon('check-circle', css_class: 'w-5 h-5 text-green-600 mr-2') %>
+            <p class="text-sm text-green-800">Your message has been sent successfully! The school will contact you soon.</p>
+          </div>
+        </div>
+        
+        <div data-school-contact-form-target="errorMessage" class="hidden bg-red-50 border border-red-200 rounded-md p-3">
+          <div class="flex">
+            <%= helpers.heroicon('x-circle', css_class: 'w-5 h-5 text-red-600 mr-2') %>
+            <div>
+              <p class="text-sm text-red-800 font-medium">There was an error sending your message:</p>
+              <p data-school-contact-form-target="errorText" class="text-sm text-red-700 mt-1"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+</div>

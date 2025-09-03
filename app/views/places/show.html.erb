@@ -82,7 +82,7 @@
 
       <!-- Map -->
       <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div id="place-map" class="w-full h-80"></div>
+        <div id="place-map" class="w-full h-80" data-google-map></div>
       </div>
 
       <!-- Details -->
@@ -225,7 +225,7 @@
 </div>
 
 <!-- Google Maps for single place -->
-<script>
+<script type="module">
   function initPlaceMap() {
     const place = {
       lat: <%= @place.lat %>,
@@ -291,17 +291,12 @@
     });
   }
 
-  // Initialize map when Google Maps API loads
-  document.addEventListener('DOMContentLoaded', function() {
-    if (typeof google !== 'undefined' && google.maps) {
+  // Use centralized Google Maps loading
+  import { googleMapsService } from '/assets/services/google_maps_service.js';
+  
+  googleMapsService.onReady(() => {
+    if (typeof initPlaceMap === 'function') {
       initPlaceMap();
-    } else {
-      // Load Google Maps API if not already loaded
-      const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initPlaceMap&libraries=geometry,places<%= ENV['GOOGLE_MAPS_MAP_ID'].present? ? ',marker' : '' %>&loading=async';
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
     }
   });
 </script>

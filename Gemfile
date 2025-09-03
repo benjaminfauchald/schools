@@ -68,6 +68,9 @@ gem 'rgeo-activerecord'
 
 gem 'administrate'
 gem 'devise'
+gem 'omniauth'
+gem 'omniauth-facebook'
+gem 'omniauth-rails_csrf_protection'
 gem 'view_component'
 gem 'foreman'
 gem "sentry-ruby"

@@ -1,0 +1,311 @@
+<% content_for :title, "Manage Inquiries" %>
+
+<header class="main-content__header" role="banner">
+  <h1 class="main-content__page-title">Manage Inquiries</h1>
+  <p class="main-content__page-subtitle">View and respond to inquiries from potential students and parents</p>
+</header>
+
+<section class="main-content__body">
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <%= form_with url: admin_inquiries_path, method: :get, local: true, class: "filters-form" do |form| %>
+      <div class="filter-group">
+        <%= form.label :school_id, "School", class: "filter-label" %>
+        <%= form.select :school_id, options_for_select([["All Schools", ""]] + @schools.map { |s| [s.name, s.id] }, params[:school_id]), 
+                       {}, { class: "filter-select" } %>
+      </div>
+      
+      <div class="filter-group">
+        <%= form.label :status, "Status", class: "filter-label" %>
+        <%= form.select :status, options_for_select([["All Statuses", ""]] + @statuses, params[:status]), 
+                       {}, { class: "filter-select" } %>
+      </div>
+      
+      <div class="filter-group">
+        <%= form.submit "Filter", class: "btn btn--primary" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Inquiries List -->
+  <div class="inquiries-list">
+    <% if @inquiries.any? %>
+      <% @inquiries.each do |inquiry| %>
+        <div class="inquiry-item">
+          <%= link_to admin_inquiry_path(inquiry), class: "inquiry-link" do %>
+            <div class="inquiry-header">
+              <div class="inquiry-status">
+                <% if inquiry.status_new? %>
+                  <span class="status-badge status-badge--new">New</span>
+                <% elsif inquiry.status_read? %>
+                  <span class="status-badge status-badge--read">Read</span>
+                <% elsif inquiry.status_responded? %>
+                  <span class="status-badge status-badge--responded">Responded</span>
+                <% else %>
+                  <span class="status-badge status-badge--default"><%= inquiry.status.humanize %></span>
+                <% end %>
+              </div>
+              <div class="inquiry-info">
+                <div class="inquiry-title">
+                  <%= inquiry.name %> - <%= inquiry.school.name %>
+                </div>
+                <div class="inquiry-meta">
+                  <%= inquiry.email %> • 
+                  <%= pluralize(inquiry.children_count, 'child') %> • 
+                  <%= time_ago_in_words(inquiry.created_at) %> ago
+                </div>
+              </div>
+              <div class="inquiry-arrow">→</div>
+            </div>
+            <div class="inquiry-message">
+              <%= truncate(inquiry.message, length: 100) %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <!-- Pagination -->
+      <% if @inquiries.respond_to?(:total_pages) && @inquiries.total_pages > 1 %>
+        <div class="pagination-section">
+          <%= paginate @inquiries %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="empty-state">
+        <div class="empty-state-icon">📧</div>
+        <h3 class="empty-state-title">No inquiries found</h3>
+        <p class="empty-state-text">
+          <% if params[:status].present? || params[:school_id].present? %>
+            Try adjusting your filters to see more results.
+          <% else %>
+            No inquiries have been submitted yet. Inquiries will appear here when potential students contact schools.
+          <% end %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+</section>
+
+<style>
+.main-content__page-subtitle {
+  color: #6c757d;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.filters-section {
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filters-form {
+  display: flex;
+  gap: 1.5rem;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-label {
+  display: block;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.9rem;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.btn--primary {
+  background: #007bff;
+  color: white;
+}
+
+.btn--primary:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.inquiries-list {
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.inquiry-item {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.inquiry-item:last-child {
+  border-bottom: none;
+}
+
+.inquiry-link {
+  display: block;
+  padding: 1.25rem;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.2s ease;
+}
+
+.inquiry-link:hover {
+  background: #f8f9fa;
+  text-decoration: none;
+  color: inherit;
+}
+
+.inquiry-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.inquiry-status {
+  flex-shrink: 0;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge--new {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge--read {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge--responded {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge--default {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.inquiry-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.inquiry-title {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+.inquiry-meta {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.inquiry-arrow {
+  font-size: 1.25rem;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.inquiry-message {
+  color: #495057;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #6c757d;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.pagination-section {
+  padding: 1rem;
+  border-top: 1px solid #e9ecef;
+  text-align: center;
+  background: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+  .filters-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-group {
+    min-width: auto;
+  }
+  
+  .inquiry-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .inquiry-arrow {
+    display: none;
+  }
+}
+</style>

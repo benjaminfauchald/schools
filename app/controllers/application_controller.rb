@@ -8,6 +8,15 @@ class ApplicationController < ActionController::Base
   # Add helper methods for location calculations
   helper_method :calculate_distance, :format_distance
 
+  # Redirect users after sign in based on their role
+  def after_sign_in_path_for(resource)
+    if resource.is_a?(User) && resource.school_owner?
+      school_owner_dashboard_index_path
+    else
+      stored_location_for(resource) || root_path
+    end
+  end
+
   def index
     @places = Place.successful_fetches.with_ratings.limit(100)
     @first_place = @places.first

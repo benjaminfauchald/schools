@@ -1,0 +1,191 @@
+<% content_for :title, "Inquiry from #{@inquiry.name}" %>
+
+<div class="space-y-6">
+  <!-- Breadcrumb -->
+  <nav class="flex" aria-label="Breadcrumb">
+    <ol class="flex items-center space-x-4">
+      <li>
+        <%= link_to "Dashboard", school_owner_dashboard_index_path, class: "text-sm font-medium text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <div class="flex items-center">
+          <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+          <%= link_to "Inquiries", school_owner_inquiries_path, class: "ml-4 text-sm font-medium text-gray-500 hover:text-gray-700" %>
+        </div>
+      </li>
+      <li>
+        <div class="flex items-center">
+          <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+          <span class="ml-4 text-sm font-medium text-gray-500">Inquiry from <%= @inquiry.name %></span>
+        </div>
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Inquiry Details -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Header -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">Inquiry from <%= @inquiry.name %></h1>
+              <p class="mt-1 text-sm text-gray-600">
+                Received <%= time_ago_in_words(@inquiry.created_at) %> ago for <%= @inquiry.school.name %>
+              </p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <% if @inquiry.status_new? %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                  New
+                </span>
+              <% elsif @inquiry.status_read? %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                  Read
+                </span>
+              <% elsif @inquiry.status_responded? %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  Responded
+                </span>
+              <% else %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                  <%= @inquiry.status.humanize %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message Content -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Message</h3>
+          <div class="prose prose-sm text-gray-700">
+            <%= simple_format(@inquiry.message) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Contact Information -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
+          
+          <dl class="space-y-3">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Name</dt>
+              <dd class="text-sm text-gray-900"><%= @inquiry.name %></dd>
+            </div>
+            
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Email</dt>
+              <dd class="text-sm text-gray-900">
+                <%= mail_to @inquiry.email, @inquiry.email, class: "text-blue-600 hover:text-blue-500" %>
+              </dd>
+            </div>
+            
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Phone</dt>
+              <dd class="text-sm text-gray-900">
+                <% if @inquiry.phone.present? %>
+                  <%= link_to @inquiry.phone, "tel:#{@inquiry.phone}", class: "text-blue-600 hover:text-blue-500" %>
+                <% else %>
+                  <span class="text-gray-400">Not provided</span>
+                <% end %>
+              </dd>
+            </div>
+            
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Children Count</dt>
+              <dd class="text-sm text-gray-900"><%= pluralize(@inquiry.children_count, 'child') %></dd>
+            </div>
+            
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Lead Source</dt>
+              <dd class="text-sm text-gray-900"><%= @inquiry.lead_source %></dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- School Information -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">School</h3>
+          
+          <div class="flex items-start space-x-3">
+            <div class="flex-1">
+              <h4 class="text-sm font-medium text-gray-900"><%= @inquiry.school.name %></h4>
+              <p class="text-sm text-gray-500"><%= @inquiry.school.display_address %></p>
+              
+              <div class="mt-3 space-x-2">
+                <%= link_to "View School", school_owner_school_path(@inquiry.school), 
+                    class: "text-sm text-blue-600 hover:text-blue-500 font-medium" %>
+                <%= link_to "Public Page", school_path(@inquiry.school), target: "_blank", 
+                    class: "text-sm text-gray-600 hover:text-gray-500 font-medium" %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Management -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Update Status</h3>
+          
+          <%= form_with model: @inquiry, url: school_owner_inquiry_path(@inquiry), method: :patch, local: true, class: "space-y-4" do |form| %>
+            <div>
+              <%= form.label :status, "Status", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :status, 
+                             options_for_select([
+                               ['New', 'new'],
+                               ['Read', 'read'],
+                               ['Responded', 'responded'],
+                               ['Closed', 'closed']
+                             ], @inquiry.status), 
+                             {}, 
+                             { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" } %>
+            </div>
+            
+            <div>
+              <%= form.submit "Update Status", 
+                  class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+          
+          <div class="space-y-3">
+            <%= mail_to @inquiry.email, "Send Email", 
+                subject: "Re: Inquiry about #{@inquiry.school.name}",
+                class: "w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            
+            <% if @inquiry.phone.present? %>
+              <%= link_to "Call Now", "tel:#{@inquiry.phone}", 
+                  class: "w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            <% end %>
+            
+            <%= link_to "Back to Inquiries", school_owner_inquiries_path, 
+                class: "w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

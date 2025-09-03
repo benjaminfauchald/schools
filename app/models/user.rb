@@ -2,7 +2,7 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable, :confirmable
+         :recoverable, :rememberable, :validatable, :confirmable, :omniauthable
 
   # Associations
   has_many :school_claims, dependent: :destroy
@@ -10,16 +10,54 @@ class User < ApplicationRecord
   has_many :audit_logs, dependent: :destroy
   has_many :magic_link_tokens, dependent: :destroy
   has_many :ai_conversations, dependent: :destroy
+  has_many :school_inquiries, dependent: :destroy
 
   # Validations
   validates :role, inclusion: { in: %w[school_owner admin] }
   validates :email, presence: true, uniqueness: true
+  validates :provider, :uid, presence: true, if: -> { provider.present? || uid.present? }
 
   # Enums
   enum :role, {
     school_owner: 'school_owner',
     admin: 'admin'
   }
+  
+  # OmniAuth methods
+  def self.from_omniauth(auth)
+    # Try to find existing user by provider and uid first
+    user = User.find_by(provider: auth.provider, uid: auth.uid)
+    
+    if user
+      # Update Facebook name if it's different
+      user.update(facebook_name: auth.info.name) if user.facebook_name != auth.info.name
+      return user
+    end
+    
+    # Try to find existing user by email
+    user = User.find_by(email: auth.info.email)
+    
+    if user
+      # Link this OAuth account to existing user
+      user.update!(
+        provider: auth.provider,
+        uid: auth.uid,
+        facebook_name: auth.info.name
+      )
+      return user
+    end
+    
+    # Create new user
+    User.create!(
+      email: auth.info.email,
+      provider: auth.provider,
+      uid: auth.uid,
+      facebook_name: auth.info.name,
+      role: 'school_owner', # Default role for new Facebook users
+      confirmed_at: Time.current, # Skip email confirmation for OAuth users
+      password: Devise.friendly_token[0, 20] # Random password (won't be used)
+    )
+  end
 
   # Callbacks
   after_update :process_temp_claims_on_confirmation, if: :confirmed_at_changed?

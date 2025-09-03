@@ -1,5 +1,6 @@
 class SchoolInquiry < ApplicationRecord
   belongs_to :school
+  belongs_to :user, optional: true
   
   validates :name, presence: true, length: { maximum: 100 }
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
@@ -30,6 +31,16 @@ class SchoolInquiry < ApplicationRecord
   
   def days_ago
     ((Time.current - created_at) / 1.day).round
+  end
+  
+  def lead_source
+    if user&.provider == 'facebook'
+      "Facebook: #{user.facebook_name}"
+    elsif user
+      "Registered User: #{user.email}"
+    else
+      "Direct (Legacy)"
+    end
   end
   
   private

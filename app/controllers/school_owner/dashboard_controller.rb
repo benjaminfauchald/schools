@@ -2,6 +2,10 @@ class SchoolOwner::DashboardController < SchoolOwner::ApplicationController
   def index
     @owned_schools = current_user.owned_schools.includes(:place)
     @pending_claims = current_user.pending_claims.includes(:school)
+    @inquiries = SchoolInquiry.joins(:school)
+                             .where(schools: { id: current_user.owned_schools.select(:id) })
+                             .includes(:school, :user)
+                             .recent
     @recent_activity = recent_activity_for_user
   end
   

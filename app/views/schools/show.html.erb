@@ -19,28 +19,52 @@
           school: @school
         ) %>
 
-    <!-- Contact & Location -->
-    <%= render Schools::ContactInfoComponent.new(
-          contact_info: @merged_data.contact_info,
-          location_data: @merged_data.location_data
-        ) %>
+    <!-- Contact Form & Map Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:items-stretch">
+      <!-- Contact Form (First on mobile, Left on desktop) -->
+      <div class="order-1 flex">
+        <div class="w-full">
+          <%= render Schools::ContactFormComponent.new(
+                school: @school,
+                contact_info: @merged_data.contact_info,
+                user_signed_in: user_signed_in?,
+                facebook_authenticated: user_signed_in? && current_user&.provider == 'facebook'
+              ) %>
+        </div>
+      </div>
+      
+      <!-- Interactive Map & Directions (Second on mobile, Right on desktop) -->
+      <div class="order-2 flex">
+        <div class="w-full">
+          <%= render Schools::InteractiveMapComponent.new(
+                school_data: @merged_data.hero_data,
+                contact_info: @merged_data.contact_info,
+                location_data: @merged_data.location_data
+              ) %>
+        </div>
+      </div>
+    </div>
 
-    <!-- Interactive Map & Directions -->
-    <%= render Schools::InteractiveMapComponent.new(
-          school_data: @merged_data.hero_data,
-          contact_info: @merged_data.contact_info,
-          location_data: @merged_data.location_data
-        ) %>
-
-    <!-- Academic Programs -->
-    <%= render Schools::AcademicProgramsComponent.new(
-          academic_programs: @merged_data.academic_programs
-        ) %>
-
-    <!-- Facilities -->
-    <%= render Schools::FacilitiesGridComponent.new(
-          facilities: @merged_data.facilities || []
-        ) %>
+    <!-- Academic Programs & Facilities Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:items-stretch">
+      <!-- Academic Programs (Left on desktop, First on mobile) -->
+      <div class="order-1 flex">
+        <div class="w-full">
+          <%= render Schools::AcademicProgramsComponent.new(
+                academic_programs: @merged_data.academic_programs
+              ) %>
+        </div>
+      </div>
+      
+      <!-- Campus Facilities (Right on desktop, Second on mobile) -->
+      <div class="order-2 flex">
+        <div class="w-full">
+          <%= render Schools::FacilitiesGridComponent.new(
+                facilities: @merged_data.facilities || []
+              ) %>
+        </div>
+      </div>
+    </div>
 
     <!-- Grade Levels & Age Groups -->
     <% if @school.school_grade_offering %>

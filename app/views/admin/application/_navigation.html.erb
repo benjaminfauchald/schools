@@ -15,6 +15,18 @@
        end %>
   <% end %>
 
+  <%= link_to admin_inquiries_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'inquiries'}" do %>
+    Inquiries
+    <% begin
+         new_count = SchoolInquiry.where(status: 'new').count
+         if new_count > 0 %>
+      <span class="navigation__badge"><%= new_count %></span>
+    <%   end
+       rescue => e
+         # Silently ignore if model not available
+       end %>
+  <% end %>
+
   <%= link_to admin_schools_path, class: "navigation__link #{'navigation__link--active' if controller_name == 'schools'}" do %>
     Schools
   <% end %>

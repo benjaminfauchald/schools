@@ -1,0 +1,118 @@
+<% content_for :title, "Manage Inquiries" %>
+
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h1 class="text-2xl font-bold text-gray-900">Manage Inquiries</h1>
+      <p class="mt-1 text-sm text-gray-600">
+        View and respond to inquiries from potential students and parents
+      </p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <%= form_with url: school_owner_inquiries_path, method: :get, local: true, class: "space-y-4 sm:space-y-0 sm:flex sm:items-end sm:space-x-4" do |form| %>
+        <div class="flex-1">
+          <%= form.label :school_id, "School", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :school_id, options_for_select([["All Schools", ""]] + @schools.map { |s| [s.name, s.id] }, params[:school_id]), 
+                         {}, { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" } %>
+        </div>
+        
+        <div class="flex-1">
+          <%= form.label :status, "Status", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :status, options_for_select([["All Statuses", ""]] + @statuses, params[:status]), 
+                         {}, { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" } %>
+        </div>
+        
+        <div>
+          <%= form.submit "Filter", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Inquiries List -->
+  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <% if @inquiries.any? %>
+      <ul class="divide-y divide-gray-200">
+        <% @inquiries.each do |inquiry| %>
+          <li>
+            <%= link_to school_owner_inquiry_path(inquiry), class: "block hover:bg-gray-50 px-4 py-4 sm:px-6" do %>
+              <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                      <% if inquiry.status_new? %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          New
+                        </span>
+                      <% elsif inquiry.status_read? %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          Read
+                        </span>
+                      <% elsif inquiry.status_responded? %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Responded
+                        </span>
+                      <% else %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          <%= inquiry.status.humanize %>
+                        </span>
+                      <% end %>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-gray-900 truncate">
+                        <%= inquiry.name %> - <%= inquiry.school.name %>
+                      </p>
+                      <div class="flex items-center space-x-4 text-sm text-gray-500">
+                        <span><%= inquiry.email %></span>
+                        <span>•</span>
+                        <span><%= pluralize(inquiry.children_count, 'child') %></span>
+                        <span>•</span>
+                        <span><%= time_ago_in_words(inquiry.created_at) %> ago</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-600 line-clamp-2">
+                      <%= truncate(inquiry.message, length: 100) %>
+                    </p>
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+      
+      <!-- Pagination -->
+      <% if @inquiries.respond_to?(:total_pages) && @inquiries.total_pages > 1 %>
+        <div class="px-4 py-3 border-t border-gray-200">
+          <%= paginate @inquiries, theme: 'twitter_bootstrap_4' %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10m0 0V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2m0 0v10a2 2 0 002 2h10a2 2 0 002-2V8M9 12h6"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No inquiries found</h3>
+        <p class="mt-1 text-sm text-gray-500">
+          <% if params[:status].present? || params[:school_id].present? %>
+            Try adjusting your filters to see more results.
+          <% else %>
+            You haven't received any inquiries yet. Inquiries will appear here when potential students contact your schools.
+          <% end %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+</div>

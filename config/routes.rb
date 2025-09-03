@@ -1,8 +1,23 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: {
     registrations: 'users/registrations',
-    confirmations: 'users/confirmations'
+    confirmations: 'users/confirmations',
+    omniauth_callbacks: 'users/omniauth_callbacks'
   }
+  
+  # Additional Devise routes
+  devise_scope :user do
+    # Add GET route for sign out (for convenience)
+    get '/users/sign_out', to: 'devise/sessions#destroy'
+    
+    # Store school context before Facebook OAuth
+    post 'users/auth/facebook/store_school', to: 'users/omniauth_callbacks#store_school'
+    
+    # Mock Facebook authentication for development
+    if Rails.env.development?
+      get 'users/auth/facebook/mock', to: 'users/omniauth_callbacks#mock_facebook', as: :mock_facebook_auth
+    end
+  end
   
   # Magic Link Authentication
   get 'auth/dashboard/:token', to: 'magic_links#dashboard', as: :magic_link_dashboard
@@ -25,6 +40,7 @@ Rails.application.routes.draw do
   # School Owner Dashboard
   namespace :school_owner do
     resources :dashboard, only: [:index]
+    resources :inquiries, only: [:index, :show, :update]
     resources :schools, only: [:index, :show, :edit, :update] do
       member do
         get :academic_programs
@@ -73,6 +89,7 @@ Rails.application.routes.draw do
   }
   namespace :admin do
       root to: "dashboard#index"
+      resources :inquiries, only: [:index, :show, :update]
       resources :places
       resources :points
       resources :schools
@@ -131,6 +148,10 @@ Rails.application.routes.draw do
     collection do
       get :filtered, to: 'schools#filtered'
       get :search, to: 'schools#search'
+    end
+    
+    member do
+      post :ai_chat
     end
     
     # Nested pages routes for school content
