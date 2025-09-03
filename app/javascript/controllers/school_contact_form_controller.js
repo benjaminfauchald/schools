@@ -9,6 +9,9 @@ export default class extends Controller {
     
     // Check if user just returned from OAuth and restore form if needed
     this.restoreFormFromSession()
+    
+    // Load previously saved form data from cookies
+    this.loadFormDataFromCookies()
   }
 
   async submitForm(event) {
@@ -75,6 +78,9 @@ export default class extends Controller {
       const result = await response.json()
 
       if (result.success) {
+        // Save form data to cookies for next time
+        this.saveFormDataToCookies()
+        
         this.showMessage(result.message, 'success')
         this.formTarget.reset()
       } else {
@@ -196,4 +202,88 @@ export default class extends Controller {
       sessionStorage.removeItem('pendingContactForm')
     }
   }
+
+  // Load form data from cookies if available
+  loadFormDataFromCookies() {
+    const savedData = this.getCookie('contactFormData')
+    console.log('Saved cookie data:', savedData)
+    
+    if (!savedData) {
+      console.log('No saved form data found in cookies')
+      return
+    }
+
+    try {
+      const formData = JSON.parse(savedData)
+      console.log('Parsed form data:', formData)
+      
+      // Only populate non-message fields (name, email, phone)
+      const fieldsToRestore = ['school_inquiry[name]', 'school_inquiry[email]', 'school_inquiry[phone]']
+      
+      fieldsToRestore.forEach(fieldName => {
+        console.log('Looking for field:', fieldName)
+        if (formData[fieldName]) {
+          const input = this.formTarget.querySelector(`[name="${fieldName}"]`)
+          console.log('Found input:', input, 'Current value:', input?.value)
+          if (input && !input.value) { // Only fill if field is empty
+            input.value = formData[fieldName]
+            console.log('Set value:', formData[fieldName])
+          }
+        }
+      })
+    } catch (error) {
+      console.error('Error loading form data from cookies:', error)
+      // Clear corrupted cookie
+      this.setCookie('contactFormData', '', -1)
+    }
+  }
+
+  // Save form data to cookies (excluding message and sensitive fields)
+  saveFormDataToCookies() {
+    console.log('Saving form data to cookies...')
+    const formData = new FormData(this.formTarget)
+    const dataToSave = {}
+    
+    // Only save name, email, and phone (not message or children count)
+    const fieldsToSave = ['school_inquiry[name]', 'school_inquiry[email]', 'school_inquiry[phone]']
+    
+    fieldsToSave.forEach(fieldName => {
+      const value = formData.get(fieldName)
+      console.log('Field:', fieldName, 'Value:', value)
+      if (value && value.trim()) {
+        dataToSave[fieldName] = value.trim()
+      }
+    })
+    
+    console.log('Data to save:', dataToSave)
+    // Save to cookie for 90 days
+    this.setCookie('contactFormData', JSON.stringify(dataToSave), 90)
+    console.log('Cookie saved successfully')
+  }
+
+  // Helper method to set cookies
+  setCookie(name, value, days) {
+    let expires = ''
+    if (days) {
+      const date = new Date()
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000))
+      expires = '; expires=' + date.toUTCString()
+    }
+    document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/; SameSite=Lax'
+  }
+
+  // Helper method to get cookies
+  getCookie(name) {
+    const nameEQ = name + '='
+    const ca = document.cookie.split(';')
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i]
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length)
+      if (c.indexOf(nameEQ) === 0) {
+        return decodeURIComponent(c.substring(nameEQ.length, c.length))
+      }
+    }
+    return null
+  }
+
 }

@@ -7,6 +7,9 @@ Rails.application.routes.draw do
   
   # Additional Devise routes
   devise_scope :user do
+    # Add GET route for sign out (for convenience)
+    get '/users/sign_out', to: 'devise/sessions#destroy'
+    
     # Store school context before Facebook OAuth
     post 'users/auth/facebook/store_school', to: 'users/omniauth_callbacks#store_school'
     

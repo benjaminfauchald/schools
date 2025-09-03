@@ -7,6 +7,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    
+    <%# Google Maps API Key for centralized loading %>
+    <meta name="google-maps-api-key" content="<%= Rails.application.credentials.dig(:google_maps, :api_key) || ENV['GOOGLE_PLACES_API_KEY'] || '' %>">
 
     <%= yield :head %>
 

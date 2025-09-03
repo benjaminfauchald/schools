@@ -120,7 +120,7 @@
             
             <!-- Map Container -->
             <div class="relative">
-              <div id="onboarding-map" class="w-full h-96"></div>
+              <div id="onboarding-map" class="w-full h-96" data-google-map></div>
               
               <!-- Map Controls -->
               <div class="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-2 space-y-2">
@@ -208,7 +208,16 @@
         document.getElementById('onboarding-map').innerHTML = '<div class="flex items-center justify-center h-full bg-red-50 text-red-600">Google Maps API authentication failed. Please check console for details.</div>';
       };
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initOnboardingMap&libraries=geometry,places<%= ENV['GOOGLE_MAPS_MAP_ID'].present? ? ',marker' : '' %>&loading=async"></script>
+    <script type="module">
+      import { googleMapsService } from '/assets/services/google_maps_service.js';
+      
+      // Initialize onboarding map when Google Maps is ready
+      googleMapsService.onReady(() => {
+        if (typeof initOnboardingMap === 'function') {
+          initOnboardingMap();
+        }
+      });
+    </script>
     
     <!-- Flowbite JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>

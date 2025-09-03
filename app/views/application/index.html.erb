@@ -11,7 +11,7 @@
       <!-- Map Container -->
       <div class="lg:col-span-2">
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div id="map" class="w-full h-96 lg:h-[500px]"></div>
+          <div id="map" class="w-full h-96 lg:h-[500px]" data-google-map></div>
         </div>
       </div>
       
@@ -132,7 +132,16 @@
       document.getElementById('map').innerHTML = '<div class="flex items-center justify-center h-full bg-red-50 text-red-600">Google Maps API authentication failed. Check console for details.</div>';
     };
   </script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_PLACES_API_KEY'] %>&callback=initMap&libraries=geometry,places<%= ENV['GOOGLE_MAPS_MAP_ID'].present? ? ',marker' : '' %>&loading=async"></script>
+  <script type="module">
+    import { googleMapsService } from '/assets/services/google_maps_service.js';
+    
+    // Initialize map when Google Maps is ready
+    googleMapsService.onReady(() => {
+      if (typeof initMap === 'function') {
+        initMap();
+      }
+    });
+  </script>
   
   <script>
     let map;
