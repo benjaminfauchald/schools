@@ -45,15 +45,26 @@
       </div>
     </div>
 
-    <!-- Academic Programs -->
-    <%= render Schools::AcademicProgramsComponent.new(
-          academic_programs: @merged_data.academic_programs
-        ) %>
-
-    <!-- Facilities -->
-    <%= render Schools::FacilitiesGridComponent.new(
-          facilities: @merged_data.facilities || []
-        ) %>
+    <!-- Academic Programs & Facilities Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:items-stretch">
+      <!-- Academic Programs (Left on desktop, First on mobile) -->
+      <div class="order-1 flex">
+        <div class="w-full">
+          <%= render Schools::AcademicProgramsComponent.new(
+                academic_programs: @merged_data.academic_programs
+              ) %>
+        </div>
+      </div>
+      
+      <!-- Campus Facilities (Right on desktop, Second on mobile) -->
+      <div class="order-2 flex">
+        <div class="w-full">
+          <%= render Schools::FacilitiesGridComponent.new(
+                facilities: @merged_data.facilities || []
+              ) %>
+        </div>
+      </div>
+    </div>
 
     <!-- Grade Levels & Age Groups -->
     <% if @school.school_grade_offering %>

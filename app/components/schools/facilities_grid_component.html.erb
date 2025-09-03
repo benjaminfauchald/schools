@@ -1,11 +1,11 @@
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden h-full flex flex-col">
   <%= render Schools::SectionHeaderComponent.new(
         title: "Campus Facilities",
         icon: "building-office-2",
         subtitle: "Modern facilities supporting student learning and development"
       ) %>
 
-  <div class="px-6 pb-6">
+  <div class="px-6 pb-6 flex-1">
     <div class="space-y-8">
       
       <% facility_groups.each do |group_name, group_data| %>
