@@ -7,7 +7,7 @@
   <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
     <!-- First Page (only show if not on first page and more than 5 pages) -->
     <% if current_page > 1 && total_pages > 5 %>
-      <%= link_to page_path(1), 
+      <%= link_to url_for(request.query_parameters.merge(page: 1)), 
             class: "relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 transition-colors duration-200",
             title: "First page",
             'aria-label': "Go to first page" do %>
@@ -34,7 +34,7 @@
 
     <!-- Last Page (only show if not on last page and more than 5 pages) -->
     <% if current_page < total_pages && total_pages > 5 %>
-      <%= link_to page_path(total_pages), 
+      <%= link_to url_for(request.query_parameters.merge(page: total_pages)), 
             class: "relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 transition-colors duration-200",
             title: "Last page (#{total_pages})",
             'aria-label': "Go to last page, page #{total_pages}" do %>

@@ -19,10 +19,12 @@
           school: @school
         ) %>
 
-    <!-- Contact & Location -->
-    <%= render Schools::ContactInfoComponent.new(
+    <!-- Contact Form -->
+    <%= render Schools::ContactFormComponent.new(
+          school: @school,
           contact_info: @merged_data.contact_info,
-          location_data: @merged_data.location_data
+          user_signed_in: user_signed_in?,
+          facebook_authenticated: user_signed_in? && current_user&.provider == 'facebook'
         ) %>
 
     <!-- Interactive Map & Directions -->

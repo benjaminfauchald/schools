@@ -1,8 +1,20 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: {
     registrations: 'users/registrations',
-    confirmations: 'users/confirmations'
+    confirmations: 'users/confirmations',
+    omniauth_callbacks: 'users/omniauth_callbacks'
   }
+  
+  # Additional Devise routes
+  devise_scope :user do
+    # Store school context before Facebook OAuth
+    post 'users/auth/facebook/store_school', to: 'users/omniauth_callbacks#store_school'
+    
+    # Mock Facebook authentication for development
+    if Rails.env.development?
+      get 'users/auth/facebook/mock', to: 'users/omniauth_callbacks#mock_facebook', as: :mock_facebook_auth
+    end
+  end
   
   # Magic Link Authentication
   get 'auth/dashboard/:token', to: 'magic_links#dashboard', as: :magic_link_dashboard

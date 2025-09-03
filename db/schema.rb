@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_02_172524) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_03_084355) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -405,10 +405,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_02_172524) do
     t.text "admin_notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
     t.index ["email"], name: "index_school_inquiries_on_email"
     t.index ["school_id", "created_at"], name: "index_school_inquiries_on_school_id_and_created_at"
     t.index ["school_id"], name: "index_school_inquiries_on_school_id"
     t.index ["status"], name: "index_school_inquiries_on_status"
+    t.index ["user_id"], name: "index_school_inquiries_on_user_id"
   end
 
   create_table "schools", force: :cascade do |t|
@@ -602,8 +604,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_02_172524) do
     t.string "role", default: "school_owner", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "provider"
+    t.string "uid"
+    t.string "facebook_name"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
   end
@@ -655,6 +661,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_02_172524) do
   add_foreign_key "school_fee_schedules", "schools"
   add_foreign_key "school_grade_offerings", "schools"
   add_foreign_key "school_inquiries", "schools"
+  add_foreign_key "school_inquiries", "users"
   add_foreign_key "schools", "places"
   add_foreign_key "taggings", "terms"
   add_foreign_key "temp_claims", "schools"
