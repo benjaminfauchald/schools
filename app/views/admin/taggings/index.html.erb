@@ -136,27 +136,27 @@
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
         <h3 class="text-lg font-medium text-gray-900">Taggings List</h3>
-        <p class="mt-1 text-sm text-gray-600">Showing <%= @taggings.count %> taggings</p>
+        <p class="mt-1 text-sm text-gray-600">Showing <%= @taggings&.count || 0 %> taggings</p>
       </div>
       
       <% if @taggings.any? %>
         <div class="overflow-x-auto">
-          <table class="w-full min-w-full divide-y divide-gray-200 table-fixed">
+          <table class="w-full min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th scope="col" class="w-1/4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Term & Context
                 </th>
-                <th scope="col" class="w-1/4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Tagged Item
                 </th>
-                <th scope="col" class="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Validity
                 </th>
-                <th scope="col" class="w-1/4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Notes
                 </th>
-                <th scope="col" class="w-1/12 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -165,35 +165,20 @@
                 <% @taggings.each do |tagging| %>
                   <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4">
-                      <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                            </svg>
-                          </div>
-                        </div>
-                        <div class="ml-4">
-                          <div class="text-sm font-medium text-gray-900"><%= tagging.term.label %></div>
-                          <div class="text-sm text-blue-600 mt-1">
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              <%= tagging.context.humanize %>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                      <div class="text-sm font-medium text-gray-900"><%= tagging.term.label %></div>
+                      <div class="text-sm text-gray-500"><%= tagging.context.humanize %></div>
                     </td>
                     <td class="px-6 py-4">
                       <div class="text-sm font-medium text-gray-900">
                         <%= tagging.taggable_type.constantize.model_name.human %>
                       </div>
-                      <div class="text-sm text-blue-600 mt-1">
+                      <div class="text-sm text-gray-500">
                         <% if tagging.taggable.respond_to?(:name) %>
                           <%= link_to truncate(tagging.taggable.name, length: 40), 
                               polymorphic_path([:admin, tagging.taggable]), 
-                              class: "hover:text-blue-700" %>
+                              class: "text-blue-600 hover:text-blue-700" %>
                         <% else %>
-                          <span class="text-gray-500">ID: <%= tagging.taggable_id %></span>
+                          ID: <%= tagging.taggable_id %>
                         <% end %>
                       </div>
                     </td>
@@ -252,13 +237,6 @@
                         <div class="text-sm text-gray-900">
                           <%= truncate(tagging.notes, length: 100) %>
                         </div>
-                        <% if tagging.notes.length > 100 %>
-                          <div class="text-sm text-gray-500 mt-1">
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                              +<%= tagging.notes.length - 100 %> more characters
-                            </span>
-                          </div>
-                        <% end %>
                       <% else %>
                         <span class="text-sm text-gray-400 italic">No notes</span>
                       <% end %>
