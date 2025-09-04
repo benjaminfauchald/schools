@@ -680,69 +680,35 @@
                 </div>
                 
                 <!-- Photos from Google Places -->
-                <% if @school.place&.photos&.any? %>
+                <% if @school.google_photos.any? %>
                   <div class="mb-8">
-                    <h3 class="text-md font-medium text-gray-900 mb-4">Current Photos from Google Places</h3>
-                    <p class="text-sm text-gray-600 mb-4">Click on photos to show or hide them on your public school page.</p>
+                    <h3 class="text-md font-medium text-gray-900 mb-4">Google Places Photos</h3>
+                    <p class="text-sm text-gray-600 mb-4">These photos are from Google Places. Click to show or hide them on your public page.</p>
                     
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      <% @school.place.photos.each do |photo| %>
-                        <% photo_key = @school.send(:generate_photo_key, photo) %>
-                        <% is_visible = @school.photo_visible?(photo) %>
-                        <div class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden photo-toggle-container cursor-pointer group"
-                             data-photo-key="<%= photo_key %>"
-                             data-visible="<%= is_visible %>"
-                             data-controller="photo-visibility"
-                             data-action="click->photo-visibility#toggle"
-                             data-photo-visibility-school-id-value="<%= @school.id %>">
-                          
-                          <!-- Photo Image -->
-                          <% photo_reference = photo.is_a?(Hash) ? photo['photo_reference'] : photo.try(:photo_reference) %>
-                          <% if photo_reference.present? %>
-                            <% photo_url = "/api/v1/photos/proxy?photo_reference=#{CGI.escape(photo_reference)}&max_width=400&t=#{Time.current.to_i}" %>
-                            <%= image_tag photo_url,
-                                alt: "#{@school.name} photo",
-                                class: "absolute inset-0 w-full h-full object-cover transition-all duration-200 #{'opacity-50' unless is_visible} z-0",
-                                loading: "lazy",
-                                onerror: "this.onerror=null; this.parentElement.innerHTML='<div class=\"w-full h-full flex items-center justify-center bg-red-100 text-red-600 text-xs p-2 relative z-10\">Image failed to load</div>';" %>
-                          <% elsif photo.respond_to?(:url) %>
+                      <% @school.google_photos.each do |photo| %>
+                        <div class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group">
+                          <% if photo.url.present? %>
                             <%= image_tag photo.url, 
-                                alt: "#{@school.name} photo",
-                                class: "w-full h-full object-cover transition-all duration-200 #{'opacity-50' unless is_visible}",
+                                alt: photo.display_alt_text,
+                                class: "w-full h-full object-cover",
                                 loading: "lazy",
                                 onerror: "this.onerror=null; this.parentElement.innerHTML='<div class=\"w-full h-full flex items-center justify-center bg-red-100 text-red-600 text-xs p-2\">Image failed to load</div>';" %>
                           <% else %>
                             <div class="w-full h-full flex items-center justify-center bg-gray-200 text-center p-2">
-                              <div>
-                                <span class="text-gray-400 text-sm">No photo reference found</span>
-                                <% if Rails.env.development? %>
-                                  <br><small class="text-xs break-all">
-                                    Photo: <%= photo.inspect[0..100] %>...<br>
-                                    Reference: <%= photo_reference.inspect %>
-                                  </small>
-                                <% end %>
-                              </div>
+                              <span class="text-gray-400 text-sm">No photo URL</span>
                             </div>
                           <% end %>
                           
-                          <!-- Visibility Status Badge -->
-                          <div class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium <%= is_visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %> z-20">
-                            <%= is_visible ? 'Showing' : 'Hidden' %>
+                          <!-- Source Badge -->
+                          <div class="absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Google Places
                           </div>
                           
-                          <!-- Click Overlay -->
-                          <div class="absolute inset-0 bg-transparent group-hover:bg-black group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center z-10">
-                            <div class="opacity-0 group-hover:opacity-100 bg-white bg-opacity-90 rounded-full p-2 transition-opacity duration-200">
-                              <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <% if is_visible %>
-                                  <!-- Eye Off Icon (hide) -->
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
-                                <% else %>
-                                  <!-- Eye Icon (show) -->
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                <% end %>
-                              </svg>
+                          <!-- Info overlay -->
+                          <div class="absolute inset-0 bg-transparent group-hover:bg-black group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                            <div class="opacity-0 group-hover:opacity-100 bg-white bg-opacity-90 rounded px-2 py-1 text-xs transition-opacity duration-200">
+                              From Google Places
                             </div>
                           </div>
                         </div>
@@ -802,25 +768,32 @@
                   </div>
                   
                   <!-- Uploaded Photos Display -->
-                  <% if false && @school.respond_to?(:photos) && @school.photos.any? %>
+                  <% if @school.uploaded_photos.any? %>
                     <div class="mt-8">
-                      <h4 class="text-md font-medium text-gray-900 mb-4">Your Uploaded Photos</h4>
+                      <h4 class="text-lg font-medium text-gray-900 mb-4">Your Uploaded Photos</h4>
+                      <p class="text-sm text-gray-600 mb-4">Photos you've uploaded directly to your school profile.</p>
                       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <% @school.photos.each do |photo| %>
+                        <% @school.uploaded_photos.each do |photo| %>
                           <div class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group">
-                            <% if photo.respond_to?(:variant) %>
-                              <%= image_tag photo.variant(resize_to_limit: [300, 300]), 
-                                  alt: "#{@school.name} uploaded photo",
-                                  class: "w-full h-full object-cover" %>
+                            <% if photo.file.attached? %>
+                              <%= image_tag photo.thumbnail_url(size: 300), 
+                                  alt: photo.display_alt_text,
+                                  class: "w-full h-full object-cover",
+                                  loading: "lazy" %>
                             <% else %>
                               <div class="w-full h-full flex items-center justify-center bg-gray-200">
-                                <span class="text-gray-400 text-sm">Photo format not supported</span>
+                                <span class="text-gray-400 text-sm">No photo attached</span>
                               </div>
                             <% end %>
                             
+                            <!-- Source Badge -->
+                            <div class="absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Uploaded
+                            </div>
+                            
                             <!-- Delete button -->
                             <%= button_to "×", 
-                                delete_photo_school_owner_school_path(@school, photo_id: photo.id), 
+                                delete_media_item_school_owner_school_path(@school, media_item_id: photo.id), 
                                 method: :delete,
                                 class: "absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-sm font-bold hover:bg-red-600",
                                 title: "Delete photo",

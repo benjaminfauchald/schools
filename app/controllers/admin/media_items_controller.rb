@@ -24,11 +24,16 @@ module Admin
         @media_items = @media_items.where(place_id: params[:place_id])
       end
       
+      # Apply source filter
+      if params[:source].present?
+        @media_items = @media_items.where(source: params[:source])
+      end
+      
       @media_items = @media_items.limit(50)
       
       # Statistics
       @total_media_items = MediaItem.count
-      @total_images = MediaItem.where(kind: %w[logo campus_photo]).count
+      @total_images = MediaItem.where(kind: %w[logo photo]).count
       @total_documents = MediaItem.where(kind: %w[brochure fee_schedule_pdf menu floor_plan]).count
       @total_videos = MediaItem.where(kind: %w[video virtual_tour]).count
       @places_with_media = Place.joins(:media_items).distinct.count
@@ -89,7 +94,7 @@ module Admin
     private
 
     def media_item_params
-      params.require(:media_item).permit(:place_id, :kind, :url, :alt_text, :sort_order)
+      params.require(:media_item).permit(:place_id, :kind, :url, :alt_text, :sort_order, :source, :file)
     end
   end
 end

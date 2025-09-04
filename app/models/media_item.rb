@@ -3,21 +3,34 @@
 class MediaItem < ApplicationRecord
   belongs_to :place
   
+  # Add file attachment capability for uploaded media
+  has_one_attached :file
+  
   validates :kind, presence: true, inclusion: { 
-    in: %w[logo campus_photo brochure fee_schedule_pdf video virtual_tour menu floor_plan]
+    in: %w[logo photo brochure fee_schedule_pdf video virtual_tour menu floor_plan]
   }
-  validates :url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }
+  validates :url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }, unless: -> { file.attached? }
+  validates :file, presence: true, unless: -> { url.present? }
   validates :sort_order, numericality: { greater_than_or_equal_to: 0 }
+  
+  # Add source enum to track where media came from
+  enum :source, {
+    google_places: 'google_places',
+    school_upload: 'school_upload',
+    admin_upload: 'admin_upload'
+  }, prefix: 'from'
   
   scope :by_kind, ->(kind) { where(kind: kind) }
   scope :ordered, -> { order(:sort_order, :created_at) }
-  scope :photos, -> { where(kind: 'campus_photo') }
+  scope :photos, -> { where(kind: 'photo') }
+  scope :uploaded_photos, -> { where(kind: 'photo').where.not(source: 'google_places') }
+  scope :google_photos, -> { where(kind: 'photo', source: 'google_places') }
   scope :documents, -> { where(kind: %w[brochure fee_schedule_pdf]) }
   scope :videos, -> { where(kind: %w[video virtual_tour]) }
   
   # Check if this is an image
   def image?
-    %w[logo campus_photo].include?(kind)
+    %w[logo photo].include?(kind)
   end
   
   # Check if this is a document
@@ -45,8 +58,8 @@ class MediaItem < ApplicationRecord
     case kind
     when 'logo'
       "#{place.name} logo"
-    when 'campus_photo'
-      "#{place.name} campus photo"
+    when 'photo'
+      "#{place.name} photo"
     when 'brochure'
       "#{place.name} brochure"
     when 'fee_schedule_pdf'
@@ -61,8 +74,8 @@ class MediaItem < ApplicationRecord
   # Get human-readable kind name
   def kind_display
     case kind
-    when 'campus_photo'
-      'Campus Photo'
+    when 'photo'
+      'Photo'
     when 'fee_schedule_pdf'
       'Fee Schedule'
     when 'virtual_tour'
@@ -82,5 +95,31 @@ class MediaItem < ApplicationRecord
     rescue URI::InvalidURIError
       false
     end
+  end
+  
+  # Get the display URL for images (either attached file or URL)
+  def image_url
+    if file.attached?
+      Rails.application.routes.url_helpers.rails_blob_url(file, only_path: false)
+    else
+      url
+    end
+  end
+  
+  # Get display URL for thumbnails
+  def thumbnail_url(size: 300)
+    if file.attached? && image?
+      Rails.application.routes.url_helpers.rails_representation_url(
+        file.variant(resize_to_limit: [size, size]), 
+        only_path: false
+      )
+    else
+      url
+    end
+  end
+  
+  # Check if this is an uploaded file vs URL reference
+  def uploaded?
+    file.attached?
   end
 end

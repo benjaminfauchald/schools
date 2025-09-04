@@ -48,6 +48,7 @@ Rails.application.routes.draw do
         get :facilities
         patch :update_facilities
         delete 'photos/:photo_id', action: :delete_photo, as: :delete_photo
+        delete 'media_items/:media_item_id', action: :delete_media_item, as: :delete_media_item
         patch :toggle_photo_visibility
         get :fetch_videos
         patch :toggle_video_visibility

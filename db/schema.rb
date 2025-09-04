@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_04_102104) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_04_161125) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -158,6 +158,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_04_102104) do
     t.integer "sort_order", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "source", default: "admin_upload"
+    t.index ["place_id", "kind", "source"], name: "index_media_items_on_place_id_and_kind_and_source"
     t.index ["place_id", "kind"], name: "index_media_items_on_place_id_and_kind"
     t.index ["place_id", "sort_order"], name: "index_media_items_on_place_id_and_sort_order"
     t.index ["place_id"], name: "index_media_items_on_place_id"
