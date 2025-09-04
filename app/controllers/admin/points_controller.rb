@@ -1,46 +1,88 @@
 module Admin
   class PointsController < Admin::ApplicationController
-    # Overwrite any of the RESTful controller actions to implement custom behavior
-    # For example, you may want to send an email after a foo is updated.
-    #
-    # def update
-    #   super
-    #   send_foo_updated_email(requested_resource)
-    # end
+    def index
+      search_term = params[:search]
+      
+      @points = Point.includes(:places).order(:id)
+      
+      # Apply search filter
+      if search_term.present?
+        @points = @points.where(
+          "name ILIKE ? OR address ILIKE ? OR addr_street ILIKE ? OR addr_city ILIKE ?", 
+          "%#{search_term}%", "%#{search_term}%", "%#{search_term}%", "%#{search_term}%"
+        )
+      end
+      
+      # Apply amenity filter
+      if params[:amenity].present?
+        @points = @points.where("amenity ILIKE ?", "%#{params[:amenity]}%")
+      end
+      
+      # Apply city filter
+      if params[:city].present?
+        @points = @points.where("addr_city ILIKE ?", "%#{params[:city]}%")
+      end
+      
+      @points = @points.limit(50)
+      
+      # Statistics
+      @total_points = Point.count
+      @points_with_amenity = Point.where.not(amenity: nil).count
+      @named_points = Point.where.not(name: nil).count
+      @points_with_contact = Point.where.not(phone: nil).count
+      @points_with_places = Point.joins(:places).distinct.count
+      
+      # Amenity breakdown
+      @amenity_counts = Point.where.not(amenity: nil).group(:amenity).count
+      @city_counts = Point.where.not(addr_city: nil).group(:addr_city).count
+    end
+    
+    def show
+      @point = Point.includes(:places).find(params[:id])
+    end
+    
+    def new
+      @point = Point.new
+    end
+    
+    def create
+      @point = Point.new(point_params)
+      
+      if @point.save
+        redirect_to admin_point_path(@point), notice: 'Point was successfully created.'
+      else
+        render :new
+      end
+    end
+    
+    def edit
+      @point = Point.find(params[:id])
+    end
+    
+    def update
+      @point = Point.find(params[:id])
+      
+      if @point.update(point_params)
+        redirect_to admin_point_path(@point), notice: 'Point was successfully updated.'
+      else
+        render :edit
+      end
+    end
+    
+    def destroy
+      @point = Point.find(params[:id])
+      @point.destroy
+      redirect_to admin_points_path, notice: 'Point was successfully deleted.'
+    end
 
-    # Override this method to specify custom lookup behavior.
-    # This will be used to set the resource for the `show`, `edit`, and `update`
-    # actions.
-    #
-    # def find_resource(param)
-    #   Foo.find_by!(slug: param)
-    # end
-
-    # The result of this lookup will be available as `requested_resource`
-
-    # Override this if you have certain roles that require a subset
-    # this will be used to set the records shown on the `index` action.
-    #
-    # def scoped_resource
-    #   if current_user.super_admin?
-    #     resource_class
-    #   else
-    #     resource_class.with_less_stuff
-    #   end
-    # end
-
-    # Override `resource_params` if you want to transform the submitted
-    # data before it's persisted. For example, the following would turn all
-    # empty values into nil values. It uses other APIs such as `resource_class`
-    # and `dashboard`:
-    #
-    # def resource_params
-    #   params.require(resource_class.model_name.param_key).
-    #     permit(dashboard.permitted_attributes(action_name)).
-    #     transform_values { |value| value == "" ? nil : value }
-    # end
-
-    # See https://administrate-demo.herokuapp.com/customizing_controller_actions
-    # for more information
+    private
+    
+    def point_params
+      params.require(:point).permit(
+        :osm_id, :name, :address, :addr_street, :addr_city, :addr_district, :addr_province, 
+        :addr_postcode, :addr_country, :amenity, :school_type, :operator, :phone, 
+        :website, :email, :lat, :lon
+      )
+    end
   end
 end

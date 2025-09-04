@@ -2,58 +2,96 @@
 
 
 <!-- Main Content -->
-  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-    <div class="space-y-8">
-      <!-- Breadcrumb -->
-      <nav class="flex" aria-label="Breadcrumb">
-        <ol role="list" class="flex items-center space-x-4">
-          <li>
-            <%= link_to admin_terms_path, class: "text-gray-400 hover:text-gray-500" do %>
-              <svg class="flex-shrink-0 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-              </svg>
-            <% end %>
-          </li>
-          <li>
-            <div class="flex items-center">
-              <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-              </svg>
-              <%= link_to "Terms", admin_terms_path, class: "ml-4 text-sm font-medium text-gray-500 hover:text-gray-700" %>
-            </div>
-          </li>
-          <li>
-            <div class="flex items-center">
-              <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-              </svg>
-              <span class="ml-4 text-sm font-medium text-gray-900">New Term</span>
-            </div>
-          </li>
-        </ol>
-      </nav>
-
-      <!-- Page Header -->
-      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-        <div class="px-6 py-6">
+<div class="w-full py-8 px-4 sm:px-6 lg:px-8">
+  <div class="space-y-8">
+    <!-- Breadcrumb -->
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        <li class="inline-flex items-center">
+          <%= link_to admin_root_path, class: "inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600" do %>
+            <svg class="w-3 h-3 mr-2.5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+              <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+            </svg>
+            Admin Dashboard
+          <% end %>
+        </li>
+        <li>
           <div class="flex items-center">
-            <div class="flex-shrink-0 w-12 h-12">
-              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-              </div>
+            <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <%= link_to "Terms", admin_terms_path, class: "ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2" %>
+          </div>
+        </li>
+        <li aria-current="page">
+          <div class="flex items-center">
+            <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">New Term</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Page Header with Inline Info -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div class="px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Create New Term</h1>
+            <p class="mt-2 text-sm text-gray-600">Add a new taxonomy term to organize and categorize content</p>
+          </div>
+        </div>
+        
+        <!-- Inline Form Info -->
+        <div class="flex flex-wrap items-center gap-6 text-sm">
+          <!-- Form Sections -->
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
             </div>
-            <div class="ml-4">
-              <h1 class="text-3xl font-bold text-gray-900">Create New Term</h1>
-              <p class="text-sm text-gray-600">Add a new taxonomy term to organize and categorize content</p>
+            <div>
+              <span class="font-semibold text-gray-900">3 Sections</span>
+              <span class="text-gray-500">Form Structure</span>
             </div>
+          </div>
+
+          <!-- Field Info -->
+          <div class="flex items-center">
+            <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            <span class="text-gray-900 font-medium">Basic Information</span>
+            <span class="text-gray-500 ml-1">Label & description</span>
+          </div>
+
+          <div class="flex items-center">
+            <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+            <span class="text-gray-900 font-medium">Organization</span>
+            <span class="text-gray-500 ml-1">Vocabulary & hierarchy</span>
+          </div>
+
+          <div class="flex items-center">
+            <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+            <span class="text-gray-900 font-medium">Settings</span>
+            <span class="text-gray-500 ml-1">Status & metadata</span>
+          </div>
+
+          <!-- Auto-generation Info -->
+          <div class="flex items-center">
+            <svg class="w-4 h-4 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-gray-700 font-medium">Auto-generates slug</span>
+            <span class="text-gray-600 ml-1">from label</span>
           </div>
         </div>
       </div>
-
-      <!-- Form -->
-      <%= render 'form', resource: @term %>
     </div>
+
+    <!-- Form -->
+    <%= render 'form', resource: @term %>
   </div>
+</div>
 </div>

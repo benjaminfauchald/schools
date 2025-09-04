@@ -2,7 +2,7 @@
 
 
 <!-- Main Content -->
-  <div class="mx-auto py-8 px-6 sm:px-8 lg:px-12 max-w-none">
+  <div class="w-full py-8 px-4 sm:px-6 lg:px-8">
     <div class="space-y-8">
       <!-- Breadcrumb -->
       <nav class="flex" aria-label="Breadcrumb">
@@ -34,80 +34,17 @@
         </ol>
       </nav>
 
-      <!-- Page Header -->
+      <!-- Page Header with Inline Stats -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
         <div class="px-6 py-6">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                  <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="ml-4">
-                <h1 class="text-3xl font-bold text-gray-900"><%= @place.name.presence || "Unnamed Place" %></h1>
-                <div class="mt-1 flex items-center space-x-4">
-                  <!-- Business Status Badge -->
-                  <% case @place.business_status %>
-                  <% when 'OPERATIONAL' %>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="3"/>
-                      </svg>
-                      Operational
-                    </span>
-                  <% when 'CLOSED_TEMPORARILY' %>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="3"/>
-                      </svg>
-                      Temporarily Closed
-                    </span>
-                  <% when 'CLOSED_PERMANENTLY' %>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="3"/>
-                      </svg>
-                      Permanently Closed
-                    </span>
-                  <% end %>
-                  
-                  <!-- API Status Badge -->
-                  <% case @place.api_status %>
-                  <% when 'OK' %>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="3"/>
-                      </svg>
-                      API OK
-                    </span>
-                  <% else %>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="3"/>
-                      </svg>
-                      <%= @place.api_status.presence || 'Unknown' %>
-                    </span>
-                  <% end %>
-
-                  <!-- Google Data Badge -->
-                  <% if @has_google_data %>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800">
-                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="3"/>
-                      </svg>
-                      Google Places
-                    </span>
-                  <% end %>
-                </div>
-              </div>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900"><%= @place.name.presence || "Unnamed Place" %></h1>
+              <p class="mt-2 text-sm text-gray-600">View detailed place information from Google Places API</p>
             </div>
-            <div class="mt-4 sm:mt-0 flex items-center space-x-3">
+            <div class="mt-4 sm:mt-0 flex space-x-3">
               <%= link_to edit_admin_place_path(@place),
-                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
@@ -116,7 +53,7 @@
               
               <% if @place.website.present? %>
                 <%= link_to @place.website, target: "_blank",
-                    class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                    class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                   </svg>
@@ -125,13 +62,100 @@
               <% end %>
               
               <%= link_to admin_places_path,
-                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
                 Back to Places
               <% end %>
             </div>
+          </div>
+          
+          <!-- Inline Statistics -->
+          <div class="flex flex-wrap items-center gap-6 text-sm">
+            <!-- Business Status -->
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+              </div>
+              <div>
+                <span class="font-semibold text-gray-900">
+                  <% case @place.business_status %>
+                  <% when 'OPERATIONAL' %>
+                    Operational
+                  <% when 'CLOSED_TEMPORARILY' %>
+                    Temporarily Closed
+                  <% when 'CLOSED_PERMANENTLY' %>
+                    Permanently Closed
+                  <% else %>
+                    Unknown
+                  <% end %>
+                </span>
+                <span class="text-gray-500">Status</span>
+              </div>
+            </div>
+
+            <!-- Rating -->
+            <% if @place.rating.present? %>
+              <div class="flex items-center">
+                <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                <span class="text-gray-900 font-medium"><%= @place.rating %></span>
+                <span class="text-gray-500 ml-1">Rating</span>
+              </div>
+            <% end %>
+
+            <!-- Reviews Count -->
+            <% if @place.user_ratings_total.present? %>
+              <div class="flex items-center">
+                <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                <span class="text-gray-900 font-medium"><%= number_with_delimiter(@place.user_ratings_total) %></span>
+                <span class="text-gray-500 ml-1">Reviews</span>
+              </div>
+            <% end %>
+
+            <!-- Google Data Status -->
+            <div class="flex items-center">
+              <div class="w-2 h-2 <%= @has_google_data ? 'bg-green-500' : 'bg-gray-400' %> rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= @has_google_data ? "Google Places" : "No Google Data" %></span>
+              <span class="text-gray-500 ml-1">API Status</span>
+            </div>
+
+            <!-- Coordinates Status -->
+            <div class="flex items-center">
+              <div class="w-2 h-2 <%= @has_coordinates ? 'bg-green-500' : 'bg-gray-400' %> rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= @has_coordinates ? "Has Location" : "No Location" %></span>
+              <span class="text-gray-500 ml-1">Coordinates</span>
+            </div>
+
+            <!-- Last Updated -->
+            <div class="flex items-center">
+              <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span class="text-gray-900 font-medium">
+                <% if @place.last_fetched_at.present? %>
+                  <%= time_ago_in_words(@place.last_fetched_at) %>
+                <% else %>
+                  Never
+                <% end %>
+              </span>
+              <span class="text-gray-500 ml-1">Updated</span>
+            </div>
+
+            <!-- Price Level -->
+            <% if @place.price_level.present? %>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                </svg>
+                <span class="text-gray-900 font-medium">
+                  <%= "$" * [@place.price_level.to_i, 4].min %>
+                </span>
+                <span class="text-gray-500 ml-1">Price Level</span>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>

@@ -22,6 +22,9 @@ class Transcript < ApplicationRecord
   scope :by_language, ->(lang) { where(language: lang) }
   scope :ai_enabled, -> { where(ai_enabled: true) }
   scope :ai_disabled, -> { where(ai_enabled: false) }
+  scope :with_embeddings, -> { where.not(vector_embedding: nil) }
+  scope :cleaned, -> { where.not(cleaned_transcript: nil) }
+  scope :needs_cleaning, -> { where(cleaned_transcript: nil).where.not(full_transcript: [nil, '']) }
   
   # Check if transcript has been successfully processed
   def processed?
@@ -73,8 +76,43 @@ class Transcript < ApplicationRecord
     }
   end
   
-  # Get embedding as array for vector operations
+  # Check if transcript has been cleaned by AI
+  def cleaned?
+    cleaned_transcript.present? && transcript_cleaned_at.present?
+  end
+  
+  # Get the best available transcript content (cleaned first, then raw)
+  def best_transcript_content
+    cleaned_transcript.present? ? cleaned_transcript : full_transcript
+  end
+  
+  # Check if transcript needs cleaning
+  def needs_cleaning?
+    processed? && ai_enabled? && full_transcript.present? && cleaned_transcript.blank?
+  end
+  
+  # Check if transcript has embedding for RAG (now using pgvector)
+  def has_embedding?
+    vector_embedding.present?
+  end
+  
+  # Get embedding vector for similarity search (pgvector format)
   def embedding_vector
+    vector_embedding
+  end
+  
+  # Check if embedding is up to date (generated recently)
+  def embedding_up_to_date?(threshold: 30.days)
+    embedding_generated_at.present? && embedding_generated_at > threshold.ago
+  end
+  
+  # Check if transcript is ready for embedding (has cleaned content)
+  def ready_for_embedding?
+    cleaned? && !has_embedding?
+  end
+  
+  # Legacy support for old embedding field (JSON format) - for migration
+  def legacy_embedding_vector
     return nil unless embedding.present?
     
     begin
@@ -82,16 +120,6 @@ class Transcript < ApplicationRecord
     rescue JSON::ParserError
       nil
     end
-  end
-  
-  # Set embedding from array
-  def embedding_vector=(vector)
-    self.embedding = vector.to_json if vector.is_a?(Array)
-  end
-  
-  # Check if transcript has embedding for RAG
-  def has_embedding?
-    embedding.present?
   end
   
   # Export transcript data for AI context
@@ -178,7 +206,7 @@ class Transcript < ApplicationRecord
       failed: where(status: 'failed').count,
       pending: where(status: 'pending').count,
       no_transcript: where(status: 'no_transcript').count,
-      with_embeddings: where.not(embedding: [nil, '']).count
+      with_embeddings: where.not(vector_embedding: nil).count
     }
   end
   

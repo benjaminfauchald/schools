@@ -76,13 +76,13 @@ class ImportSchoolWebsiteDataJob < ApplicationJob
           
           Rails.logger.info "Successfully crawled #{crawl_result['pages_found']} pages for school #{school.id}"
           
-          # Create audit log entry
+          # Create audit log entry with consistent field name
           AuditLog.create!(
             auditable: school,
             action: 'update',
-            changes: {
-              'pages_found' => crawl_result['pages_found'],
-              'completed_at' => Time.current.iso8601
+            changed_fields: {
+              'website_crawl_pages' => [nil, crawl_result['pages_found']],
+              'website_crawl_completed' => [nil, Time.current.iso8601]
             }
           )
         else

@@ -2,7 +2,7 @@ module Admin
   class DashboardController < Admin::ApplicationController
     def index
       @pending_claims = SchoolClaim.pending.includes(:school, :user).order(created_at: :desc)
-      @recent_approved = SchoolClaim.approved.includes(:school, :user).limit(10).order(updated_at: :desc)
+      @recent_pending_inquiries = SchoolInquiry.where(status: ['new', 'read']).includes(:school).limit(5).order(created_at: :desc)
       @recent_rejected = SchoolClaim.rejected.includes(:school, :user).limit(10).order(updated_at: :desc)
       
       @stats = {

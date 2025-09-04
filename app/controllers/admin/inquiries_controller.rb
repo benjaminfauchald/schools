@@ -14,7 +14,16 @@ module Admin
       @inquiries = @inquiries.limit(50)
       
       # For filter dropdowns
-      @schools = School.order(:name)
+      if params[:status].present?
+        # If a status is selected, only show schools that have inquiries with that status
+        school_ids_with_status = SchoolInquiry.where(status: params[:status]).distinct.pluck(:school_id)
+        @schools = School.where(id: school_ids_with_status).order(:name)
+      else
+        # Show all schools that have any inquiries
+        school_ids_with_inquiries = SchoolInquiry.distinct.pluck(:school_id)
+        @schools = School.where(id: school_ids_with_inquiries).order(:name)
+      end
+      
       @statuses = SchoolInquiry.statuses.keys.map { |status| [status.humanize, status] }
     end
     

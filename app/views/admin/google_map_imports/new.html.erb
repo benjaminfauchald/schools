@@ -1,45 +1,60 @@
 <% content_for :title, "Import from Google Maps" %>
 
-
 <!-- Main Content -->
-  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-    <div class="space-y-8">
-      <!-- Breadcrumb -->
-      <nav class="flex" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 md:space-x-3">
-          <li class="inline-flex items-center">
-            <%= link_to admin_root_path, class: "inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600" do %>
-              <svg class="w-3 h-3 mr-2.5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-              </svg>
-              Admin Dashboard
-            <% end %>
-          </li>
-          <li aria-current="page">
-            <div class="flex items-center">
-              <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-              </svg>
-              <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Import from Google Maps</span>
-            </div>
-          </li>
-        </ol>
-      </nav>
+<div class="w-full py-8">
+  <div class="space-y-8 px-4 sm:px-6 lg:px-8">
 
-      <!-- Page Header -->
+      <!-- Page Header with Inline Info -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
         <div class="px-6 py-6">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900">Import from Google Maps</h1>
+              <p class="mt-2 text-sm text-gray-600">Convert Google Maps locations into school entries automatically</p>
+            </div>
+          </div>
+          
+          <!-- Inline Process Info -->
+          <div class="flex flex-wrap items-center gap-6 text-sm">
+            <!-- Process Steps -->
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                 </svg>
               </div>
+              <div>
+                <span class="font-semibold text-gray-900">5-Step Process</span>
+                <span class="text-gray-500">Automated Import</span>
+              </div>
             </div>
-            <div class="ml-4">
-              <h1 class="text-3xl font-bold text-gray-900">Import from Google Maps</h1>
-              <p class="mt-2 text-sm text-gray-600">Convert Google Maps locations into school entries automatically</p>
+
+            <!-- Supported Formats -->
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium">Place URLs</span>
+              <span class="text-gray-500 ml-1">Direct links</span>
+            </div>
+
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium">Search URLs</span>
+              <span class="text-gray-500 ml-1">With location data</span>
+            </div>
+
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium">Share URLs</span>
+              <span class="text-gray-500 ml-1">Shortened links</span>
+            </div>
+
+            <!-- Result Info -->
+            <div class="flex items-center">
+              <svg class="w-4 h-4 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              <span class="text-gray-700 font-medium">Creates draft school</span>
+              <span class="text-gray-600 ml-1">for review</span>
             </div>
           </div>
         </div>
@@ -76,43 +91,6 @@
         </div>
       <% end %>
 
-      <!-- Instructions Card -->
-      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-        <div class="px-6 py-6">
-          <div class="flex items-start">
-            <div class="flex-shrink-0">
-              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              </div>
-            </div>
-            <div class="ml-4 flex-1">
-              <h3 class="text-lg font-medium text-gray-900 mb-3">Supported URL Formats</h3>
-              <div class="space-y-4">
-                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <div class="font-medium text-gray-900 mb-1">Place URLs</div>
-                  <code class="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded break-all">https://www.google.com/maps/place/School+Name/@14.123,100.456,17z/...</code>
-                  <p class="text-sm text-gray-600 mt-2">Direct links to specific places from Google Maps</p>
-                </div>
-                
-                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <div class="font-medium text-gray-900 mb-1">Search URLs</div>
-                  <code class="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded break-all">https://www.google.com/maps/search/school+name/@14.123,100.456,15z/...</code>
-                  <p class="text-sm text-gray-600 mt-2">Search result URLs with location data</p>
-                </div>
-                
-                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <div class="font-medium text-gray-900 mb-1">Share URLs</div>
-                  <code class="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded break-all">https://maps.app.goo.gl/ABC123...</code>
-                  <p class="text-sm text-gray-600 mt-2">Shortened URLs from the Google Maps share feature</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Import Form -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
         <div class="px-6 py-6">
@@ -127,7 +105,7 @@
                   class: "block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base",
                   required: true %>
               <p class="mt-2 text-sm text-gray-600">
-                Paste the complete Google Maps URL here. The system will extract the place ID and import all available information.
+                Paste any Google Maps URL (place, search, or share link). The system will extract place data and create a school entry for review.
               </p>
             </div>
 
@@ -145,74 +123,36 @@
         </div>
       </div>
 
-      <!-- Import Process Info -->
-      <div class="bg-amber-50 border border-amber-200 rounded-xl shadow-sm">
+      <!-- URL Format Examples -->
+      <div class="bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
         <div class="px-6 py-6">
-          <div class="flex items-start">
-            <div class="flex-shrink-0">
-              <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Supported URL Formats</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center p-4 bg-white rounded-lg border border-gray-200">
+              <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
               </div>
+              <div class="font-medium text-gray-900 mb-2">Place URLs</div>
+              <code class="text-xs text-gray-600 break-all">.../place/School+Name/@...</code>
             </div>
-            <div class="ml-4 flex-1">
-              <h3 class="text-lg font-medium text-amber-800 mb-4">Import Process</h3>
-              <div class="space-y-3">
-                <div class="flex items-start">
-                  <div class="flex-shrink-0 w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span class="text-xs font-medium text-amber-700">1</span>
-                  </div>
-                  <div>
-                    <div class="font-medium text-amber-800">Extract Place ID</div>
-                    <p class="text-sm text-amber-700">Parse the Google Maps URL to find the unique place identifier</p>
-                  </div>
-                </div>
-                
-                <div class="flex items-start">
-                  <div class="flex-shrink-0 w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span class="text-xs font-medium text-amber-700">2</span>
-                  </div>
-                  <div>
-                    <div class="font-medium text-amber-800">Fetch Place Data</div>
-                    <p class="text-sm text-amber-700">Contact Google Places API to get complete information</p>
-                  </div>
-                </div>
-                
-                <div class="flex items-start">
-                  <div class="flex-shrink-0 w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span class="text-xs font-medium text-amber-700">3</span>
-                  </div>
-                  <div>
-                    <div class="font-medium text-amber-800">Create Place Record</div>
-                    <p class="text-sm text-amber-700">Store location data, ratings, photos, and reviews</p>
-                  </div>
-                </div>
-                
-                <div class="flex items-start">
-                  <div class="flex-shrink-0 w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span class="text-xs font-medium text-amber-700">4</span>
-                  </div>
-                  <div>
-                    <div class="font-medium text-amber-800">Generate School</div>
-                    <p class="text-sm text-amber-700">Convert place data into a school entry with proper address structure</p>
-                  </div>
-                </div>
-                
-                <div class="flex items-start">
-                  <div class="flex-shrink-0 w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span class="text-xs font-medium text-amber-700">5</span>
-                  </div>
-                  <div>
-                    <div class="font-medium text-amber-800">Ready for Review</div>
-                    <p class="text-sm text-amber-700">New school starts in 'draft' status for admin review and editing</p>
-                  </div>
-                </div>
+            
+            <div class="text-center p-4 bg-white rounded-lg border border-gray-200">
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
               </div>
+              <div class="font-medium text-gray-900 mb-2">Search URLs</div>
+              <code class="text-xs text-gray-600 break-all">.../search/school+name/@...</code>
+            </div>
+            
+            <div class="text-center p-4 bg-white rounded-lg border border-gray-200">
+              <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+              </div>
+              <div class="font-medium text-gray-900 mb-2">Share URLs</div>
+              <code class="text-xs text-gray-600 break-all">maps.app.goo.gl/ABC123</code>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>

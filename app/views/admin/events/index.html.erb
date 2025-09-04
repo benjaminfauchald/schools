@@ -2,77 +2,59 @@
 
 
 <!-- Main Content -->
-  <div class="mx-auto py-8 px-6 sm:px-8 lg:px-12 max-w-none">
+  <div class="w-full py-8 px-4 sm:px-6 lg:px-8">
     <div class="space-y-8">
-      <!-- Header Section -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Events Management</h1>
-          <p class="mt-2 text-sm text-gray-600">Manage school events and activities</p>
-        </div>
-        <%= link_to new_admin_event_path, 
-            class: "mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-          </svg>
-          Add New Event
-        <% end %>
-      </div>
+      <!-- Page Header with Inline Stats -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900">Events Management</h1>
+              <p class="mt-2 text-sm text-gray-600">Manage school events and activities</p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+              <%= link_to new_admin_event_path, 
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Add New Event
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Inline Statistics -->
+          <div class="flex flex-wrap items-center gap-6 text-sm">
+            <!-- Total Events -->
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              <div>
+                <span class="font-semibold text-gray-900"><%= number_with_delimiter(@total_events || 0) %></span>
+                <span class="text-gray-500">Total Events</span>
+              </div>
+            </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
+            <!-- Event Status Breakdown -->
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@upcoming_events || 0) %></span>
+              <span class="text-gray-500 ml-1">Upcoming</span>
             </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Total Events</p>
-              <p class="text-2xl font-semibold text-gray-900"><%= @total_events %></p>
+
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@ongoing_events || 0) %></span>
+              <span class="text-gray-500 ml-1">Ongoing</span>
             </div>
-          </div>
-        </div>
-        
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-              </svg>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Upcoming</p>
-              <p class="text-2xl font-semibold text-gray-900"><%= @upcoming_events %></p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Ongoing</p>
-              <p class="text-2xl font-semibold text-gray-900"><%= @ongoing_events %></p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-              </svg>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Past</p>
-              <p class="text-2xl font-semibold text-gray-900"><%= @past_events %></p>
+
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-gray-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@past_events || 0) %></span>
+              <span class="text-gray-500 ml-1">Past</span>
             </div>
           </div>
         </div>

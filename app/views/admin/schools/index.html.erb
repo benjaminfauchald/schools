@@ -2,19 +2,19 @@
 
 
 <!-- Main Content -->
-  <div class="mx-auto py-8 px-6 sm:px-8 lg:px-12 max-w-none">
+  <div class="w-full py-8 px-4 sm:px-6 lg:px-8">
     <div class="space-y-8">
-      <!-- Page Header -->
+      <!-- Page Header with Inline Stats -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
         <div class="px-6 py-6">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
             <div>
               <h1 class="text-3xl font-bold text-gray-900">Schools Management</h1>
-              <p class="mt-2 text-sm text-gray-600">Manage school listings, information, and ownership claims</p>
+              <p class="mt-2 text-sm text-gray-600">Manage school listings, information, and ownership claims.</p>
             </div>
             <div class="mt-4 sm:mt-0">
               <%= link_to new_admin_school_path, 
-                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
@@ -22,108 +22,45 @@
               <% end %>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <!-- Total Schools -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
+          
+          <!-- Inline Statistics -->
+          <div class="flex flex-wrap items-center gap-6 text-sm">
+            <!-- Total Schools -->
             <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                  </svg>
-                </div>
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
               </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Total Schools</h3>
-                <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@total_schools) %></p>
+              <div>
+                <span class="font-semibold text-gray-900"><%= number_with_delimiter(@total_schools || 0) %></span>
+                <span class="text-gray-500">Total Schools</span>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Claimed Schools -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
+            <!-- Ownership Type Breakdown -->
             <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Claimed Schools</h3>
-                <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@claimed_schools) %></p>
-                <p class="text-xs text-gray-500"><%= ((@claimed_schools.to_f / @total_schools) * 100).round(1) %>% coverage</p>
-              </div>
+              <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@public_schools || 0) %></span>
+              <span class="text-gray-500 ml-1">Public</span>
             </div>
-          </div>
-        </div>
 
-        <!-- Public Schools -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
             <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Public Schools</h3>
-                <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@public_schools) %></p>
-              </div>
+              <div class="w-2 h-2 bg-indigo-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@private_schools || 0) %></span>
+              <span class="text-gray-500 ml-1">Private</span>
             </div>
-          </div>
-        </div>
 
-        <!-- Private Schools -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
             <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Private Schools</h3>
-                <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@private_schools) %></p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Active Schools -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Active Schools</h3>
-                <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@active_schools) %></p>
-              </div>
+              <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@claimed_schools || 0) %></span>
+              <span class="text-gray-500 ml-1">Claimed</span>
+              <span class="text-gray-400 ml-1">(<%= ((@claimed_schools.to_f / @total_schools) * 100).round(1) %>%)</span>
             </div>
           </div>
         </div>
       </div>
+
 
       <!-- Search and Filters Section -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
@@ -180,7 +117,7 @@
         
         <% if @schools.any? %>
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table class="w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -218,7 +155,7 @@
                             </svg>
                           </div>
                         </div>
-                        <div class="ml-4">
+                        <div class="ml-6">
                           <div class="text-sm font-medium text-gray-900">
                             <%= link_to school.name, admin_school_path(school), class: "text-blue-600 hover:text-blue-700" %>
                           </div>

@@ -2,19 +2,19 @@
 
 
 <!-- Main Content -->
-  <div class="mx-auto py-8 px-6 sm:px-8 lg:px-12 max-w-none">
+  <div class="w-full py-8 px-4 sm:px-6 lg:px-8">
     <div class="space-y-8">
-      <!-- Page Header -->
+      <!-- Page Header with Inline Stats -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
         <div class="px-6 py-6">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
             <div>
               <h1 class="text-3xl font-bold text-gray-900">Travel Times Management</h1>
               <p class="mt-2 text-sm text-gray-600">Manage transportation data and commute times</p>
             </div>
             <div class="mt-4 sm:mt-0">
               <%= link_to new_admin_travel_time_path, 
-                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
@@ -22,135 +22,78 @@
               <% end %>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
-        <!-- Total Travel Times -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
+          
+          <!-- Inline Statistics -->
+          <div class="flex flex-wrap items-center gap-6 text-sm">
+            <!-- Total Travel Times -->
             <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
               </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Total Times</h3>
-                <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@total_travel_times) %></p>
+              <div>
+                <span class="font-semibold text-gray-900"><%= number_with_delimiter(@total_travel_times || 0) %></span>
+                <span class="text-gray-500">Total Times</span>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Successful Times -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
+            <!-- Status Breakdown -->
             <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Successful</h3>
-                <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@successful_times) %></p>
-                <% if @total_travel_times > 0 %>
-                  <p class="text-xs text-gray-500"><%= ((@successful_times.to_f / @total_travel_times) * 100).round(1) %>% success</p>
-                <% end %>
-              </div>
+              <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@successful_times || 0) %></span>
+              <span class="text-gray-500 ml-1">Successful</span>
+              <% if @total_travel_times > 0 %>
+                <span class="text-gray-400 ml-1">(<%= ((@successful_times.to_f / @total_travel_times) * 100).round(1) %>%)</span>
+              <% end %>
             </div>
-          </div>
-        </div>
 
-        <!-- Failed Times -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
             <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Failed</h3>
-                <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@failed_times) %></p>
-              </div>
+              <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@failed_times || 0) %></span>
+              <span class="text-gray-500 ml-1">Failed</span>
             </div>
-          </div>
-        </div>
 
-        <!-- Stale Times -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
             <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Stale (24h+)</h3>
-                <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@stale_times) %></p>
-              </div>
+              <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@stale_times || 0) %></span>
+              <span class="text-gray-500 ml-1">Stale (24h+)</span>
             </div>
-          </div>
-        </div>
 
-        <!-- Average Driving -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
+            <!-- Average Times -->
             <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                  </svg>
-                </div>
+              <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
               </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Avg Driving</h3>
-                <p class="text-2xl font-bold text-gray-900">
+              <div>
+                <span class="font-semibold text-gray-900">
                   <% if @avg_driving_time %>
                     <%= @avg_driving_time.round %>m
                   <% else %>
                     N/A
                   <% end %>
-                </p>
+                </span>
+                <span class="text-gray-500">Avg Driving</span>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Average Transit -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="px-6 py-6">
             <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-                  </svg>
-                </div>
+              <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                </svg>
               </div>
-              <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Avg Transit</h3>
-                <p class="text-2xl font-bold text-gray-900">
+              <div>
+                <span class="font-semibold text-gray-900">
                   <% if @avg_transit_time %>
                     <%= @avg_transit_time.round %>m
                   <% else %>
                     N/A
                   <% end %>
-                </p>
+                </span>
+                <span class="text-gray-500">Avg Transit</span>
               </div>
             </div>
           </div>

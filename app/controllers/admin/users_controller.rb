@@ -36,10 +36,19 @@ module Admin
     end
 
     def create
-      @user = User.new(user_params)
+      @user = User.new(user_params.except(:skip_confirmation))
+      @user.password = Devise.friendly_token[0, 20] # Generate temporary password
       
       if @user.save
-        redirect_to admin_user_path(@user), notice: 'User was successfully created.'
+        if params[:user][:skip_confirmation] == '1'
+          # Skip email confirmation - mark as confirmed
+          @user.update!(confirmed_at: Time.current)
+          redirect_to admin_user_path(@user), notice: 'User was successfully created and marked as confirmed.'
+        else
+          # Send confirmation email
+          @user.send_confirmation_instructions
+          redirect_to admin_user_path(@user), notice: 'User was successfully created. A confirmation email has been sent to their email address.'
+        end
       else
         render :new
       end
@@ -73,7 +82,7 @@ module Admin
     private
 
     def user_params
-      params.require(:user).permit(:email, :role, :confirmed_at)
+      params.require(:user).permit(:email, :role, :skip_confirmation)
     end
   end
 end

@@ -54,6 +54,8 @@ module Admin
       @school = School.new(school_params)
       
       if @school.save
+        # Create audit log for the creation
+        create_audit_log(@school, 'admin_create', school_params.keys)
         redirect_to admin_school_path(@school), notice: 'School was successfully created.'
       else
         render :new
@@ -68,6 +70,8 @@ module Admin
       @school = School.find(params[:id])
       
       if @school.update(school_params)
+        # Create audit log for the update
+        create_audit_log(@school, 'admin_update', @school.previous_changes.keys - ['updated_at'])
         redirect_to admin_school_path(@school), notice: 'School was successfully updated.'
       else
         render :edit
@@ -80,12 +84,46 @@ module Admin
       if @school.school_claims.any?
         redirect_to admin_schools_path, alert: 'Cannot delete school with existing claims.'
       else
+        # Create audit log before deletion (capture school data before destruction)
+        create_audit_log(@school, 'admin_delete', { name: [@school.name, nil], id: [@school.id, nil] })
         @school.destroy
         redirect_to admin_schools_path, notice: 'School was successfully deleted.'
       end
     end
 
     private
+
+    def create_audit_log(school, action, changed_fields = nil)
+      # Capture actual changes with before/after values
+      changes_hash = case changed_fields
+      when Array
+        if action.include?('update') && school.previous_changes.present?
+          # Get the actual Rails changes for specified fields
+          school.previous_changes.slice(*changed_fields).except('updated_at', 'created_at')
+        else
+          # For non-update actions, create a simple hash
+          changed_fields.present? ? { updated_fields: changed_fields } : {}
+        end
+      when Hash
+        # Already a proper changes hash
+        changed_fields
+      when nil
+        # Use all changes from the model
+        school.previous_changes&.except('updated_at', 'created_at') || {}
+      else
+        { updated_fields: changed_fields }
+      end
+
+      AuditLog.create!(
+        auditable: school,
+        user_id: current_user&.id,
+        action: action,
+        changed_fields: changes_hash
+      )
+    rescue StandardError => e
+      Rails.logger.error "Failed to create audit log: #{e.message}"
+      # Don't fail the main action if audit logging fails
+    end
 
     def school_params
       params.require(:school).permit(

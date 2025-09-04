@@ -1,5 +1,100 @@
 module Admin
   class SchoolClaimsController < Admin::ApplicationController
+    before_action :find_school_claim, only: [:show]
+    
+    def index
+      search_term = params[:search]
+      
+      @school_claims = SchoolClaim.includes(:school, :user).order(created_at: :desc)
+      
+      # Apply search filter
+      if search_term.present?
+        @school_claims = @school_claims.joins(:school, :user).where(
+          "schools.name ILIKE ? OR users.email ILIKE ? OR school_claims.admin_notes ILIKE ?",
+          "%#{search_term}%", "%#{search_term}%", "%#{search_term}%"
+        )
+      end
+      
+      # Apply status filter
+      if params[:status].present?
+        @school_claims = @school_claims.where(status: params[:status])
+      end
+      
+      # Apply date filter
+      if params[:date_filter].present?
+        case params[:date_filter]
+        when 'today'
+          @school_claims = @school_claims.where(created_at: Date.current.beginning_of_day..Date.current.end_of_day)
+        when 'week'
+          @school_claims = @school_claims.where(created_at: 1.week.ago..Time.current)
+        when 'month'
+          @school_claims = @school_claims.where(created_at: 1.month.ago..Time.current)
+        end
+      end
+      
+      @school_claims = @school_claims.limit(50)
+      
+      # Statistics
+      @total_claims = SchoolClaim.count
+      @pending_claims = SchoolClaim.pending.count
+      @approved_claims = SchoolClaim.approved.count
+      @rejected_claims = SchoolClaim.rejected.count
+      @today_claims = SchoolClaim.where(created_at: Date.current.beginning_of_day..Date.current.end_of_day).count
+      @week_claims = SchoolClaim.where(created_at: 1.week.ago..Time.current).count
+      
+      # Status breakdown
+      @status_counts = SchoolClaim.group(:status).count
+      
+      # Available statuses for filter
+      @available_statuses = SchoolClaim.distinct.pluck(:status).compact.sort
+    end
+
+    def show
+      # @school_claim is set by before_action
+    end
+    
+    def new
+      @school_claim = SchoolClaim.new
+      @schools = School.order(:name).limit(100)
+      @users = User.order(:email).limit(100)
+    end
+    
+    def create
+      @school_claim = SchoolClaim.new(school_claim_params)
+      
+      if @school_claim.save
+        redirect_to admin_school_claim_path(@school_claim), notice: 'School claim was successfully created.'
+      else
+        @schools = School.order(:name).limit(100)
+        @users = User.order(:email).limit(100)
+        render :new
+      end
+    end
+    
+    def edit
+      @school_claim = find_resource(params[:id])
+      @schools = School.order(:name).limit(100)
+      @users = User.order(:email).limit(100)
+    end
+    
+    def update
+      @school_claim = find_resource(params[:id])
+      
+      if @school_claim.update(school_claim_params)
+        redirect_to admin_school_claim_path(@school_claim), notice: 'School claim was successfully updated.'
+      else
+        @schools = School.order(:name).limit(100)
+        @users = User.order(:email).limit(100)
+        render :edit
+      end
+    end
+    
+    def destroy
+      @school_claim = find_resource(params[:id])
+      @school_claim.destroy
+      redirect_to admin_school_claims_path, notice: 'School claim was successfully deleted.'
+    end
+
     def approve
       claim = requested_resource
       
@@ -175,6 +270,18 @@ module Admin
     end
     
     private
+    
+    def find_school_claim
+      @school_claim = SchoolClaim.includes(:school, :user).find(params[:id])
+    end
+    
+    def find_resource(param)
+      SchoolClaim.find(param)
+    end
+    
+    def school_claim_params
+      params.require(:school_claim).permit(:school_id, :user_id, :status, :admin_notes, :evidence_url, :revocation_reason)
+    end
     
     # Inherit current_admin_user from ApplicationController
   end

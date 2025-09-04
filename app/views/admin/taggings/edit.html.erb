@@ -1,4 +1,4 @@
-<% content_for :title, "Edit Tagging: #{@tagging.term.name}" %>
+<% content_for :title, "Edit Tagging: #{@tagging.term.label}" %>
 
 
 <!-- Main Content -->
@@ -89,7 +89,7 @@
                   <div class="mt-2 text-sm text-gray-600">
                     <div class="flex items-center space-x-4">
                       <div>
-                        <span class="font-medium">Term:</span> <%= @tagging.term.name %>
+                        <span class="font-medium">Term:</span> <%= @tagging.term.label %>
                       </div>
                       <div>
                         <span class="font-medium">Context:</span> <%= @tagging.context.humanize %>
@@ -116,7 +116,7 @@
                   <div>
                     <%= form.label :term_id, "Term", class: "block text-sm font-medium text-gray-700 mb-2" %>
                     <%= form.select :term_id, 
-                        grouped_options_for_select(@terms.group_by { |t| t.vocabulary.label }.map { |label, terms| [label, terms.map { |t| [t.name, t.id] }] }, @tagging.term_id), 
+                        grouped_options_for_select(@terms.group_by { |t| t.vocabulary.label }.map { |label, terms| [label, terms.map { |t| [t.label, t.id] }] }, @tagging.term_id), 
                         { prompt: "Select a term..." },
                         { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg", id: "tagging_term_id" } %>
                     <p class="mt-1 text-xs text-gray-500">Choose the term that describes this tagging</p>

@@ -60,8 +60,23 @@ class TranscriptSegment < ApplicationRecord
     text.downcase.include?(query.downcase)
   end
   
-  # Get embedding as array for vector operations
+  # Check if segment has embedding for RAG (now using pgvector)
+  def has_embedding?
+    vector_embedding.present?
+  end
+  
+  # Get embedding vector for similarity search (pgvector format)
   def embedding_vector
+    vector_embedding
+  end
+  
+  # Check if embedding is up to date (generated recently)
+  def embedding_up_to_date?(threshold: 30.days)
+    embedding_generated_at.present? && embedding_generated_at > threshold.ago
+  end
+  
+  # Legacy support for old embedding field (JSON format) - for migration
+  def legacy_embedding_vector
     return nil unless embedding.present?
     
     begin
@@ -69,16 +84,6 @@ class TranscriptSegment < ApplicationRecord
     rescue JSON::ParserError
       nil
     end
-  end
-  
-  # Set embedding from array
-  def embedding_vector=(vector)
-    self.embedding = vector.to_json if vector.is_a?(Array)
-  end
-  
-  # Check if segment has embedding for RAG
-  def has_embedding?
-    embedding.present?
   end
   
   # Export segment data for AI context
@@ -159,12 +164,28 @@ class TranscriptSegment < ApplicationRecord
   end
   
   def self.with_embeddings
-    where.not(embedding: [nil, ''])
+    where.not(vector_embedding: nil)
   end
   
-  def self.find_similar_segments(query_embedding, limit: 10)
-    # This would require pgvector extension for proper vector similarity
-    # For now, return empty relation
+  def self.find_similar_segments(query_embedding, limit: 10, similarity_threshold: 0.8)
+    # Vector similarity search using pgvector cosine similarity
+    return none unless query_embedding.present?
+    
+    # Convert embedding to pgvector format if it's an array
+    if query_embedding.is_a?(Array)
+      query_vector = "[#{query_embedding.join(',')}]"
+    else
+      query_vector = query_embedding
+    end
+    
+    # Use pgvector's cosine similarity operator
+    with_embeddings
+      .select("*, 1 - (vector_embedding <=> '#{query_vector}') as similarity")
+      .where("1 - (vector_embedding <=> ?) > ?", query_vector, similarity_threshold)
+      .order(Arel.sql("similarity DESC"))
+      .limit(limit)
+  rescue => e
+    Rails.logger.error "Error in vector similarity search: #{e.message}"
     none
   end
   

@@ -2,7 +2,7 @@
 
 
 <!-- Main Content -->
-  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+  <div class="w-full py-8 px-4 sm:px-6 lg:px-8">
     <div class="space-y-8">
       <!-- Breadcrumb -->
       <nav class="flex" aria-label="Breadcrumb">
@@ -112,13 +112,11 @@
             <!-- Confirmation Status -->
             <div>
               <label class="flex items-center">
-                <%= form.check_box :confirmed_at, 
-                    {},
-                    Time.current, nil,
-                    class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-                <span class="ml-2 text-sm text-gray-700">Mark email as confirmed</span>
+                <%= form.check_box :skip_confirmation, 
+                    { class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" } %>
+                <span class="ml-2 text-sm text-gray-700">Skip email confirmation</span>
               </label>
-              <p class="mt-1 text-sm text-gray-500">Check this box to skip email confirmation for this user</p>
+              <p class="mt-1 text-sm text-gray-500">Check this box to mark the user as confirmed immediately. If unchecked, a confirmation email will be sent.</p>
             </div>
 
             <!-- Information Box -->
