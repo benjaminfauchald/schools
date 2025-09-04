@@ -1,0 +1,81 @@
+<% content_for :title, "Edit #{@term.label}" %>
+
+
+<!-- Main Content -->
+  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div class="space-y-8">
+      <!-- Breadcrumb -->
+      <nav class="flex" aria-label="Breadcrumb">
+        <ol role="list" class="flex items-center space-x-4">
+          <li>
+            <%= link_to admin_terms_path, class: "text-gray-400 hover:text-gray-500" do %>
+              <svg class="flex-shrink-0 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+              </svg>
+            <% end %>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <%= link_to "Terms", admin_terms_path, class: "ml-4 text-sm font-medium text-gray-500 hover:text-gray-700" %>
+            </div>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <%= link_to @term.label, admin_term_path(@term), class: "ml-4 text-sm font-medium text-gray-500 hover:text-gray-700" %>
+            </div>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="ml-4 text-sm font-medium text-gray-900">Edit</span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Page Header -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 w-12 h-12">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="ml-4">
+                <h1 class="text-3xl font-bold text-gray-900">Edit Term</h1>
+                <p class="text-sm text-gray-600">
+                  Editing: <strong><%= @term.label %></strong>
+                  <span class="ml-2 font-mono bg-gray-100 px-2 py-1 rounded text-xs"><%= @term.slug %></span>
+                </p>
+              </div>
+            </div>
+            <div class="mt-4 sm:mt-0">
+              <%= link_to admin_term_path(@term), 
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                View Term
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <%= render 'form', resource: @term %>
+    </div>
+  </div>
+</div>

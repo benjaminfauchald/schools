@@ -11,7 +11,7 @@ module Admin
       # Filter by school if provided
       @inquiries = @inquiries.where(school_id: params[:school_id]) if params[:school_id].present?
       
-      @inquiries = @inquiries.page(params[:page])
+      @inquiries = @inquiries.limit(50)
       
       # For filter dropdowns
       @schools = School.order(:name)

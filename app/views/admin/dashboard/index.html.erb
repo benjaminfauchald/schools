@@ -1,447 +1,433 @@
 <% content_for :title, "Admin Dashboard" %>
 
-<header class="main-content__header" role="banner">
-  <h1 class="main-content__page-title">Admin Dashboard</h1>
-</header>
 
-<section class="main-content__body">
-  <!-- Stats Overview -->
-  <div class="dashboard-stats">
-    <div class="stats-grid">
-      <div class="stat-card stat-card--pending">
-        <div class="stat-number"><%= @stats[:pending_claims] %></div>
-        <div class="stat-label">Pending Claims</div>
-        <% if @stats[:pending_claims] > 0 %>
-          <div class="stat-action">
-            <%= link_to "Review Now", admin_school_claims_path(search: "pending:"), class: "stat-link" %>
+<!-- Main Content -->
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+      <div class="space-y-6">
+        <!-- Welcome Header -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Admin Dashboard</dt>
+                  <dd class="text-lg font-medium text-gray-900">School Management System</dd>
+                </dl>
+              </div>
+            </div>
           </div>
-        <% end %>
-      </div>
-      
-      <div class="stat-card stat-card--approved">
-        <div class="stat-number"><%= @stats[:approved_claims] %></div>
-        <div class="stat-label">Approved Claims</div>
-        <div class="stat-meta">Total approved</div>
-      </div>
-      
-      <div class="stat-card stat-card--rejected">
-        <div class="stat-number"><%= @stats[:rejected_claims] %></div>
-        <div class="stat-label">Rejected Claims</div>
-        <div class="stat-meta">Total rejected</div>
-      </div>
-      
-      <div class="stat-card stat-card--total">
-        <div class="stat-number"><%= @stats[:total_claims] %></div>
-        <div class="stat-label">Total Claims</div>
-        <div class="stat-meta">All time</div>
-      </div>
-    </div>
-
-    <div class="stats-grid secondary-stats">
-      <div class="stat-card stat-card--warning">
-        <div class="stat-number"><%= @stats[:stale_claims] %></div>
-        <div class="stat-label">Stale Claims</div>
-        <div class="stat-meta">Pending >30 days</div>
-        <% if @stats[:stale_claims] > 0 %>
-          <div class="stat-action">
-            <%= link_to "Review Stale", admin_school_claims_path, class: "stat-link" %>
-          </div>
-        <% end %>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-number"><%= @stats[:claims_this_week] %></div>
-        <div class="stat-label">This Week</div>
-        <div class="stat-meta">New claims</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-number"><%= @stats[:claims_this_month] %></div>
-        <div class="stat-label">This Month</div>
-        <div class="stat-meta">New claims</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-number"><%= number_with_delimiter(@claimed_schools) %>/<%= number_with_delimiter(@total_schools) %></div>
-        <div class="stat-label">Schools Claimed</div>
-        <div class="stat-meta"><%= ((@claimed_schools.to_f / @total_schools) * 100).round(1) %>% coverage</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Quick Actions -->
-  <div class="dashboard-section">
-    <h2>Quick Actions</h2>
-    <div class="quick-actions">
-      <%= link_to admin_school_claims_path(search: "pending:"), class: "action-button action-button--primary" do %>
-        <div class="action-icon">📋</div>
-        <div class="action-text">
-          <div class="action-title">Review Pending Claims</div>
-          <div class="action-subtitle"><%= pluralize(@stats[:pending_claims], 'claim') %> awaiting review</div>
         </div>
-      <% end %>
 
-      <%= link_to admin_school_claims_path, class: "action-button" do %>
-        <div class="action-icon">📊</div>
-        <div class="action-text">
-          <div class="action-title">All School Claims</div>
-          <div class="action-subtitle">View complete claim history</div>
-        </div>
-      <% end %>
-
-      <%= link_to admin_schools_path, class: "action-button" do %>
-        <div class="action-icon">🏫</div>
-        <div class="action-text">
-          <div class="action-title">Manage Schools</div>
-          <div class="action-subtitle"><%= number_with_delimiter(@total_schools) %> schools total</div>
-        </div>
-      <% end %>
-
-      <%= link_to admin_users_path, class: "action-button" do %>
-        <div class="action-icon">👥</div>
-        <div class="action-text">
-          <div class="action-title">User Management</div>
-          <div class="action-subtitle">View all users</div>
-        </div>
-      <% end %>
-    </div>
-  </div>
-
-  <!-- Recent Activity -->
-  <div class="dashboard-section">
-    <div class="activity-grid">
-      <!-- Pending Claims -->
-      <% if @pending_claims.any? %>
-        <div class="activity-section">
-          <h3>Recent Pending Claims</h3>
-          <div class="activity-list">
-            <% @pending_claims.limit(5).each do |claim| %>
-              <div class="activity-item">
-                <div class="activity-info">
-                  <div class="activity-title">
-                    <%= link_to claim.school.name, admin_school_claim_path(claim), class: "activity-link" %>
+        <!-- Key Statistics -->
+        <div>
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Key Statistics</h2>
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Pending Claims -->
+            <div class="relative bg-white pt-5 px-4 pb-12 sm:pt-6 sm:px-6 shadow rounded-lg overflow-hidden">
+              <dt>
+                <div class="absolute bg-yellow-500 rounded-md p-3">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                  </svg>
+                </div>
+                <p class="ml-16 text-sm font-medium text-gray-500 truncate">Pending Claims</p>
+              </dt>
+              <dd class="ml-16 pb-6 flex items-baseline sm:pb-7">
+                <p class="text-2xl font-semibold text-gray-900"><%= @stats[:pending_claims] %></p>
+                <% if @stats[:pending_claims] > 0 %>
+                  <div class="absolute bottom-0 inset-x-0 bg-gray-50 px-4 py-4 sm:px-6">
+                    <%= link_to "Review Now", admin_school_claims_path(search: "pending:"), 
+                        class: "text-sm font-medium text-yellow-600 hover:text-yellow-500" %>
                   </div>
-                  <div class="activity-meta">
-                    <%= claim.user.email %> • 
-                    <%= time_ago_in_words(claim.created_at) %> ago
-                    <% if claim.stale? %>
-                      <span class="activity-warning">⚠️ Stale</span>
+                <% end %>
+              </dd>
+            </div>
+
+            <!-- Approved Claims -->
+            <div class="relative bg-white pt-5 px-4 pb-12 sm:pt-6 sm:px-6 shadow rounded-lg overflow-hidden">
+              <dt>
+                <div class="absolute bg-green-500 rounded-md p-3">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <p class="ml-16 text-sm font-medium text-gray-500 truncate">Approved Claims</p>
+              </dt>
+              <dd class="ml-16 pb-6 flex items-baseline sm:pb-7">
+                <p class="text-2xl font-semibold text-gray-900"><%= @stats[:approved_claims] %></p>
+                <div class="absolute bottom-0 inset-x-0 bg-gray-50 px-4 py-4 sm:px-6">
+                  <span class="text-sm text-gray-600">Total approved</span>
+                </div>
+              </dd>
+            </div>
+
+            <!-- Rejected Claims -->
+            <div class="relative bg-white pt-5 px-4 pb-12 sm:pt-6 sm:px-6 shadow rounded-lg overflow-hidden">
+              <dt>
+                <div class="absolute bg-red-500 rounded-md p-3">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </div>
+                <p class="ml-16 text-sm font-medium text-gray-500 truncate">Rejected Claims</p>
+              </dt>
+              <dd class="ml-16 pb-6 flex items-baseline sm:pb-7">
+                <p class="text-2xl font-semibold text-gray-900"><%= @stats[:rejected_claims] %></p>
+                <div class="absolute bottom-0 inset-x-0 bg-gray-50 px-4 py-4 sm:px-6">
+                  <span class="text-sm text-gray-600">Total rejected</span>
+                </div>
+              </dd>
+            </div>
+
+            <!-- Total Claims -->
+            <div class="relative bg-white pt-5 px-4 pb-12 sm:pt-6 sm:px-6 shadow rounded-lg overflow-hidden">
+              <dt>
+                <div class="absolute bg-blue-500 rounded-md p-3">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                  </svg>
+                </div>
+                <p class="ml-16 text-sm font-medium text-gray-500 truncate">Total Claims</p>
+              </dt>
+              <dd class="ml-16 pb-6 flex items-baseline sm:pb-7">
+                <p class="text-2xl font-semibold text-gray-900"><%= @stats[:total_claims] %></p>
+                <div class="absolute bottom-0 inset-x-0 bg-gray-50 px-4 py-4 sm:px-6">
+                  <span class="text-sm text-gray-600">All time</span>
+                </div>
+              </dd>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary Statistics -->
+        <div>
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Additional Metrics</h2>
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Stale Claims -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center h-8 w-8 rounded-md bg-orange-500 text-white">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate">Stale Claims</dt>
+                      <dd class="flex items-baseline">
+                        <div class="text-2xl font-semibold text-gray-900"><%= @stats[:stale_claims] %></div>
+                        <div class="ml-2 flex items-baseline text-sm text-gray-600">
+                          Pending >30 days
+                        </div>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+                <% if @stats[:stale_claims] > 0 %>
+                  <div class="mt-3">
+                    <%= link_to "Review Stale", admin_school_claims_path, 
+                        class: "text-sm font-medium text-orange-600 hover:text-orange-500" %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- This Week -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center h-8 w-8 rounded-md bg-indigo-500 text-white">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate">This Week</dt>
+                      <dd class="flex items-baseline">
+                        <div class="text-2xl font-semibold text-gray-900"><%= @stats[:claims_this_week] %></div>
+                        <div class="ml-2 flex items-baseline text-sm text-gray-600">
+                          New claims
+                        </div>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- This Month -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center h-8 w-8 rounded-md bg-purple-500 text-white">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate">This Month</dt>
+                      <dd class="flex items-baseline">
+                        <div class="text-2xl font-semibold text-gray-900"><%= @stats[:claims_this_month] %></div>
+                        <div class="ml-2 flex items-baseline text-sm text-gray-600">
+                          New claims
+                        </div>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- School Coverage -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center h-8 w-8 rounded-md bg-teal-500 text-white">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt class="text-sm font-medium text-gray-500 truncate">Schools Claimed</dt>
+                      <dd class="flex items-baseline">
+                        <div class="text-2xl font-semibold text-gray-900">
+                          <%= number_with_delimiter(@claimed_schools) %>/<%= number_with_delimiter(@total_schools) %>
+                        </div>
+                        <div class="ml-2 flex items-baseline text-sm text-gray-600">
+                          <%= ((@claimed_schools.to_f / @total_schools) * 100).round(1) %>% coverage
+                        </div>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-6">Quick Actions</h3>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <%= link_to admin_school_claims_path(search: "pending:"), 
+                  class: "relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors" do %>
+                <div>
+                  <span class="rounded-lg inline-flex p-3 bg-yellow-50 text-yellow-600 ring-4 ring-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                  </span>
+                </div>
+                <div class="mt-8">
+                  <h3 class="text-lg font-medium">
+                    <span class="absolute inset-0" aria-hidden="true"></span>
+                    Review Pending Claims
+                  </h3>
+                  <p class="mt-2 text-sm text-gray-500">
+                    <%= pluralize(@stats[:pending_claims], 'claim') %> awaiting your review
+                  </p>
+                </div>
+                <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400" aria-hidden="true">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"/>
+                  </svg>
+                </span>
+              <% end %>
+
+              <%= link_to admin_inquiries_path, 
+                  class: "relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors" do %>
+                <div>
+                  <span class="rounded-lg inline-flex p-3 bg-blue-50 text-blue-600 ring-4 ring-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                  </span>
+                </div>
+                <div class="mt-8">
+                  <h3 class="text-lg font-medium">
+                    <span class="absolute inset-0" aria-hidden="true"></span>
+                    Manage Inquiries
+                  </h3>
+                  <p class="mt-2 text-sm text-gray-500">
+                    View and respond to school inquiries
+                  </p>
+                </div>
+                <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400" aria-hidden="true">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"/>
+                  </svg>
+                </span>
+              <% end %>
+
+              <%= link_to admin_schools_path, 
+                  class: "relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors" do %>
+                <div>
+                  <span class="rounded-lg inline-flex p-3 bg-green-50 text-green-600 ring-4 ring-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                  </span>
+                </div>
+                <div class="mt-8">
+                  <h3 class="text-lg font-medium">
+                    <span class="absolute inset-0" aria-hidden="true"></span>
+                    Manage Schools
+                  </h3>
+                  <p class="mt-2 text-sm text-gray-500">
+                    <%= number_with_delimiter(@total_schools) %> schools in total
+                  </p>
+                </div>
+                <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400" aria-hidden="true">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"/>
+                  </svg>
+                </span>
+              <% end %>
+
+              <%= link_to admin_users_path, 
+                  class: "relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors" do %>
+                <div>
+                  <span class="rounded-lg inline-flex p-3 bg-purple-50 text-purple-600 ring-4 ring-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                    </svg>
+                  </span>
+                </div>
+                <div class="mt-8">
+                  <h3 class="text-lg font-medium">
+                    <span class="absolute inset-0" aria-hidden="true"></span>
+                    User Management
+                  </h3>
+                  <p class="mt-2 text-sm text-gray-500">
+                    Manage system users and access
+                  </p>
+                </div>
+                <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400" aria-hidden="true">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"/>
+                  </svg>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <!-- Pending Claims -->
+          <% if @pending_claims.any? %>
+            <div class="bg-white shadow rounded-lg">
+              <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Pending Claims</h3>
+                <div class="flow-root">
+                  <ul class="-my-5 divide-y divide-gray-200">
+                    <% @pending_claims.limit(5).each do |claim| %>
+                      <li class="py-4">
+                        <div class="flex items-center space-x-4">
+                          <div class="flex-shrink-0">
+                            <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">
+                              <%= link_to claim.school.name, admin_school_claim_path(claim), class: "hover:text-blue-600" %>
+                            </p>
+                            <p class="text-sm text-gray-500 flex items-center">
+                              <%= claim.user.email %> • 
+                              <span class="ml-1"><%= time_ago_in_words(claim.created_at) %> ago</span>
+                              <% if claim.stale? %>
+                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                  ⚠️ Stale
+                                </span>
+                              <% end %>
+                            </p>
+                          </div>
+                          <div class="flex-shrink-0">
+                            <%= link_to "Review", admin_school_claim_path(claim), 
+                                class: "inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+                          </div>
+                        </div>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+                <% if @pending_claims.count > 5 %>
+                  <div class="mt-6">
+                    <%= link_to admin_school_claims_path(search: "pending:"), 
+                        class: "w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" do %>
+                      View all <%= @pending_claims.count %> pending claims
                     <% end %>
                   </div>
-                </div>
-                <div class="activity-actions">
-                  <%= link_to "Review", admin_school_claim_path(claim), class: "activity-action-link" %>
-                </div>
+                <% end %>
               </div>
-            <% end %>
-            <% if @pending_claims.count > 5 %>
-              <div class="activity-more">
-                <%= link_to "View all #{@pending_claims.count} pending claims", admin_school_claims_path(search: "pending:"), class: "activity-more-link" %>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
+            </div>
+          <% end %>
 
-      <!-- Recent Approved -->
-      <% if @recent_approved.any? %>
-        <div class="activity-section">
-          <h3>Recently Approved</h3>
-          <div class="activity-list">
-            <% @recent_approved.limit(5).each do |claim| %>
-              <div class="activity-item">
-                <div class="activity-info">
-                  <div class="activity-title">
-                    <%= link_to claim.school.name, admin_school_claim_path(claim), class: "activity-link" %>
-                  </div>
-                  <div class="activity-meta">
-                    <%= claim.user.email %> • 
-                    Approved <%= time_ago_in_words(claim.updated_at) %> ago
-                  </div>
+          <!-- Recently Approved -->
+          <% if @recent_approved.any? %>
+            <div class="bg-white shadow rounded-lg">
+              <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Recently Approved</h3>
+                <div class="flow-root">
+                  <ul class="-my-5 divide-y divide-gray-200">
+                    <% @recent_approved.limit(5).each do |claim| %>
+                      <li class="py-4">
+                        <div class="flex items-center space-x-4">
+                          <div class="flex-shrink-0">
+                            <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">
+                              <%= link_to claim.school.name, admin_school_claim_path(claim), class: "hover:text-blue-600" %>
+                            </p>
+                            <p class="text-sm text-gray-500">
+                              <%= claim.user.email %> • 
+                              Approved <%= time_ago_in_words(claim.updated_at) %> ago
+                            </p>
+                          </div>
+                          <div class="flex-shrink-0">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                              ✓ Approved
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    <% end %>
+                  </ul>
                 </div>
-                <div class="activity-status activity-status--approved">✓</div>
               </div>
-            <% end %>
-          </div>
+            </div>
+          <% end %>
         </div>
-      <% end %>
+      </div>
     </div>
   </div>
-</section>
-
-<style>
-.dashboard-stats {
-  margin-bottom: 2rem;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.secondary-stats {
-  margin-top: 1rem;
-}
-
-.stat-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e1e5e9;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.stat-card--pending {
-  border-left: 4px solid #ffc107;
-  background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);
-}
-
-.stat-card--approved {
-  border-left: 4px solid #28a745;
-  background: linear-gradient(135deg, #d4edda 0%, #ffffff 100%);
-}
-
-.stat-card--rejected {
-  border-left: 4px solid #dc3545;
-  background: linear-gradient(135deg, #f8d7da 0%, #ffffff 100%);
-}
-
-.stat-card--total {
-  border-left: 4px solid #007bff;
-  background: linear-gradient(135deg, #d1ecf1 0%, #ffffff 100%);
-}
-
-.stat-card--warning {
-  border-left: 4px solid #fd7e14;
-  background: linear-gradient(135deg, #ffe8d1 0%, #ffffff 100%);
-}
-
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  line-height: 1;
-}
-
-.stat-label {
-  font-weight: 600;
-  color: #495057;
-  margin-top: 0.5rem;
-  margin-bottom: 0.25rem;
-}
-
-.stat-meta {
-  font-size: 0.85rem;
-  color: #6c757d;
-}
-
-.stat-action {
-  margin-top: 0.75rem;
-}
-
-.stat-link {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.stat-link:hover {
-  text-decoration: underline;
-}
-
-.dashboard-section {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e1e5e9;
-  margin-bottom: 1.5rem;
-}
-
-.dashboard-section h2 {
-  margin: 0 0 1rem 0;
-  color: #2c3e50;
-}
-
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.action-button {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  text-decoration: none;
-  color: inherit;
-  transition: all 0.2s ease;
-}
-
-.action-button:hover {
-  background: #e9ecef;
-  border-color: #adb5bd;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  text-decoration: none;
-  color: inherit;
-}
-
-.action-button--primary {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  color: white;
-  border-color: #007bff;
-}
-
-.action-button--primary:hover {
-  background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
-  color: white;
-}
-
-.action-icon {
-  font-size: 2rem;
-  margin-right: 1rem;
-  flex-shrink: 0;
-}
-
-.action-title {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.action-subtitle {
-  font-size: 0.85rem;
-  opacity: 0.8;
-}
-
-.activity-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 2rem;
-}
-
-.activity-section h3 {
-  margin: 0 0 1rem 0;
-  color: #495057;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e9ecef;
-}
-
-.activity-list {
-  space-y: 0.75rem;
-}
-
-.activity-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-  background: #f8f9fa;
-  border-radius: 6px;
-  margin-bottom: 0.75rem;
-}
-
-.activity-info {
-  flex: 1;
-}
-
-.activity-title {
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-}
-
-.activity-link {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.activity-link:hover {
-  text-decoration: underline;
-}
-
-.activity-meta {
-  font-size: 0.85rem;
-  color: #6c757d;
-}
-
-.activity-warning {
-  background: #fff3cd;
-  color: #856404;
-  padding: 0.125rem 0.25rem;
-  border-radius: 3px;
-  font-size: 0.75rem;
-}
-
-.activity-actions {
-  flex-shrink: 0;
-  margin-left: 1rem;
-}
-
-.activity-action-link {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.activity-action-link:hover {
-  text-decoration: underline;
-}
-
-.activity-status {
-  flex-shrink: 0;
-  margin-left: 1rem;
-  font-size: 1.25rem;
-}
-
-.activity-status--approved {
-  color: #28a745;
-}
-
-.activity-more {
-  text-align: center;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.activity-more-link {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.activity-more-link:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .quick-actions {
-    grid-template-columns: 1fr;
-  }
-  
-  .activity-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .action-button {
-    justify-content: center;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
+</div>

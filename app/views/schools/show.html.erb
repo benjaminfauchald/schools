@@ -28,7 +28,8 @@
                 school: @school,
                 contact_info: @merged_data.contact_info,
                 user_signed_in: user_signed_in?,
-                facebook_authenticated: user_signed_in? && current_user&.provider == 'facebook'
+                facebook_authenticated: user_signed_in? && current_user&.provider == 'facebook',
+                debug_mode: debug_mode_enabled?
               ) %>
         </div>
       </div>

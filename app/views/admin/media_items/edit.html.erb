@@ -1,0 +1,215 @@
+<% content_for :title, "Edit Media Item" %>
+
+
+<!-- Main Content -->
+  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div class="space-y-8">
+      <!-- Breadcrumb -->
+      <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+          <li class="inline-flex items-center">
+            <%= link_to admin_root_path, class: "inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600" do %>
+              <svg class="w-3 h-3 mr-2.5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+              </svg>
+              Admin Dashboard
+            <% end %>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <%= link_to "Media Items", admin_media_items_path, class: "ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2" %>
+            </div>
+          </li>
+          <li aria-current="page">
+            <div class="flex items-center">
+              <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Edit Media Item</span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Header -->
+      <div class="text-center">
+        <h1 class="text-3xl font-bold text-gray-900">Edit Media Item</h1>
+        <p class="mt-2 text-lg text-gray-600">Update media content for places</p>
+      </div>
+
+      <!-- Form -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <%= form_with model: [:admin, @media_item], local: true, class: "space-y-6" do |form| %>
+            <% if @media_item.errors.any? %>
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">
+                      <%= pluralize(@media_item.errors.count, "error") %> prohibited this media item from being saved:
+                    </h3>
+                    <div class="mt-2 text-sm text-red-700">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <% @media_item.errors.full_messages.each do |message| %>
+                          <li><%= message %></li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Basic Information -->
+            <div class="space-y-6">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+                <div class="grid grid-cols-1 gap-6">
+                  <div>
+                    <%= form.label :place_id, "Place", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :place_id, 
+                        options_from_collection_for_select(@places, :id, :name, @media_item.place_id), 
+                        { prompt: "Select a place..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+                  </div>
+
+                  <div>
+                    <%= form.label :kind, "Media Type", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :kind, 
+                        options_for_select([
+                          ['Logo', 'logo'],
+                          ['Campus Photo', 'campus_photo'],
+                          ['Brochure', 'brochure'],
+                          ['Fee Schedule PDF', 'fee_schedule_pdf'],
+                          ['Video', 'video'],
+                          ['Virtual Tour', 'virtual_tour'],
+                          ['Menu', 'menu'],
+                          ['Floor Plan', 'floor_plan']
+                        ], @media_item.kind), 
+                        { prompt: "Select media type..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Media Content -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Media Content</h3>
+                <div class="grid grid-cols-1 gap-6">
+                  <div>
+                    <%= form.label :url, "Media URL", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.url_field :url, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "https://example.com/media/image.jpg" %>
+                    <p class="mt-2 text-sm text-gray-500">Direct URL to the media file (image, video, or document)</p>
+                  </div>
+
+                  <div>
+                    <%= form.label :alt_text, "Alt Text / Description", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_area :alt_text, 
+                        rows: 3,
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "Describe the media content for accessibility..." %>
+                    <p class="mt-2 text-sm text-gray-500">Optional description for accessibility and SEO. If left blank, will be auto-generated.</p>
+                  </div>
+
+                  <div>
+                    <%= form.label :sort_order, "Sort Order", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.number_field :sort_order, 
+                        min: 0,
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "0" %>
+                    <p class="mt-2 text-sm text-gray-500">Lower numbers appear first. Default is 0.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Media Preview -->
+              <% if @media_item.url.present? %>
+                <div>
+                  <h3 class="text-lg font-medium text-gray-900 mb-4">Current Media</h3>
+                  <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div class="flex items-start space-x-4">
+                      <div class="flex-shrink-0">
+                        <% if @media_item.image? %>
+                          <div class="w-20 h-20 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                          </div>
+                        <% elsif @media_item.video? %>
+                          <div class="w-20 h-20 bg-red-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                          </div>
+                        <% else %>
+                          <div class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                          </div>
+                        <% end %>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900"><%= @media_item.kind_display %></p>
+                        <p class="text-sm text-gray-500 truncate"><%= @media_item.url %></p>
+                        <% if @media_item.alt_text.present? %>
+                          <p class="text-sm text-gray-600 mt-1"><%= @media_item.alt_text %></p>
+                        <% end %>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <%= link_to @media_item.url, target: "_blank", 
+                            class: "inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                          </svg>
+                          View
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- Information Panel -->
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">About Media Items</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                      <p>Media items are photos, videos, documents, and other media assets associated with places. They help showcase facilities, provide information, and enhance user experience. Use descriptive alt text for accessibility.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <%= link_to admin_media_items_path, 
+                  class: "inline-flex justify-center py-3 px-6 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                Cancel
+              <% end %>
+              <%= form.submit "Update Media Item", 
+                  class: "inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

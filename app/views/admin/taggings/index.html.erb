@@ -1,0 +1,273 @@
+<% content_for :title, "Taggings Management" %>
+
+
+<!-- Main Content -->
+  <div class="mx-auto py-8 px-6 sm:px-8 lg:px-12 max-w-none">
+    <div class="space-y-8">
+      <!-- Header Section -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Taggings Management</h1>
+          <p class="mt-2 text-sm text-gray-600">Manage relationships between schools and taxonomy terms</p>
+        </div>
+        <%= link_to new_admin_tagging_path, 
+            class: "mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Add New Tagging
+        <% end %>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">Total Taggings</p>
+              <p class="text-2xl font-semibold text-gray-900"><%= @total_taggings %></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">Currently Valid</p>
+              <p class="text-2xl font-semibold text-gray-900"><%= @valid_taggings %></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">Expired</p>
+              <p class="text-2xl font-semibold text-gray-900"><%= @expired_taggings %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search and Filters -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+        <%= form_with url: admin_taggings_path, method: :get, local: true, class: "space-y-4" do |form| %>
+          <!-- Search Bar -->
+          <div>
+            <%= form.text_field :search, 
+                placeholder: "Search by term name, context, or notes...", 
+                value: params[:search],
+                class: "block w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" %>
+          </div>
+          
+          <!-- Filters Row -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <%= form.select :context, 
+                  options_for_select([['All Contexts', '']] + @contexts.map { |c| [c.humanize, c] }, params[:context]), 
+                  {},
+                  { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+            </div>
+            <div>
+              <%= form.select :validity, 
+                  options_for_select([
+                    ['All Validity', ''],
+                    ['Currently Valid', 'valid'],
+                    ['Expired', 'expired'],
+                    ['Expiring Soon (30 days)', 'expiring_soon']
+                  ], params[:validity]), 
+                  {},
+                  { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+            </div>
+            <div>
+              <%= form.select :taggable_type, 
+                  options_for_select([['All Types', '']] + @taggable_types.map { |t| [t.humanize, t] }, params[:taggable_type]), 
+                  {},
+                  { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+            </div>
+            <div class="flex space-x-3">
+              <%= form.submit "Filter", 
+                  class: "flex-1 inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+              <%= link_to "Clear", admin_taggings_path, 
+                  class: "flex-1 inline-flex justify-center py-3 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Taggings Table -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Taggings List</h3>
+          <p class="mt-1 text-sm text-gray-600">Showing <%= @taggings.count %> of <%= @total_taggings %> taggings</p>
+        </div>
+        
+        <% if @taggings.any? %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Term & Context</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tagged Item</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Validity</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                  <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% @taggings.each do |tagging| %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                          </svg>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-medium text-gray-900"><%= tagging.term.name %></div>
+                          <div class="text-sm text-gray-500">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                              <%= tagging.context.humanize %>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm text-gray-900">
+                        <%= tagging.taggable_type.constantize.model_name.human %>
+                      </div>
+                      <div class="text-sm text-gray-500">
+                        <% if tagging.taggable.respond_to?(:name) %>
+                          <%= link_to truncate(tagging.taggable.name, length: 40), 
+                              polymorphic_path([:admin, tagging.taggable]), 
+                              class: "text-blue-600 hover:text-blue-700" %>
+                        <% else %>
+                          ID: <%= tagging.taggable_id %>
+                        <% end %>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <% if tagging.valid_from || tagging.valid_to %>
+                        <% if tagging.currently_valid? %>
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Valid
+                          </span>
+                        <% elsif tagging.valid_to && tagging.valid_to < Date.current %>
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Expired
+                          </span>
+                        <% elsif tagging.valid_to && tagging.valid_to <= Date.current + 30.days %>
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Expiring Soon
+                          </span>
+                        <% else %>
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Valid
+                          </span>
+                        <% end %>
+                        <div class="text-xs text-gray-500 mt-1">
+                          <% if tagging.valid_from %>
+                            From: <%= tagging.valid_from.strftime("%m/%d/%y") %>
+                          <% end %>
+                          <% if tagging.valid_to %>
+                            <br>Until: <%= tagging.valid_to.strftime("%m/%d/%y") %>
+                          <% end %>
+                        </div>
+                      <% else %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          Permanent
+                        </span>
+                      <% end %>
+                    </td>
+                    <td class="px-6 py-4">
+                      <% if tagging.notes.present? %>
+                        <div class="text-sm text-gray-900 max-w-xs">
+                          <%= truncate(tagging.notes, length: 60) %>
+                        </div>
+                      <% else %>
+                        <span class="text-sm text-gray-400 italic">No notes</span>
+                      <% end %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div class="flex items-center justify-end space-x-2">
+                        <%= link_to admin_tagging_path(tagging), 
+                            class: "text-blue-600 hover:text-blue-900 p-1 rounded transition-colors",
+                            title: "View Tagging" do %>
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                          </svg>
+                        <% end %>
+                        <%= link_to edit_admin_tagging_path(tagging), 
+                            class: "text-yellow-600 hover:text-yellow-900 p-1 rounded transition-colors",
+                            title: "Edit Tagging" do %>
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                          </svg>
+                        <% end %>
+                        <%= link_to admin_tagging_path(tagging), 
+                            method: :delete,
+                            data: { 
+                              confirm: "Are you sure you want to delete this tagging?",
+                              turbo_method: :delete 
+                            },
+                            class: "text-red-600 hover:text-red-900 p-1 rounded transition-colors",
+                            title: "Delete Tagging" do %>
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                          </svg>
+                        <% end %>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="px-6 py-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No taggings found</h3>
+            <p class="mt-1 text-sm text-gray-500">
+              <% if params[:search].present? || params[:context].present? || params[:validity].present? || params[:taggable_type].present? %>
+                No taggings match your current search criteria.
+              <% else %>
+                Get started by creating a new tagging relationship.
+              <% end %>
+            </p>
+            <% unless params[:search].present? || params[:context].present? || params[:validity].present? || params[:taggable_type].present? %>
+              <div class="mt-6">
+                <%= link_to new_admin_tagging_path, 
+                    class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  </svg>
+                  Add New Tagging
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

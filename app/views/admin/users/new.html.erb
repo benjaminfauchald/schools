@@ -1,0 +1,158 @@
+<% content_for :title, "Add New User" %>
+
+
+<!-- Main Content -->
+  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div class="space-y-8">
+      <!-- Breadcrumb -->
+      <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+          <li class="inline-flex items-center">
+            <%= link_to admin_root_path, class: "inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600" do %>
+              <svg class="w-3 h-3 mr-2.5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+              </svg>
+              Admin Dashboard
+            <% end %>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <%= link_to "Users", admin_users_path, class: "ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2" %>
+            </div>
+          </li>
+          <li aria-current="page">
+            <div class="flex items-center">
+              <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">New User</span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Page Header -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900">Add New User</h1>
+              <p class="mt-2 text-sm text-gray-600">Create a new user account with appropriate permissions</p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+              <%= link_to admin_users_path,
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Users
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New User Form -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <%= form_with model: @user, url: admin_users_path, method: :post, local: true, class: "space-y-6" do |form| %>
+            <% if @user.errors.any? %>
+              <div class="rounded-md bg-red-50 p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">
+                      There were <%= pluralize(@user.errors.count, "error") %> with your submission:
+                    </h3>
+                    <div class="mt-2 text-sm text-red-700">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <% @user.errors.full_messages.each do |message| %>
+                          <li><%= message %></li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Email -->
+              <div>
+                <%= form.label :email, "Email Address", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= form.email_field :email, 
+                    class: "block w-full px-3 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg",
+                    placeholder: "user@example.com",
+                    required: true %>
+                <p class="mt-1 text-sm text-gray-500">This will be the user's login email</p>
+              </div>
+
+              <!-- Role -->
+              <div>
+                <%= form.label :role, "User Role", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= form.select :role, 
+                    options_for_select([
+                      ['User', 'user'],
+                      ['School Owner', 'school_owner'],
+                      ['Admin', 'admin']
+                    ], 'user'),
+                    {},
+                    { class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+                <p class="mt-1 text-sm text-gray-500">Select the appropriate role for this user</p>
+              </div>
+            </div>
+
+            <!-- Confirmation Status -->
+            <div>
+              <label class="flex items-center">
+                <%= form.check_box :confirmed_at, 
+                    {},
+                    Time.current, nil,
+                    class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+                <span class="ml-2 text-sm text-gray-700">Mark email as confirmed</span>
+              </label>
+              <p class="mt-1 text-sm text-gray-500">Check this box to skip email confirmation for this user</p>
+            </div>
+
+            <!-- Information Box -->
+            <div class="rounded-md bg-blue-50 p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-blue-800">
+                    Password Setup
+                  </h3>
+                  <div class="mt-2 text-sm text-blue-700">
+                    <p>A temporary password will be generated and sent to the user's email address. The user will be required to change it on their first login.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+              <%= link_to admin_users_path,
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                Cancel
+              <% end %>
+              
+              <%= form.submit "Create User", 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

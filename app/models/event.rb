@@ -12,6 +12,7 @@ class Event < ApplicationRecord
   scope :upcoming, -> { where('starts_at > ?', Time.current) }
   scope :past, -> { where('starts_at < ?', Time.current) }
   scope :current, -> { where('starts_at <= ? AND (ends_at IS NULL OR ends_at > ?)', Time.current, Time.current) }
+  scope :ongoing, -> { current }
   scope :today, -> { where(starts_at: Date.current.beginning_of_day..Date.current.end_of_day) }
   scope :this_week, -> { where(starts_at: Date.current.beginning_of_week..Date.current.end_of_week) }
   scope :this_month, -> { where(starts_at: Date.current.beginning_of_month..Date.current.end_of_month) }
