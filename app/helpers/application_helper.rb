@@ -113,4 +113,9 @@ module ApplicationHelper
       end
     end
   end
+  
+  # Check if debug mode is enabled
+  def debug_mode_enabled?
+    ENV['DEBUG_MODE'].to_s.downcase == 'on'
+  end
 end

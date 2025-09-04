@@ -1,0 +1,192 @@
+<%= form_with model: [:admin, resource], local: true, class: "space-y-8" do |f| %>
+  <% if resource.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+      <div class="flex items-center mb-4">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            <%= pluralize(resource.errors.count, "error") %> prohibited this term from being saved:
+          </h3>
+        </div>
+      </div>
+      <ul class="list-disc pl-5 space-y-1">
+        <% resource.errors.full_messages.each do |message| %>
+          <li class="text-sm text-red-700"><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+      <p class="text-sm text-gray-600 mt-1">Enter the core details for this term</p>
+    </div>
+    <div class="px-6 py-6 space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <%= f.label :label, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.text_field :label, 
+              class: "block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 #{resource.errors[:label].any? ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}", 
+              placeholder: "Enter term label" %>
+          <% if resource.errors[:label].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= resource.errors[:label].first %></p>
+          <% end %>
+        </div>
+
+        <div>
+          <%= f.label :slug, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.text_field :slug, 
+              class: "block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm #{resource.errors[:slug].any? ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}", 
+              placeholder: "term-slug" %>
+          <p class="mt-1 text-xs text-gray-500">URL-friendly identifier (auto-generated from label if empty)</p>
+          <% if resource.errors[:slug].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= resource.errors[:slug].first %></p>
+          <% end %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :description, class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.text_area :description, 
+            rows: 4,
+            class: "block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical", 
+            placeholder: "Optional description of this term..." %>
+        <p class="mt-1 text-xs text-gray-500">Provide a detailed description of what this term represents</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Organization</h3>
+      <p class="text-sm text-gray-600 mt-1">Set the vocabulary and hierarchy for this term</p>
+    </div>
+    <div class="px-6 py-6 space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <%= f.label :vocabulary_id, "Vocabulary", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.select :vocabulary_id, 
+              options_from_collection_for_select(@vocabularies, :id, :label, resource.vocabulary_id),
+              { prompt: "Select a vocabulary..." },
+              { 
+                class: "block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 #{resource.errors[:vocabulary_id].any? ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}",
+                "data-vocabulary-select": true
+              } %>
+          <p class="mt-1 text-xs text-gray-500">The vocabulary this term belongs to</p>
+          <% if resource.errors[:vocabulary_id].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= resource.errors[:vocabulary_id].first %></p>
+          <% end %>
+        </div>
+
+        <div>
+          <%= f.label :parent_id, "Parent Term", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.select :parent_id, 
+              options_from_collection_for_select(@potential_parents || [], :id, :label, resource.parent_id),
+              { prompt: "No parent (root level)" },
+              { 
+                class: "block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                "data-parent-select": true
+              } %>
+          <p class="mt-1 text-xs text-gray-500">Leave empty for root-level term</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Settings</h3>
+      <p class="text-sm text-gray-600 mt-1">Configure term status and metadata</p>
+    </div>
+    <div class="px-6 py-6 space-y-6">
+      <div class="flex items-center">
+        <div class="flex items-center h-5">
+          <%= f.check_box :is_active, 
+              class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+        </div>
+        <div class="ml-3">
+          <%= f.label :is_active, class: "text-sm font-medium text-gray-700" do %>
+            Active
+          <% end %>
+          <p class="text-xs text-gray-500">Active terms are available for use and appear in selections</p>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :metadata, class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.text_area :metadata, 
+            rows: 4,
+            class: "block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm resize-vertical", 
+            placeholder: '{"key": "value", "custom_field": "data"}' %>
+        <p class="mt-1 text-xs text-gray-500">Optional JSON metadata for storing additional term properties</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col sm:flex-row gap-4 sm:justify-end">
+    <%= link_to admin_terms_path, 
+        class: "inline-flex items-center justify-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+      Cancel
+    <% end %>
+    
+    <%= f.submit(resource.persisted? ? "Update Term" : "Create Term",
+        class: "inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm") %>
+  </div>
+<% end %>
+
+<script>
+// Auto-generate slug from label
+document.addEventListener('DOMContentLoaded', function() {
+  const labelInput = document.querySelector('input[name="term[label]"]');
+  const slugInput = document.querySelector('input[name="term[slug]"]');
+  
+  if (labelInput && slugInput && !slugInput.value) {
+    labelInput.addEventListener('input', function() {
+      const slug = this.value
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+      
+      slugInput.value = slug;
+    });
+  }
+  
+  // Update parent options when vocabulary changes
+  const vocabularySelect = document.querySelector('[data-vocabulary-select]');
+  const parentSelect = document.querySelector('[data-parent-select]');
+  
+  if (vocabularySelect && parentSelect) {
+    vocabularySelect.addEventListener('change', function() {
+      const vocabularyId = this.value;
+      
+      // Clear current parent options except the prompt
+      parentSelect.innerHTML = '<option value="">No parent (root level)</option>';
+      
+      if (vocabularyId) {
+        // Fetch terms for this vocabulary via AJAX
+        fetch(`/admin/vocabularies/${vocabularyId}/terms.json`)
+          .then(response => response.json())
+          .then(terms => {
+            terms.forEach(term => {
+              if (term.id != <%= resource.id || 'null' %>) {
+                const option = new Option(term.label, term.id);
+                parentSelect.add(option);
+              }
+            });
+          })
+          .catch(error => console.error('Error loading terms:', error));
+      }
+    });
+  }
+});
+</script>

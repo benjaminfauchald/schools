@@ -1,0 +1,355 @@
+<% content_for :title, "Travel Times Management" %>
+
+
+<!-- Main Content -->
+  <div class="w-full py-8 px-4 sm:px-6 lg:px-8">
+    <div class="space-y-8">
+      <!-- Page Header with Inline Stats -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900">Travel Times Management</h1>
+              <p class="mt-2 text-sm text-gray-600">Manage transportation data and commute times</p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+              <%= link_to new_admin_travel_time_path, 
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Add New Travel Time
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Inline Statistics -->
+          <div class="flex flex-wrap items-center gap-6 text-sm">
+            <!-- Total Travel Times -->
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div>
+                <span class="font-semibold text-gray-900"><%= number_with_delimiter(@total_travel_times || 0) %></span>
+                <span class="text-gray-500">Total Times</span>
+              </div>
+            </div>
+
+            <!-- Status Breakdown -->
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@successful_times || 0) %></span>
+              <span class="text-gray-500 ml-1">Successful</span>
+              <% if @total_travel_times > 0 %>
+                <span class="text-gray-400 ml-1">(<%= ((@successful_times.to_f / @total_travel_times) * 100).round(1) %>%)</span>
+              <% end %>
+            </div>
+
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@failed_times || 0) %></span>
+              <span class="text-gray-500 ml-1">Failed</span>
+            </div>
+
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= number_with_delimiter(@stale_times || 0) %></span>
+              <span class="text-gray-500 ml-1">Stale (24h+)</span>
+            </div>
+
+            <!-- Average Times -->
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+              </div>
+              <div>
+                <span class="font-semibold text-gray-900">
+                  <% if @avg_driving_time %>
+                    <%= @avg_driving_time.round %>m
+                  <% else %>
+                    N/A
+                  <% end %>
+                </span>
+                <span class="text-gray-500">Avg Driving</span>
+              </div>
+            </div>
+
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                </svg>
+              </div>
+              <div>
+                <span class="font-semibold text-gray-900">
+                  <% if @avg_transit_time %>
+                    <%= @avg_transit_time.round %>m
+                  <% else %>
+                    N/A
+                  <% end %>
+                </span>
+                <span class="text-gray-500">Avg Transit</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search and Filters Section -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <%= form_with url: admin_travel_times_path, method: :get, local: true, class: "space-y-4" do |f| %>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <%= f.label :search, "Search", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.text_field :search, 
+                    value: params[:search], 
+                    placeholder: "Search by place name or origin...",
+                    class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" %>
+              </div>
+              
+              <div>
+                <%= f.label :mode, "Transportation Mode", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.select :mode, 
+                    options_for_select([
+                      ['All Modes', ''],
+                      ['Driving', 'driving'],
+                      ['Public Transit', 'transit'],
+                      ['Walking', 'walking'],
+                      ['Cycling', 'cycling']
+                    ], params[:mode]),
+                    {},
+                    { class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+              </div>
+
+              <div>
+                <%= f.label :status, "Data Status", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.select :status, 
+                    options_for_select([
+                      ['All Status', ''],
+                      ['Successful', 'successful'],
+                      ['Failed', 'failed'],
+                      ['Recent (24h)', 'recent'],
+                      ['Stale (24h+)', 'stale']
+                    ], params[:status]),
+                    {},
+                    { class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+              </div>
+              
+              <div class="flex items-end">
+                <%= f.submit "Search", 
+                    class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Travel Times List -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h3 class="text-lg font-medium text-gray-900">Travel Times</h3>
+        </div>
+        
+        <% if @travel_times.any? %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Place
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Origin
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Mode & Duration
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Computed
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% @travel_times.each do |travel_time| %>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 w-10 h-10">
+                          <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                          </div>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-medium text-gray-900">
+                            <%= link_to (travel_time.place&.name.presence || "Unnamed Place"), admin_travel_time_path(travel_time), class: "text-blue-600 hover:text-blue-700" %>
+                          </div>
+                          <div class="text-sm text-gray-500">ID: <%= travel_time.id %></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="text-sm text-gray-900">
+                        <%= travel_time.origin_hash %>
+                      </div>
+                      <div class="text-sm text-gray-500">
+                        Coordinates
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <span class="text-lg mr-2">
+                          <% case travel_time.mode %>
+                          <% when 'driving' %>
+                            🚗
+                          <% when 'transit' %>
+                            🚌
+                          <% when 'walking' %>
+                            🚶
+                          <% when 'cycling' %>
+                            🚴
+                          <% else %>
+                            ⏱️
+                          <% end %>
+                        </span>
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">
+                            <%= travel_time.mode.humanize %>
+                          </div>
+                          <div class="text-sm text-gray-500">
+                            <% if travel_time.minutes %>
+                              <%= travel_time.duration_display %>
+                            <% else %>
+                              <span class="text-red-500">Failed to calculate</span>
+                            <% end %>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <% if travel_time.successful? %>
+                        <% if travel_time.stale? %>
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            <svg class="w-2 h-2 mr-1 fill-current" viewBox="0 0 8 8">
+                              <circle cx="4" cy="4" r="3"/>
+                            </svg>
+                            Stale
+                          </span>
+                        <% else %>
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <svg class="w-2 h-2 mr-1 fill-current" viewBox="0 0 8 8">
+                              <circle cx="4" cy="4" r="3"/>
+                            </svg>
+                            Fresh
+                          </span>
+                        <% end %>
+                      <% else %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          <svg class="w-2 h-2 mr-1 fill-current" viewBox="0 0 8 8">
+                            <circle cx="4" cy="4" r="3"/>
+                          </svg>
+                          Failed
+                        </span>
+                      <% end %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm text-gray-900">
+                        <%= travel_time.computed_at.strftime("%m/%d/%Y") %>
+                      </div>
+                      <div class="text-sm text-gray-500">
+                        <%= travel_time.computed_at.strftime("%I:%M %p") %>
+                      </div>
+                      <% if travel_time.age_hours > 24 %>
+                        <div class="text-xs text-yellow-600">
+                          <%= travel_time.age_hours.round(1) %>h ago
+                        </div>
+                      <% end %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div class="flex items-center justify-end space-x-2">
+                        <%= link_to admin_travel_time_path(travel_time),
+                            class: "inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                          </svg>
+                          View
+                        <% end %>
+                        
+                        <%= link_to edit_admin_travel_time_path(travel_time),
+                            class: "inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                          </svg>
+                          Edit
+                        <% end %>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Results Info -->
+          <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+              <p class="text-sm text-gray-700">
+                Showing <%= @travel_times.count %> of <%= @total_travel_times %> travel times
+              </p>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p class="text-sm text-gray-700">
+                  Showing <span class="font-medium"><%= @travel_times.count %></span> travel times
+                  <% if @travel_times.count < @total_travel_times %>
+                    (limited to first 50 results - use search to narrow down)
+                  <% end %>
+                </p>
+              </div>
+            </div>
+          </div>
+        <% else %>
+          <div class="text-center py-12">
+            <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 class="mt-2 text-lg font-medium text-gray-900">No travel times found</h3>
+            <p class="mt-2 text-sm text-gray-500 max-w-sm mx-auto">
+              <% if params[:search].present? || params[:mode].present? || params[:status].present? %>
+                Try adjusting your search criteria or filters to see more results.
+              <% else %>
+                No travel times have been computed yet. Add the first travel time entry to get started.
+              <% end %>
+            </p>
+            <div class="mt-6">
+              <%= link_to new_admin_travel_time_path, 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Add First Travel Time
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

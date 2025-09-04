@@ -1,46 +1,104 @@
 module Admin
   class TaggingsController < Admin::ApplicationController
-    # Overwrite any of the RESTful controller actions to implement custom behavior
-    # For example, you may want to send an email after a foo is updated.
-    #
-    # def update
-    #   super
-    #   send_foo_updated_email(requested_resource)
-    # end
+    before_action :set_tagging, only: [:show, :edit, :update, :destroy]
+    
+    def index
+      search_term = params[:search]
+      
+      @taggings = Tagging.includes(:term, :taggable).all
+      
+      # Apply search filter
+      if search_term.present?
+        @taggings = @taggings.joins(:term).where(
+          "terms.name ILIKE ? OR taggings.context ILIKE ? OR taggings.notes ILIKE ?", 
+          "%#{search_term}%", "%#{search_term}%", "%#{search_term}%"
+        )
+      end
+      
+      # Apply context filter
+      if params[:context].present?
+        @taggings = @taggings.where(context: params[:context])
+      end
+      
+      # Apply validity filter
+      if params[:validity].present?
+        case params[:validity]
+        when 'valid'
+          @taggings = @taggings.valid_at(Date.current)
+        when 'expired'
+          @taggings = @taggings.where('valid_to < ?', Date.current)
+        when 'expiring_soon'
+          @taggings = @taggings.where(valid_to: Date.current..(Date.current + 30.days))
+        end
+      end
+      
+      # Apply taggable type filter
+      if params[:taggable_type].present?
+        @taggings = @taggings.where(taggable_type: params[:taggable_type])
+      end
+      
+      @taggings = @taggings.order(created_at: :desc).limit(50)
+      @total_taggings = Tagging.count
+      @valid_taggings = Tagging.valid_at(Date.current).count
+      @expired_taggings = Tagging.where('valid_to < ?', Date.current).count
+      @contexts = Tagging.distinct.pluck(:context).compact.sort
+      @taggable_types = Tagging.distinct.pluck(:taggable_type).compact.sort
+    end
 
-    # Override this method to specify custom lookup behavior.
-    # This will be used to set the resource for the `show`, `edit`, and `update`
-    # actions.
-    #
-    # def find_resource(param)
-    #   Foo.find_by!(slug: param)
-    # end
+    def show
+      # Tagging details already loaded by set_tagging
+    end
 
-    # The result of this lookup will be available as `requested_resource`
+    def new
+      @tagging = Tagging.new
+      load_form_data
+    end
 
-    # Override this if you have certain roles that require a subset
-    # this will be used to set the records shown on the `index` action.
-    #
-    # def scoped_resource
-    #   if current_user.super_admin?
-    #     resource_class
-    #   else
-    #     resource_class.with_less_stuff
-    #   end
-    # end
+    def create
+      @tagging = Tagging.new(tagging_params)
+      
+      if @tagging.save
+        redirect_to admin_tagging_path(@tagging), notice: 'Tagging was successfully created.'
+      else
+        load_form_data
+        render :new, status: :unprocessable_entity
+      end
+    end
 
-    # Override `resource_params` if you want to transform the submitted
-    # data before it's persisted. For example, the following would turn all
-    # empty values into nil values. It uses other APIs such as `resource_class`
-    # and `dashboard`:
-    #
-    # def resource_params
-    #   params.require(resource_class.model_name.param_key).
-    #     permit(dashboard.permitted_attributes(action_name)).
-    #     transform_values { |value| value == "" ? nil : value }
-    # end
+    def edit
+      load_form_data
+    end
 
-    # See https://administrate-demo.herokuapp.com/customizing_controller_actions
-    # for more information
+    def update
+      if @tagging.update(tagging_params)
+        redirect_to admin_tagging_path(@tagging), notice: 'Tagging was successfully updated.'
+      else
+        load_form_data
+        render :edit, status: :unprocessable_entity
+      end
+    end
+
+    def destroy
+      @tagging.destroy
+      redirect_to admin_taggings_path, notice: 'Tagging was successfully deleted.'
+    end
+
+    private
+
+    def set_tagging
+      @tagging = Tagging.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      redirect_to admin_taggings_path, alert: 'Tagging not found.'
+    end
+
+    def load_form_data
+      @vocabularies = Vocabulary.ordered
+      @terms = Term.includes(:vocabulary).ordered
+      @places = Place.joins(:school).order('places.name')
+    end
+
+    def tagging_params
+      params.require(:tagging).permit(:context, :notes, :taggable_type, :taggable_id, :term_id, :valid_from, :valid_to)
+    end
   end
 end

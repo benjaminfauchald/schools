@@ -1,46 +1,87 @@
 module Admin
   class EventsController < Admin::ApplicationController
-    # Overwrite any of the RESTful controller actions to implement custom behavior
-    # For example, you may want to send an email after a foo is updated.
-    #
-    # def update
-    #   super
-    #   send_foo_updated_email(requested_resource)
-    # end
+    before_action :set_event, only: [:show, :edit, :update, :destroy]
+    
+    def index
+      search_term = params[:search]
+      
+      @events = Event.includes(:place).all
+      
+      # Apply search filter
+      if search_term.present?
+        @events = @events.joins(:place).where(
+          "events.title ILIKE ? OR events.description ILIKE ? OR places.name ILIKE ?", 
+          "%#{search_term}%", "%#{search_term}%", "%#{search_term}%"
+        )
+      end
+      
+      # Apply status filter
+      if params[:status].present?
+        case params[:status]
+        when 'upcoming'
+          @events = @events.upcoming
+        when 'ongoing'
+          @events = @events.ongoing
+        when 'past'
+          @events = @events.past
+        end
+      end
+      
+      @events = @events.order(:starts_at).limit(50)
+      @total_events = Event.count
+      @upcoming_events = Event.upcoming.count
+      @ongoing_events = Event.ongoing.count
+      @past_events = Event.past.count
+    end
 
-    # Override this method to specify custom lookup behavior.
-    # This will be used to set the resource for the `show`, `edit`, and `update`
-    # actions.
-    #
-    # def find_resource(param)
-    #   Foo.find_by!(slug: param)
-    # end
+    def show
+      # Event details already loaded by set_event
+    end
 
-    # The result of this lookup will be available as `requested_resource`
+    def new
+      @event = Event.new
+      @places = Place.joins(:school).order('places.name')
+    end
 
-    # Override this if you have certain roles that require a subset
-    # this will be used to set the records shown on the `index` action.
-    #
-    # def scoped_resource
-    #   if current_user.super_admin?
-    #     resource_class
-    #   else
-    #     resource_class.with_less_stuff
-    #   end
-    # end
+    def create
+      @event = Event.new(event_params)
+      
+      if @event.save
+        redirect_to admin_event_path(@event), notice: 'Event was successfully created.'
+      else
+        @places = Place.joins(:school).order('places.name')
+        render :new, status: :unprocessable_entity
+      end
+    end
 
-    # Override `resource_params` if you want to transform the submitted
-    # data before it's persisted. For example, the following would turn all
-    # empty values into nil values. It uses other APIs such as `resource_class`
-    # and `dashboard`:
-    #
-    # def resource_params
-    #   params.require(resource_class.model_name.param_key).
-    #     permit(dashboard.permitted_attributes(action_name)).
-    #     transform_values { |value| value == "" ? nil : value }
-    # end
+    def edit
+      @places = Place.joins(:school).order('places.name')
+    end
 
-    # See https://administrate-demo.herokuapp.com/customizing_controller_actions
-    # for more information
+    def update
+      if @event.update(event_params)
+        redirect_to admin_event_path(@event), notice: 'Event was successfully updated.'
+      else
+        @places = Place.joins(:school).order('places.name')
+        render :edit, status: :unprocessable_entity
+      end
+    end
+
+    def destroy
+      @event.destroy
+      redirect_to admin_events_path, notice: 'Event was successfully deleted.'
+    end
+
+    private
+
+    def set_event
+      @event = Event.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      redirect_to admin_events_path, alert: 'Event not found.'
+    end
+
+    def event_params
+      params.require(:event).permit(:title, :description, :starts_at, :ends_at, :location, :url, :place_id)
+    end
   end
 end

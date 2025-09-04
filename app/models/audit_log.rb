@@ -99,4 +99,45 @@ class AuditLog < ApplicationRecord
       "#{(time_diff / 86400).to_i} days ago"
     end
   end
+  
+  # Helper class method to create audit logs with proper change tracking
+  def self.create_for_record(record, action, user_id = nil, custom_changes = nil)
+    return unless record.present?
+    
+    # Determine changes to record
+    changes_hash = case custom_changes
+    when Hash
+      # Use provided changes hash
+      custom_changes
+    when Array
+      # Convert field names to Rails changes
+      if action == 'update' && record.previous_changes.present?
+        record.previous_changes.slice(*custom_changes)
+      elsif action == 'update' && record.changes.present?
+        record.changes.slice(*custom_changes)
+      else
+        # For creates/deletes, create [nil, current_value] pairs
+        custom_changes.each_with_object({}) do |field, hash|
+          current_value = record.try(field)
+          hash[field] = action == 'delete' ? [current_value, nil] : [nil, current_value]
+        end
+      end
+    else
+      # Use all available changes from the model
+      record.previous_changes.presence || record.changes || {}
+    end
+    
+    # Clean up timestamps unless specifically requested
+    changes_hash = changes_hash.except('updated_at', 'created_at') unless custom_changes.is_a?(Hash)
+    
+    # Only create if there are changes or it's a significant action
+    return if changes_hash.empty? && !%w[create delete submit approve reject suspend].include?(action.to_s)
+    
+    create!(
+      auditable: record,
+      user_id: user_id,
+      action: action.to_s,
+      changed_fields: changes_hash
+    )
+  end
 end

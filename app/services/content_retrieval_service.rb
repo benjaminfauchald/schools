@@ -170,6 +170,84 @@ class ContentRetrievalService
   def search_transcripts(query, limit: 5)
     return [] unless @place&.transcripts&.any?
     
+    # Try vector search first if embeddings are available
+    vector_items = search_transcripts_by_vector(query, limit: limit * 2)
+    
+    # Fallback to text search if vector search yields insufficient results
+    if vector_items.length < limit / 2
+      Rails.logger.debug "🔍 Vector search yielded #{vector_items.length} results, falling back to text search"
+      text_items = search_transcripts_by_text(query, limit: limit)
+      
+      # Combine results, prioritizing vector results
+      all_items = (vector_items + text_items).uniq { |item| [item[:type], item[:id]] }
+      return all_items.first(limit)
+    end
+    
+    vector_items.first(limit)
+  end
+
+  def search_transcripts_by_vector(query, limit: 10)
+    return [] unless query.present?
+    
+    begin
+      # Generate embedding for the search query
+      embedding_service = EmbeddingGenerationService.new
+      query_embedding = embedding_service.generate_embedding(query)
+      
+      return [] unless query_embedding
+      
+      items = []
+      
+      # Search transcript segments using vector similarity
+      Rails.logger.debug "🔮 Performing vector similarity search for transcripts"
+      
+      # Get all transcript segments from this place's transcripts
+      place_transcript_ids = @place.transcripts.processed.ai_enabled.with_embeddings.pluck(:id)
+      return [] if place_transcript_ids.empty?
+      
+      similar_segments = TranscriptSegment.by_transcript_ids(place_transcript_ids)
+                                        .find_similar_segments(query_embedding, 
+                                                              limit: limit, 
+                                                              similarity_threshold: 0.7)
+      
+      similar_segments.each do |segment|
+        transcript = segment.transcript
+        items << {
+          type: 'transcript_segment',
+          id: segment.id,
+          title: "#{transcript.video_title} (#{segment.time_range_display})",
+          content: segment.text,
+          video_id: transcript.video_id,
+          youtube_url: segment.youtube_url_with_timestamp,
+          start_time: segment.start_time,
+          end_time: segment.end_time,
+          relevance_score: segment.respond_to?(:similarity) ? segment.similarity.to_f : 0.8,
+          search_method: 'vector'
+        }
+      end
+      
+      # Also search full transcripts if they have embeddings
+      @place.transcripts.processed.ai_enabled.with_embeddings.each do |transcript|
+        # Skip if we already have segments from this transcript
+        next if items.any? { |item| item[:video_id] == transcript.video_id }
+        
+        # For full transcripts, we'd need to implement similarity search at transcript level
+        # For now, we'll rely on segment-level search which is more granular
+      end
+      
+      Rails.logger.debug "🔮 Vector search found #{items.length} results"
+      items.sort_by { |item| -item[:relevance_score] }
+      
+    rescue => e
+      Rails.logger.error "❌ Vector search failed: #{e.message}"
+      Rails.logger.error e.backtrace.first(3).join("\n")
+      []
+    end
+  end
+
+  def search_transcripts_by_text(query, limit: 5)
+    return [] unless @place&.transcripts&.any?
+    
     items = []
     query_terms = query.downcase.split
     
@@ -183,7 +261,8 @@ class ContentRetrievalService
           content: extract_relevant_transcript_excerpt(transcript.full_transcript, query_terms),
           video_id: transcript.video_id,
           youtube_url: transcript.youtube_url,
-          relevance_score: calculate_text_relevance(transcript.full_transcript, query_terms)
+          relevance_score: calculate_text_relevance(transcript.full_transcript, query_terms),
+          search_method: 'text'
         }
       end
       
@@ -199,7 +278,8 @@ class ContentRetrievalService
             youtube_url: segment.youtube_url_with_timestamp,
             start_time: segment.start_time,
             end_time: segment.end_time,
-            relevance_score: calculate_text_relevance(segment.text, query_terms) + 0.1 # Bonus for segment precision
+            relevance_score: calculate_text_relevance(segment.text, query_terms) + 0.1, # Bonus for segment precision
+            search_method: 'text'
           }
         end
       end

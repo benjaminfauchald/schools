@@ -1,0 +1,131 @@
+<% content_for :title, "Create New Event" %>
+
+<!-- Main Content -->
+<div class="w-full py-8 px-4 sm:px-6 lg:px-8">
+  <div class="space-y-8">
+    <!-- Page Header -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div class="px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Create New Event</h1>
+            <p class="mt-2 text-sm text-gray-600">Add a new event for a school or educational institution</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <%= form_with model: [:admin, @event], local: true, class: "space-y-6" do |form| %>
+            <% if @event.errors.any? %>
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">
+                      <%= pluralize(@event.errors.count, "error") %> prohibited this event from being saved:
+                    </h3>
+                    <div class="mt-2 text-sm text-red-700">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <% @event.errors.full_messages.each do |message| %>
+                          <li><%= message %></li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Basic Information -->
+            <div class="space-y-6">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+                <div class="grid grid-cols-1 gap-6">
+                  <div>
+                    <%= form.label :title, class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :title, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "Enter event title" %>
+                  </div>
+
+                  <div>
+                    <%= form.label :description, class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_area :description, 
+                        rows: 4,
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "Describe the event, activities, and any important details..." %>
+                  </div>
+
+                  <div>
+                    <%= form.label :place_id, "School", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :place_id, 
+                        options_from_collection_for_select(@places, :id, :name, @event.place_id), 
+                        { prompt: "Select a school..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Date and Time -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Date and Time</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <%= form.label :starts_at, "Start Date & Time", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.datetime_local_field :starts_at, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" %>
+                  </div>
+
+                  <div>
+                    <%= form.label :ends_at, "End Date & Time (Optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.datetime_local_field :ends_at, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" %>
+                    <p class="mt-1 text-xs text-gray-500">Leave empty if the end time is not specified</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Location and Additional Info -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Location and Additional Information</h3>
+                <div class="grid grid-cols-1 gap-6">
+                  <div>
+                    <%= form.label :location, "Specific Location (Optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :location, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "e.g., Main Auditorium, Sports Field, Room 101" %>
+                    <p class="mt-1 text-xs text-gray-500">Specify a location within the school if needed</p>
+                  </div>
+
+                  <div>
+                    <%= form.label :url, "Event Website (Optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.url_field :url, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "https://example.com/event-details" %>
+                    <p class="mt-1 text-xs text-gray-500">Link to event registration or more information</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <%= link_to admin_events_path, 
+                  class: "inline-flex justify-center py-3 px-6 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                Cancel
+              <% end %>
+              <%= form.submit "Create Event", 
+                  class: "inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+  </div>
+</div>

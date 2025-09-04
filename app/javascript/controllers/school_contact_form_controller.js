@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["form", "submitButton", "facebookButton", "authSection", "messages", "successMessage", "errorMessage", "errorText"]
-  static values = { schoolId: Number, userSignedIn: Boolean, facebookAuthenticated: Boolean }
+  static values = { schoolId: Number, userSignedIn: Boolean, facebookAuthenticated: Boolean, debugMode: Boolean }
 
   connect() {
     this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
@@ -56,9 +56,11 @@ export default class extends Controller {
     const formData = new FormData(this.formTarget)
     
     // Debug: Log form data before sending
-    console.log('Form data being submitted:')
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`)
+    if (this.debugModeValue) {
+      console.log('Form data being submitted:')
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`)
+      }
     }
 
     try {
@@ -86,11 +88,15 @@ export default class extends Controller {
         this.formTarget.reset()
       } else {
         const errorMessage = result.errors ? result.errors.join(', ') : 'Failed to send message'
-        console.error('Validation errors:', result.errors)
+        if (this.debugModeValue) {
+          console.error('Validation errors:', result.errors)
+        }
         this.showMessage(errorMessage, 'error')
       }
     } catch (error) {
-      console.error('Contact form error:', error)
+      if (this.debugModeValue) {
+        console.error('Contact form error:', error)
+      }
       this.showMessage('Network error. Please check your connection and try again.', 'error')
     } finally {
       // Re-enable submit button
@@ -128,7 +134,9 @@ export default class extends Controller {
       },
       body: JSON.stringify({ school_id: this.schoolIdValue })
     }).catch(error => {
-      console.warn('Failed to store school context:', error)
+      if (this.debugModeValue) {
+        console.warn('Failed to store school context:', error)
+      }
     })
     
     // Let the link proceed to Facebook OAuth
@@ -199,7 +207,9 @@ export default class extends Controller {
         this.element.scrollIntoView({ behavior: 'smooth' })
       }
     } catch (error) {
-      console.error('Error restoring form from session:', error)
+      if (this.debugModeValue) {
+        console.error('Error restoring form from session:', error)
+      }
       sessionStorage.removeItem('pendingContactForm')
     }
   }
@@ -279,33 +289,47 @@ export default class extends Controller {
   // Load form data from cookies if available
   loadFormDataFromCookies() {
     const savedData = this.getCookie('contactFormData')
-    console.log('Saved cookie data:', savedData)
+    if (this.debugModeValue) {
+      console.log('Saved cookie data:', savedData)
+    }
     
     if (!savedData) {
-      console.log('No saved form data found in cookies')
+      if (this.debugModeValue) {
+        console.log('No saved form data found in cookies')
+      }
       return
     }
 
     try {
       const formData = JSON.parse(savedData)
-      console.log('Parsed form data:', formData)
+      if (this.debugModeValue) {
+        console.log('Parsed form data:', formData)
+      }
       
       // Only populate non-message fields (name, email, phone)
       const fieldsToRestore = ['school_inquiry[name]', 'school_inquiry[email]', 'school_inquiry[phone]']
       
       fieldsToRestore.forEach(fieldName => {
-        console.log('Looking for field:', fieldName)
+        if (this.debugModeValue) {
+          console.log('Looking for field:', fieldName)
+        }
         if (formData[fieldName]) {
           const input = this.formTarget.querySelector(`[name="${fieldName}"]`)
-          console.log('Found input:', input, 'Current value:', input?.value)
+          if (this.debugModeValue) {
+            console.log('Found input:', input, 'Current value:', input?.value)
+          }
           if (input && !input.value) { // Only fill if field is empty
             input.value = formData[fieldName]
-            console.log('Set value:', formData[fieldName])
+            if (this.debugModeValue) {
+              console.log('Set value:', formData[fieldName])
+            }
           }
         }
       })
     } catch (error) {
-      console.error('Error loading form data from cookies:', error)
+      if (this.debugModeValue) {
+        console.error('Error loading form data from cookies:', error)
+      }
       // Clear corrupted cookie
       this.setCookie('contactFormData', '', -1)
     }
@@ -313,7 +337,9 @@ export default class extends Controller {
 
   // Save form data to cookies (excluding message and sensitive fields)
   saveFormDataToCookies() {
-    console.log('Saving form data to cookies...')
+    if (this.debugModeValue) {
+      console.log('Saving form data to cookies...')
+    }
     const formData = new FormData(this.formTarget)
     const dataToSave = {}
     
@@ -322,16 +348,22 @@ export default class extends Controller {
     
     fieldsToSave.forEach(fieldName => {
       const value = formData.get(fieldName)
-      console.log('Field:', fieldName, 'Value:', value)
+      if (this.debugModeValue) {
+        console.log('Field:', fieldName, 'Value:', value)
+      }
       if (value && value.trim()) {
         dataToSave[fieldName] = value.trim()
       }
     })
     
-    console.log('Data to save:', dataToSave)
+    if (this.debugModeValue) {
+      console.log('Data to save:', dataToSave)
+    }
     // Save to cookie for 90 days
     this.setCookie('contactFormData', JSON.stringify(dataToSave), 90)
-    console.log('Cookie saved successfully')
+    if (this.debugModeValue) {
+      console.log('Cookie saved successfully')
+    }
   }
 
   // Helper method to set cookies

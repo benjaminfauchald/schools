@@ -1,311 +1,273 @@
-<% content_for :title, "Manage Inquiries" %>
+<% content_for :title, "Inquiries Management" %>
 
-<header class="main-content__header" role="banner">
-  <h1 class="main-content__page-title">Manage Inquiries</h1>
-  <p class="main-content__page-subtitle">View and respond to inquiries from potential students and parents</p>
-</header>
+<!-- Main Content -->
+<div class="w-full py-8">
+  <div class="space-y-8 px-4 sm:px-6 lg:px-8">
+  <!-- Page Header with Inline Stats -->
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+    <div class="px-6 py-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Inquiries Management</h1>
+          <p class="mt-2 text-sm text-gray-600">View and respond to inquiries from potential students and parents across all schools</p>
+        </div>
+      </div>
+      
+      <!-- Inline Statistics and Admin Notice -->
+      <div class="flex flex-wrap items-center gap-6 text-sm">
+        <!-- Total Inquiries -->
+        <div class="flex items-center">
+          <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <div>
+            <span class="font-semibold text-gray-900"><%= number_with_delimiter(@inquiries.count || 0) %></span>
+            <span class="text-gray-500">Total Inquiries</span>
+          </div>
+        </div>
 
-<section class="main-content__body">
+        <!-- Status Breakdown -->
+        <div class="flex items-center">
+          <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+          <span class="text-gray-900 font-medium"><%= number_with_delimiter(@inquiries.select(&:status_new?).count || 0) %></span>
+          <span class="text-gray-500 ml-1">New</span>
+        </div>
+
+        <div class="flex items-center">
+          <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+          <span class="text-gray-900 font-medium"><%= number_with_delimiter(@inquiries.select(&:status_read?).count || 0) %></span>
+          <span class="text-gray-500 ml-1">Read</span>
+        </div>
+
+        <div class="flex items-center">
+          <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+          <span class="text-gray-900 font-medium"><%= number_with_delimiter(@inquiries.select(&:status_responded?).count || 0) %></span>
+          <span class="text-gray-500 ml-1">Responded</span>
+        </div>
+
+        <!-- Admin Notice -->
+        <div class="flex items-center">
+          <svg class="w-4 h-4 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+          <span class="text-gray-700 font-medium">Admin Access:</span>
+          <span class="text-gray-600 ml-1">Status changes managed by school owners</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Filters -->
-  <div class="filters-section">
-    <%= form_with url: admin_inquiries_path, method: :get, local: true, class: "filters-form" do |form| %>
-      <div class="filter-group">
-        <%= form.label :school_id, "School", class: "filter-label" %>
-        <%= form.select :school_id, options_for_select([["All Schools", ""]] + @schools.map { |s| [s.name, s.id] }, params[:school_id]), 
-                       {}, { class: "filter-select" } %>
-      </div>
-      
-      <div class="filter-group">
-        <%= form.label :status, "Status", class: "filter-label" %>
-        <%= form.select :status, options_for_select([["All Statuses", ""]] + @statuses, params[:status]), 
-                       {}, { class: "filter-select" } %>
-      </div>
-      
-      <div class="filter-group">
-        <%= form.submit "Filter", class: "btn btn--primary" %>
-      </div>
-    <% end %>
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+    <div class="px-6 py-6">
+      <%= form_with url: admin_inquiries_path, method: :get, local: true, class: "grid grid-cols-1 md:grid-cols-3 gap-4" do |form| %>
+        <div>
+          <%= form.label :school_id, "School", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :school_id, options_for_select([["All Schools", ""]] + @schools.map { |s| [s.name, s.id] }, params[:school_id]), 
+                         {}, { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" } %>
+        </div>
+        
+        <div>
+          <%= form.label :status, "Status", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :status, options_for_select([["All Statuses", ""]] + @statuses, params[:status]), 
+                         {}, { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" } %>
+        </div>
+        
+        <div class="flex items-end justify-start">
+          <%= form.submit "Filter", class: "mt-1 px-6 py-2 text-base border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm" %>
+        </div>
+      <% end %>
+    </div>
   </div>
 
   <!-- Inquiries List -->
-  <div class="inquiries-list">
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+      <h3 class="text-lg font-medium text-gray-900">Inquiries List</h3>
+      <p class="mt-1 text-sm text-gray-600">Showing <%= @inquiries.count %> inquiries</p>
+    </div>
+    
     <% if @inquiries.any? %>
-      <% @inquiries.each do |inquiry| %>
-        <div class="inquiry-item">
-          <%= link_to admin_inquiry_path(inquiry), class: "inquiry-link" do %>
-            <div class="inquiry-header">
-              <div class="inquiry-status">
-                <% if inquiry.status_new? %>
-                  <span class="status-badge status-badge--new">New</span>
-                <% elsif inquiry.status_read? %>
-                  <span class="status-badge status-badge--read">Read</span>
-                <% elsif inquiry.status_responded? %>
-                  <span class="status-badge status-badge--responded">Responded</span>
-                <% else %>
-                  <span class="status-badge status-badge--default"><%= inquiry.status.humanize %></span>
-                <% end %>
-              </div>
-              <div class="inquiry-info">
-                <div class="inquiry-title">
-                  <%= inquiry.name %> - <%= inquiry.school.name %>
-                </div>
-                <div class="inquiry-meta">
-                  <%= inquiry.email %> • 
-                  <%= pluralize(inquiry.children_count, 'child') %> • 
-                  <%= time_ago_in_words(inquiry.created_at) %> ago
-                </div>
-              </div>
-              <div class="inquiry-arrow">→</div>
-            </div>
-            <div class="inquiry-message">
-              <%= truncate(inquiry.message, length: 100) %>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Avatar
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Contact
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                School
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Message
+              </th>
+              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Children
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Received
+              </th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @inquiries.each do |inquiry| %>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <!-- Avatar Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </td>
+                
+                <!-- Contact Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= inquiry.name %>
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    <%= inquiry.email %>
+                  </div>
+                </td>
+                
+                <!-- School Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-blue-600">
+                    <%= link_to inquiry.school.name, admin_school_path(inquiry.school), class: "hover:text-blue-700 font-medium" %>
+                  </div>
+                </td>
+                
+                <!-- Status Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% if inquiry.status_new? %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="3"/>
+                      </svg>
+                      New
+                    </span>
+                  <% elsif inquiry.status_read? %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="3"/>
+                      </svg>
+                      Read
+                    </span>
+                  <% elsif inquiry.status_responded? %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="3"/>
+                      </svg>
+                      Responded
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="3"/>
+                      </svg>
+                      <%= inquiry.status.humanize %>
+                    </span>
+                  <% end %>
+                </td>
+                
+                <!-- Message Column -->
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900 max-w-xs">
+                    <%= truncate(inquiry.message, length: 80) %>
+                  </div>
+                  <% if inquiry.message.length > 80 %>
+                    <div class="text-xs text-gray-500 mt-1">
+                      +<%= inquiry.message.length - 80 %> more chars
+                    </div>
+                  <% end %>
+                </td>
+                
+                <!-- Children Column -->
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <div class="text-sm text-gray-900 font-medium">
+                    <%= inquiry.children_count %>
+                  </div>
+                </td>
+                
+                <!-- Received Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <%= inquiry.created_at.strftime("%m/%d/%Y") %>
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    <%= time_ago_in_words(inquiry.created_at) %> ago
+                  </div>
+                </td>
+                
+                <!-- Actions Column -->
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <%= link_to admin_inquiry_path(inquiry), 
+                      class: "text-blue-600 hover:text-blue-900 font-medium" do %>
+                    View
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Results Info -->
+      <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Showing <span class="font-medium"><%= @inquiries.count %></span> inquiries
+            </p>
+          </div>
+          <% if @inquiries.respond_to?(:total_pages) && @inquiries.total_pages > 1 %>
+            <div>
+              <%= paginate @inquiries, theme: 'twitter_bootstrap_4' %>
             </div>
           <% end %>
         </div>
-      <% end %>
-      
-      <!-- Pagination -->
-      <% if @inquiries.respond_to?(:total_pages) && @inquiries.total_pages > 1 %>
-        <div class="pagination-section">
-          <%= paginate @inquiries %>
-        </div>
-      <% end %>
+      </div>
     <% else %>
-      <div class="empty-state">
-        <div class="empty-state-icon">📧</div>
-        <h3 class="empty-state-title">No inquiries found</h3>
-        <p class="empty-state-text">
+      <div class="text-center py-12">
+        <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h3 class="mt-2 text-lg font-medium text-gray-900">No inquiries found</h3>
+        <p class="mt-2 text-sm text-gray-500 max-w-sm mx-auto">
           <% if params[:status].present? || params[:school_id].present? %>
-            Try adjusting your filters to see more results.
+            Try adjusting your filters to see more results. You can change the school or status filters above.
           <% else %>
-            No inquiries have been submitted yet. Inquiries will appear here when potential students contact schools.
+            No inquiries have been submitted yet. When potential students contact schools, their inquiries will appear here.
           <% end %>
         </p>
+        <% if params[:status].present? || params[:school_id].present? %>
+          <div class="mt-6">
+            <%= link_to admin_inquiries_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              Clear Filters
+            <% end %>
+          </div>
+        <% end %>
       </div>
     <% end %>
   </div>
-</section>
-
-<style>
-.main-content__page-subtitle {
-  color: #6c757d;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.filters-section {
-  background: white;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.filters-form {
-  display: flex;
-  gap: 1.5rem;
-  align-items: end;
-  flex-wrap: wrap;
-}
-
-.filter-group {
-  flex: 1;
-  min-width: 200px;
-}
-
-.filter-label {
-  display: block;
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.filter-select {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  background: white;
-  font-size: 0.9rem;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  display: inline-block;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.btn--primary {
-  background: #007bff;
-  color: white;
-}
-
-.btn--primary:hover {
-  background: #0056b3;
-  transform: translateY(-1px);
-}
-
-.inquiries-list {
-  background: white;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.inquiry-item {
-  border-bottom: 1px solid #e9ecef;
-}
-
-.inquiry-item:last-child {
-  border-bottom: none;
-}
-
-.inquiry-link {
-  display: block;
-  padding: 1.25rem;
-  text-decoration: none;
-  color: inherit;
-  transition: background-color 0.2s ease;
-}
-
-.inquiry-link:hover {
-  background: #f8f9fa;
-  text-decoration: none;
-  color: inherit;
-}
-
-.inquiry-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.inquiry-status {
-  flex-shrink: 0;
-}
-
-.status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.status-badge--new {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.status-badge--read {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.status-badge--responded {
-  background: #d4edda;
-  color: #155724;
-}
-
-.status-badge--default {
-  background: #e9ecef;
-  color: #495057;
-}
-
-.inquiry-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.inquiry-title {
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 0.25rem;
-  font-size: 1rem;
-}
-
-.inquiry-meta {
-  font-size: 0.85rem;
-  color: #6c757d;
-}
-
-.inquiry-arrow {
-  font-size: 1.25rem;
-  color: #6c757d;
-  flex-shrink: 0;
-}
-
-.inquiry-message {
-  color: #495057;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 3rem 2rem;
-  color: #6c757d;
-}
-
-.empty-state-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-.empty-state-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 0.5rem;
-}
-
-.empty-state-text {
-  font-size: 0.9rem;
-  margin: 0;
-}
-
-.pagination-section {
-  padding: 1rem;
-  border-top: 1px solid #e9ecef;
-  text-align: center;
-  background: #f8f9fa;
-}
-
-@media (max-width: 768px) {
-  .filters-form {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .filter-group {
-    min-width: auto;
-  }
-  
-  .inquiry-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  
-  .inquiry-arrow {
-    display: none;
-  }
-}
-</style>
+    </div>
+  </div>

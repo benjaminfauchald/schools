@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_03_084355) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_04_102104) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -533,50 +533,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_03_084355) do
     t.index ["vocabulary_id"], name: "index_terms_on_vocabulary_id"
   end
 
-  create_table "transcript_segments", force: :cascade do |t|
-    t.bigint "transcript_id", null: false
-    t.integer "segment_index", null: false
-    t.text "text", null: false
-    t.float "start_time"
-    t.float "end_time"
-    t.string "speaker"
-    t.float "confidence"
-    t.text "embedding"
-    t.json "metadata"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["end_time"], name: "index_transcript_segments_on_end_time"
-    t.index ["speaker"], name: "index_transcript_segments_on_speaker"
-    t.index ["start_time"], name: "index_transcript_segments_on_start_time"
-    t.index ["transcript_id", "segment_index"], name: "index_transcript_segments_on_transcript_id_and_segment_index", unique: true
-    t.index ["transcript_id"], name: "index_transcript_segments_on_transcript_id"
-  end
+# Could not dump table "transcript_segments" because of following StandardError
+#   Unknown type 'vector(1536)' for column 'vector_embedding'
 
-  create_table "transcripts", force: :cascade do |t|
-    t.bigint "place_id", null: false
-    t.string "video_id", null: false
-    t.string "video_title"
-    t.text "video_description"
-    t.string "video_url"
-    t.text "full_transcript"
-    t.string "language", default: "en"
-    t.integer "duration_seconds"
-    t.string "status", default: "pending"
-    t.text "processing_error"
-    t.json "metadata"
-    t.text "embedding"
-    t.datetime "processed_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "processing_job_id"
-    t.boolean "ai_enabled", default: true, null: false
-    t.index ["ai_enabled"], name: "index_transcripts_on_ai_enabled"
-    t.index ["place_id", "video_id"], name: "index_transcripts_on_place_id_and_video_id", unique: true
-    t.index ["place_id"], name: "index_transcripts_on_place_id"
-    t.index ["processed_at"], name: "index_transcripts_on_processed_at"
-    t.index ["status"], name: "index_transcripts_on_status"
-    t.index ["video_id"], name: "index_transcripts_on_video_id"
-  end
+
+# Could not dump table "transcripts" because of following StandardError
+#   Unknown type 'vector(1536)' for column 'vector_embedding'
+
 
   create_table "travel_times", force: :cascade do |t|
     t.bigint "place_id", null: false

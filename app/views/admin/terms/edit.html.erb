@@ -1,0 +1,100 @@
+<% content_for :title, "Edit #{@term.label}" %>
+
+<!-- Main Content -->
+<div class="w-full py-8">
+  <div class="space-y-8 px-4 sm:px-6 lg:px-8">
+
+      <!-- Page Header -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900">Edit Term</h1>
+              <p class="mt-2 text-sm text-gray-600">Update taxonomy term and category information</p>
+            </div>
+            <div class="mt-4 sm:mt-0 flex space-x-3">
+              <%= link_to admin_term_path(@term), 
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                View Term
+              <% end %>
+              <%= link_to admin_terms_path, 
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Terms
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Inline Statistics -->
+          <div class="flex flex-wrap items-center gap-6 text-sm">
+            <!-- Term Label -->
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+              </div>
+              <div>
+                <span class="font-semibold text-gray-900"><%= @term.label %></span>
+                <span class="text-gray-500">Label</span>
+              </div>
+            </div>
+
+            <!-- Slug -->
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium font-mono"><%= @term.slug %></span>
+              <span class="text-gray-500 ml-1">Slug</span>
+            </div>
+
+            <!-- Vocabulary -->
+            <% if @term.vocabulary %>
+              <div class="flex items-center">
+                <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                <span class="text-gray-900 font-medium"><%= @term.vocabulary.label %></span>
+                <span class="text-gray-500 ml-1">Vocabulary</span>
+              </div>
+            <% end %>
+
+            <!-- Status -->
+            <div class="flex items-center">
+              <div class="w-2 h-2 <%= @term.is_active? ? 'bg-green-500' : 'bg-red-500' %> rounded-full mr-2"></div>
+              <span class="text-gray-900 font-medium"><%= @term.is_active? ? 'Active' : 'Inactive' %></span>
+              <span class="text-gray-500 ml-1">Status</span>
+            </div>
+
+            <!-- Children Count -->
+            <% if @term.children.any? %>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <span class="text-gray-900 font-medium"><%= @term.children.count %> children</span>
+                <span class="text-gray-500 ml-1">Hierarchy</span>
+              </div>
+            <% end %>
+
+            <!-- Usage Count -->
+            <% if @term.taggings.any? %>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span class="text-gray-900 font-medium"><%= @term.taggings.count %> usages</span>
+                <span class="text-gray-500 ml-1">In Use</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <%= render 'form', resource: @term %>
+  </div>
+</div>

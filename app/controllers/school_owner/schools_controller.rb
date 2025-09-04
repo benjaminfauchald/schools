@@ -1259,14 +1259,42 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     false
   end
 
-  def create_audit_log(school, action, changed_fields)
+  def create_audit_log(school, action, changed_fields = nil)
     return unless defined?(AuditLog)
+    
+    # Determine what changes to record
+    changes_hash = case changed_fields
+    when Array
+      # Convert field names to actual Rails changes (before/after values)
+      if action == 'update' && school.previous_changes.present?
+        # Use previous_changes after a successful save
+        school.previous_changes.slice(*changed_fields).except('updated_at', 'created_at')
+      elsif action == 'update' && school.changes.present?
+        # Use current changes if before save
+        school.changes.slice(*changed_fields).except('updated_at', 'created_at')
+      else
+        # For creates or when no changes available, create field => [nil, current_value] pairs
+        changed_fields.each_with_object({}) do |field, hash|
+          current_value = school.try(field)
+          hash[field] = [nil, current_value]
+        end
+      end
+    when Hash
+      # Already a proper changes hash
+      changed_fields.except('updated_at', 'created_at')
+    else
+      # Default: use all model changes
+      (school.previous_changes.presence || school.changes || {}).except('updated_at', 'created_at')
+    end
+    
+    # Only create audit log if there are actual changes or it's a significant action
+    return if changes_hash.empty? && !%w[create delete].include?(action)
     
     AuditLog.create!(
       auditable: school,
       user_id: current_user.id,
       action: action,
-      changed_fields: { updated_fields: changed_fields }
+      changed_fields: changes_hash
     )
   end
   

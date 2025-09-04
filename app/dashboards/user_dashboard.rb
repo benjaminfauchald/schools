@@ -33,9 +33,10 @@ class UserDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
     id
-    audit_logs
-    claimed_schools
-    confirmation_sent_at
+    email
+    role
+    confirmed_at
+    created_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES

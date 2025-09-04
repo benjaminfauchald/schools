@@ -1,0 +1,220 @@
+<% content_for :title, "Create New Tagging" %>
+
+
+<!-- Main Content -->
+  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div class="space-y-8">
+      <!-- Breadcrumb -->
+      <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+          <li class="inline-flex items-center">
+            <%= link_to admin_root_path, class: "inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600" do %>
+              <svg class="w-3 h-3 mr-2.5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+              </svg>
+              Admin Dashboard
+            <% end %>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <%= link_to "Taggings", admin_taggings_path, class: "ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2" %>
+            </div>
+          </li>
+          <li aria-current="page">
+            <div class="flex items-center">
+              <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Create New Tagging</span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Header -->
+      <div class="text-center">
+        <h1 class="text-3xl font-bold text-gray-900">Create New Tagging</h1>
+        <p class="mt-2 text-lg text-gray-600">Associate a term with a school or other entity</p>
+      </div>
+
+      <!-- Form -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <%= form_with model: [:admin, @tagging], local: true, class: "space-y-6" do |form| %>
+            <% if @tagging.errors.any? %>
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">
+                      <%= pluralize(@tagging.errors.count, "error") %> prohibited this tagging from being saved:
+                    </h3>
+                    <div class="mt-2 text-sm text-red-700">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <% @tagging.errors.full_messages.each do |message| %>
+                          <li><%= message %></li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Term Selection -->
+            <div class="space-y-6">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Term Selection</h3>
+                <div class="grid grid-cols-1 gap-6">
+                  <div>
+                    <%= form.label :term_id, "Term", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :term_id, 
+                        grouped_options_for_select(@terms.group_by { |t| t.vocabulary.label }.map { |label, terms| [label, terms.map { |t| [t.label, t.id] }] }), 
+                        { prompt: "Select a term..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg", id: "tagging_term_id" } %>
+                    <p class="mt-1 text-xs text-gray-500">Choose the term that describes this tagging</p>
+                  </div>
+
+                  <div>
+                    <%= form.label :context, "Context", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :context, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "Context will auto-fill based on selected term",
+                        readonly: true,
+                        id: "tagging_context" %>
+                    <p class="mt-1 text-xs text-gray-500">Context automatically matches the vocabulary code of the selected term</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item Selection -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Item to Tag</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <%= form.label :taggable_type, "Item Type", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :taggable_type, 
+                        options_for_select([
+                          ['School/Place', 'Place']
+                        ]), 
+                        { prompt: "Select item type..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg", id: "tagging_taggable_type" } %>
+                  </div>
+
+                  <div>
+                    <%= form.label :taggable_id, "Item", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :taggable_id, 
+                        options_from_collection_for_select(@places, :id, :name), 
+                        { prompt: "Select an item..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg", id: "tagging_taggable_id" } %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Validity Period -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Validity Period (Optional)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <%= form.label :valid_from, "Valid From", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.date_field :valid_from, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" %>
+                    <p class="mt-1 text-xs text-gray-500">Leave empty if valid from creation</p>
+                  </div>
+
+                  <div>
+                    <%= form.label :valid_to, "Valid To", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.date_field :valid_to, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" %>
+                    <p class="mt-1 text-xs text-gray-500">Leave empty for permanent tagging</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional Information -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Additional Information</h3>
+                <div class="grid grid-cols-1 gap-6">
+                  <div>
+                    <%= form.label :notes, "Notes (Optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_area :notes, 
+                        rows: 4,
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "Add any additional notes about this tagging..." %>
+                    <p class="mt-1 text-xs text-gray-500">Optional notes to provide context or additional information</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Information Panel -->
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">About Taggings</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                      <p>Taggings create relationships between taxonomy terms and schools or other entities. Examples include:</p>
+                      <ul class="list-disc pl-5 mt-2 space-y-1">
+                        <li><strong>Curriculum:</strong> Associating "IB Diploma" with a specific school</li>
+                        <li><strong>Accreditation:</strong> Marking a school as "CIS Accredited" with expiry dates</li>
+                        <li><strong>Facilities:</strong> Tagging schools with available facilities like "Swimming Pool"</li>
+                        <li><strong>Age Groups:</strong> Indicating which age groups a school serves</li>
+                      </ul>
+                      <p class="mt-2">The context field automatically matches the vocabulary code to ensure data consistency.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <%= link_to admin_taggings_path, 
+                  class: "inline-flex justify-center py-3 px-6 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                Cancel
+              <% end %>
+              <%= form.submit "Create Tagging", 
+                  class: "inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-fill context based on selected term
+document.addEventListener('DOMContentLoaded', function() {
+  const termSelect = document.getElementById('tagging_term_id');
+  const contextField = document.getElementById('tagging_context');
+  
+  // Term to vocabulary mapping
+  const termVocabularies = {};
+  <% @terms.each do |term| %>
+    termVocabularies[<%= term.id %>] = '<%= term.vocabulary.code %>';
+  <% end %>
+  
+  if (termSelect && contextField) {
+    termSelect.addEventListener('change', function() {
+      const termId = parseInt(this.value);
+      if (termId && termVocabularies[termId]) {
+        contextField.value = termVocabularies[termId];
+      } else {
+        contextField.value = '';
+      }
+    });
+  }
+});
+</script>

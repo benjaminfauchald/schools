@@ -1,0 +1,137 @@
+<% content_for :title, "Create New Vocabulary" %>
+
+<!-- Main Content -->
+<div class="w-full py-8 px-4 sm:px-6 lg:px-8">
+  <div class="space-y-8">
+    <!-- Page Header -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div class="px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Create New Vocabulary</h1>
+            <p class="mt-2 text-sm text-gray-600">Add a new taxonomy vocabulary to organize terms and categories</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <%= form_with model: [:admin, @vocabulary], local: true, class: "space-y-6" do |form| %>
+            <% if @vocabulary.errors.any? %>
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">
+                      <%= pluralize(@vocabulary.errors.count, "error") %> prohibited this vocabulary from being saved:
+                    </h3>
+                    <div class="mt-2 text-sm text-red-700">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <% @vocabulary.errors.full_messages.each do |message| %>
+                          <li><%= message %></li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Basic Information -->
+            <div class="space-y-6">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+                <div class="grid grid-cols-1 gap-6">
+                  <div>
+                    <%= form.label :label, "Label", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :label, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "Enter vocabulary label (e.g., 'Curriculum Types')" %>
+                    <p class="mt-1 text-xs text-gray-500">A human-readable name for this vocabulary</p>
+                  </div>
+
+                  <div>
+                    <%= form.label :code, "Code", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :code, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono",
+                        placeholder: "Enter unique code (e.g., 'curriculum_type')",
+                        pattern: "[a-z_]+",
+                        title: "Use lowercase letters and underscores only" %>
+                    <p class="mt-1 text-xs text-gray-500">Unique identifier using lowercase letters and underscores only</p>
+                  </div>
+
+                  <div>
+                    <%= form.label :description, "Description (Optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_area :description, 
+                        rows: 4,
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "Describe the purpose and use of this vocabulary..." %>
+                    <p class="mt-1 text-xs text-gray-500">Explain what this vocabulary is used for and what types of terms it contains</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Information Panel -->
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">About Vocabularies</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                      <p>Vocabularies are containers for related terms that can be used to categorize and tag content. Common examples include:</p>
+                      <ul class="list-disc pl-5 mt-2 space-y-1">
+                        <li><strong>Curriculum Types:</strong> IB, British, American, etc.</li>
+                        <li><strong>Facility Types:</strong> Swimming Pool, Library, Laboratory, etc.</li>
+                        <li><strong>Age Groups:</strong> Early Years, Primary, Secondary, etc.</li>
+                        <li><strong>Accreditation Bodies:</strong> CIS, NEASC, IBO, etc.</li>
+                      </ul>
+                      <p class="mt-2">After creating a vocabulary, you can add individual terms to it.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <%= link_to admin_vocabularies_path, 
+                  class: "inline-flex justify-center py-3 px-6 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                Cancel
+              <% end %>
+              <%= form.submit "Create Vocabulary", 
+                  class: "inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+  </div>
+</div>
+
+<script>
+// Auto-generate code from label
+document.addEventListener('DOMContentLoaded', function() {
+  const labelField = document.getElementById('vocabulary_label');
+  const codeField = document.getElementById('vocabulary_code');
+  
+  if (labelField && codeField && !codeField.value) {
+    labelField.addEventListener('input', function() {
+      const code = this.value
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, '_')
+        .replace(/^_+|_+$/g, '');
+      codeField.value = code;
+    });
+  }
+});
+</script>

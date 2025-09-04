@@ -1,0 +1,221 @@
+<% content_for :title, "Create New Place" %>
+
+<!-- Main Content -->
+<div class="w-full py-8 px-4 sm:px-6 lg:px-8">
+  <div class="space-y-8">
+    <!-- Page Header -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div class="px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <%= link_to admin_places_path, class: "inline-flex items-center text-blue-600 hover:text-blue-800 mb-4" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+              Back to Places
+            <% end %>
+            
+            <h1 class="text-3xl font-bold text-gray-900">Create New Place</h1>
+            <p class="mt-2 text-sm text-gray-600">Add a new place or business location to the system</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <!-- Form -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <%= form_with model: [:admin, @place], local: true, class: "space-y-6" do |form| %>
+            <% if @place.errors.any? %>
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">
+                      <%= pluralize(@place.errors.count, "error") %> prohibited this place from being saved:
+                    </h3>
+                    <div class="mt-2 text-sm text-red-700">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <% @place.errors.full_messages.each do |message| %>
+                          <li><%= message %></li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Basic Information -->
+            <div class="space-y-6">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+                <div class="grid grid-cols-1 gap-6">
+                  <div>
+                    <%= form.label :name, "Place Name", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :name, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "Enter place name" %>
+                  </div>
+
+                  <div>
+                    <%= form.label :formatted_address, "Address", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_area :formatted_address, 
+                        rows: 3,
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "Enter full address" %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status Information -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Status Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <%= form.label :business_status, "Business Status", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :business_status, 
+                        options_for_select([
+                          ['Operational', 'OPERATIONAL'],
+                          ['Closed Temporarily', 'CLOSED_TEMPORARILY'],
+                          ['Closed Permanently', 'CLOSED_PERMANENTLY']
+                        ]), 
+                        { prompt: "Select business status..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+                  </div>
+
+                  <div>
+                    <%= form.label :api_status, "API Status", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :api_status, 
+                        options_for_select([
+                          ['OK', 'OK'],
+                          ['Zero Results', 'ZERO_RESULTS'],
+                          ['Over Query Limit', 'OVER_QUERY_LIMIT'],
+                          ['Request Denied', 'REQUEST_DENIED'],
+                          ['Invalid Request', 'INVALID_REQUEST'],
+                          ['Unknown Error', 'UNKNOWN_ERROR']
+                        ]), 
+                        { prompt: "Select API status..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contact Information -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <%= form.label :formatted_phone_number, "Phone Number", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :formatted_phone_number, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "e.g., (555) 123-4567" %>
+                  </div>
+
+                  <div>
+                    <%= form.label :international_phone_number, "International Phone Number", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :international_phone_number, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "e.g., +1 555-123-4567" %>
+                  </div>
+
+                  <div class="md:col-span-2">
+                    <%= form.label :website, "Website", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.url_field :website, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "https://example.com" %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rating & Reviews -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Rating & Reviews</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <%= form.label :rating, "Rating (1-5)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.number_field :rating, 
+                        step: 0.1, min: 1, max: 5,
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "4.5" %>
+                  </div>
+
+                  <div>
+                    <%= form.label :user_ratings_total, "Total Reviews", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.number_field :user_ratings_total, 
+                        min: 0,
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "142" %>
+                  </div>
+
+                  <div>
+                    <%= form.label :price_level, "Price Level (1-4)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :price_level, 
+                        options_for_select([
+                          ['$ - Inexpensive', 1],
+                          ['$$ - Moderate', 2],
+                          ['$$$ - Expensive', 3],
+                          ['$$$$ - Very Expensive', 4]
+                        ]), 
+                        { prompt: "Select price level..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional Options -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Additional Options</h3>
+                <div class="space-y-4">
+                  <div class="flex items-center">
+                    <%= form.check_box :permanently_closed, 
+                        class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+                    <%= form.label :permanently_closed, "Permanently Closed", 
+                        class: "ml-2 block text-sm text-gray-900" %>
+                  </div>
+
+                  <div class="flex items-center">
+                    <%= form.check_box :wheelchair_accessible_entrance, 
+                        class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+                    <%= form.label :wheelchair_accessible_entrance, "Wheelchair Accessible Entrance", 
+                        class: "ml-2 block text-sm text-gray-900" %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Information Panel -->
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">About Places</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                      <p>Places represent business locations and points of interest. They can be schools, restaurants, shops, or any other type of establishment. Most place data is typically populated from Google Places API, but you can also create manual entries.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <%= link_to admin_places_path, 
+                  class: "inline-flex justify-center py-3 px-6 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
+                Cancel
+              <% end %>
+              <%= form.submit "Create Place", 
+                  class: "inline-flex justify-center py-3 px-6 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+</div>

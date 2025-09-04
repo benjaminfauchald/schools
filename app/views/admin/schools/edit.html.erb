@@ -1,0 +1,240 @@
+<% content_for :title, "Edit School - #{@school.name}" %>
+
+<!-- Main Content -->
+<div class="w-full py-8 px-4 sm:px-6 lg:px-8">
+  <div class="space-y-8">
+    <!-- Breadcrumb -->
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        <li class="inline-flex items-center">
+          <%= link_to admin_root_path, class: "inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600" do %>
+            <svg class="w-3 h-3 mr-2.5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+              <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+            </svg>
+            Admin Dashboard
+          <% end %>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <%= link_to "Schools", admin_schools_path, class: "ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2" %>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <%= link_to @school.name, admin_school_path(@school), class: "ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2" %>
+          </div>
+        </li>
+        <li aria-current="page">
+          <div class="flex items-center">
+            <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Edit School</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div class="px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Edit School</h1>
+            <p class="mt-2 text-sm text-gray-600">Update school information and settings</p>
+          </div>
+          <div class="mt-4 sm:mt-0 flex space-x-3">
+            <%= link_to admin_school_path(@school),
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              View School
+            <% end %>
+            
+            <%= link_to admin_schools_path,
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              Back to Schools
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div class="px-6 py-6">
+        <%= form_with model: [:admin, @school], local: true, class: "space-y-6" do |form| %>
+          <% if @school.errors.any? %>
+            <div class="rounded-md bg-red-50 p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">
+                    <%= pluralize(@school.errors.count, "error") %> prohibited this school from being saved:
+                  </h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                      <% @school.errors.full_messages.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Basic Information -->
+            <div class="space-y-6">
+              <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+              
+              <div>
+                <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :name, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :slug, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :slug, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :about, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_area :about, 
+                    rows: 4,
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <%= form.label :ownership, class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.select :ownership, 
+                      options_for_select([
+                        ['Nonprofit', 'nonprofit'],
+                        ['Private', 'private'],
+                        ['Foundation', 'foundation'],
+                        ['Other', 'other']
+                      ], @school.ownership),
+                      { prompt: 'Select ownership' },
+                      { class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" } %>
+                </div>
+
+                <div>
+                  <%= form.label :status, class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.select :status, 
+                      options_for_select([
+                        ['Draft', 'draft'],
+                        ['Pending Review', 'pending_review'],
+                        ['Published', 'published'],
+                        ['Suspended', 'suspended']
+                      ], @school.status),
+                      { prompt: 'Select status' },
+                      { class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" } %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="space-y-6">
+              <h3 class="text-lg font-medium text-gray-900">Contact Information</h3>
+              
+              <div>
+                <%= form.label :phone, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :phone, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :email, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.email_field :email, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :website_url, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.url_field :website_url, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :facebook_url, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.url_field :facebook_url, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Address Information -->
+          <div class="space-y-6">
+            <h3 class="text-lg font-medium text-gray-900">Address Information</h3>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <%= form.label :address_line_1, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :address_line_1, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :address_line_2, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :address_line_2, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :district, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :district, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :province, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :province, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :postcode, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :postcode, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+
+              <div>
+                <%= form.label :country_code, class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :country_code, 
+                    class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <%= link_to "Cancel", admin_school_path(@school), 
+                class: "px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" %>
+            
+            <%= form.submit "Update School", 
+                class: "px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

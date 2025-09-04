@@ -1,46 +1,95 @@
 module Admin
   class MediaItemsController < Admin::ApplicationController
-    # Overwrite any of the RESTful controller actions to implement custom behavior
-    # For example, you may want to send an email after a foo is updated.
-    #
-    # def update
-    #   super
-    #   send_foo_updated_email(requested_resource)
-    # end
 
-    # Override this method to specify custom lookup behavior.
-    # This will be used to set the resource for the `show`, `edit`, and `update`
-    # actions.
-    #
-    # def find_resource(param)
-    #   Foo.find_by!(slug: param)
-    # end
+    def index
+      search_term = params[:search]
+      
+      @media_items = MediaItem.includes(:place).order(created_at: :desc)
+      
+      # Apply search filter
+      if search_term.present?
+        @media_items = @media_items.joins(:place).where(
+          "places.name ILIKE ? OR media_items.alt_text ILIKE ? OR media_items.url ILIKE ?", 
+          "%#{search_term}%", "%#{search_term}%", "%#{search_term}%"
+        )
+      end
+      
+      # Apply kind filter
+      if params[:kind].present?
+        @media_items = @media_items.where(kind: params[:kind])
+      end
+      
+      # Apply place filter
+      if params[:place_id].present?
+        @media_items = @media_items.where(place_id: params[:place_id])
+      end
+      
+      @media_items = @media_items.limit(50)
+      
+      # Statistics
+      @total_media_items = MediaItem.count
+      @total_images = MediaItem.where(kind: %w[logo campus_photo]).count
+      @total_documents = MediaItem.where(kind: %w[brochure fee_schedule_pdf menu floor_plan]).count
+      @total_videos = MediaItem.where(kind: %w[video virtual_tour]).count
+      @places_with_media = Place.joins(:media_items).distinct.count
+      
+      # Kind distribution
+      @kind_stats = MediaItem.group(:kind).count
+      
+      # Popular places for selector
+      @popular_places = Place.joins(:media_items)
+        .group('places.id', 'places.name')
+        .order('COUNT(media_items.id) DESC')
+        .limit(20)
+        .pluck(:id, :name)
+    end
 
-    # The result of this lookup will be available as `requested_resource`
+    def show
+      @media_item = MediaItem.includes(:place).find(params[:id])
+    end
 
-    # Override this if you have certain roles that require a subset
-    # this will be used to set the records shown on the `index` action.
-    #
-    # def scoped_resource
-    #   if current_user.super_admin?
-    #     resource_class
-    #   else
-    #     resource_class.with_less_stuff
-    #   end
-    # end
+    def new
+      @media_item = MediaItem.new
+      @places = Place.where.not(name: nil).order(:name).limit(100)
+    end
 
-    # Override `resource_params` if you want to transform the submitted
-    # data before it's persisted. For example, the following would turn all
-    # empty values into nil values. It uses other APIs such as `resource_class`
-    # and `dashboard`:
-    #
-    # def resource_params
-    #   params.require(resource_class.model_name.param_key).
-    #     permit(dashboard.permitted_attributes(action_name)).
-    #     transform_values { |value| value == "" ? nil : value }
-    # end
+    def create
+      @media_item = MediaItem.new(media_item_params)
+      
+      if @media_item.save
+        redirect_to admin_media_item_path(@media_item), notice: 'Media item was successfully created.'
+      else
+        @places = Place.where.not(name: nil).order(:name).limit(100)
+        render :new
+      end
+    end
 
-    # See https://administrate-demo.herokuapp.com/customizing_controller_actions
-    # for more information
+    def edit
+      @media_item = MediaItem.find(params[:id])
+      @places = Place.where.not(name: nil).order(:name).limit(100)
+    end
+
+    def update
+      @media_item = MediaItem.find(params[:id])
+      
+      if @media_item.update(media_item_params)
+        redirect_to admin_media_item_path(@media_item), notice: 'Media item was successfully updated.'
+      else
+        @places = Place.where.not(name: nil).order(:name).limit(100)
+        render :edit
+      end
+    end
+
+    def destroy
+      @media_item = MediaItem.find(params[:id])
+      @media_item.destroy
+      redirect_to admin_media_items_path, notice: 'Media item was successfully deleted.'
+    end
+
+    private
+
+    def media_item_params
+      params.require(:media_item).permit(:place_id, :kind, :url, :alt_text, :sort_order)
+    end
   end
 end

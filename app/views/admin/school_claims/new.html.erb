@@ -1,0 +1,152 @@
+<% content_for :title, "Create New School Claim" %>
+
+<!-- Main Content -->
+<div class="w-full py-8 px-4 sm:px-6 lg:px-8">
+  <div class="space-y-8">
+    <!-- Page Header -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div class="px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Create New School Claim</h1>
+            <p class="mt-2 text-sm text-gray-600">Add a new school ownership claim to the system</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div class="px-6 py-6">
+        <%= form_with model: [:admin, @school_claim], local: true, class: "space-y-6" do |form| %>
+          <% if @school_claim.errors.any? %>
+            <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">There were <%= pluralize(@school_claim.errors.count, "error") %> with your submission:</h3>
+                  <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+                    <% @school_claim.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- School Selection -->
+            <div>
+              <%= form.label :school_id, "School", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.select :school_id, 
+                  options_for_select([['Select a school...', '']] + @schools.map { |s| [s.name, s.id] }, @school_claim.school_id),
+                  {},
+                  { 
+                    class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg",
+                    required: true
+                  } %>
+              <p class="mt-1 text-sm text-gray-500">Select the school this claim is for</p>
+            </div>
+
+            <!-- User Selection -->
+            <div>
+              <%= form.label :user_id, "User/Claimant", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.select :user_id, 
+                  options_for_select([['Select a user...', '']] + @users.map { |u| [u.email, u.id] }, @school_claim.user_id),
+                  {},
+                  { 
+                    class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg",
+                    required: true
+                  } %>
+              <p class="mt-1 text-sm text-gray-500">Select the user making this claim</p>
+            </div>
+
+            <!-- Status -->
+            <div>
+              <%= form.label :status, "Status", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.select :status, 
+                  options_for_select([
+                    ['Pending Review', 'pending'],
+                    ['Approved', 'approved'],
+                    ['Rejected', 'rejected'],
+                    ['Revoked', 'revoked']
+                  ], @school_claim.status || 'pending'),
+                  {},
+                  { 
+                    class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg"
+                  } %>
+              <p class="mt-1 text-sm text-gray-500">Current status of this claim</p>
+            </div>
+
+            <!-- Evidence URL -->
+            <div>
+              <%= form.label :evidence_url, "Evidence URL", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.url_field :evidence_url, 
+                  placeholder: "https://example.com/evidence-document.pdf",
+                  class: "block w-full px-3 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" %>
+              <p class="mt-1 text-sm text-gray-500">URL to supporting documentation (optional)</p>
+            </div>
+          </div>
+
+          <!-- Admin Notes -->
+          <div>
+            <%= form.label :admin_notes, "Admin Notes", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.text_area :admin_notes, 
+                placeholder: "Add any administrative notes about this claim...",
+                rows: 4,
+                class: "block w-full px-3 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" %>
+            <p class="mt-1 text-sm text-gray-500">Internal notes for administrative use</p>
+          </div>
+
+          <!-- Revocation Reason (only if status is revoked) -->
+          <div id="revocation-reason-field" style="display: none;">
+            <%= form.label :revocation_reason, "Revocation Reason", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.text_area :revocation_reason, 
+                placeholder: "Reason for revoking this claim...",
+                rows: 3,
+                class: "block w-full px-3 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" %>
+            <p class="mt-1 text-sm text-gray-500">Required when status is set to revoked</p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+            <%= link_to admin_school_claims_path,
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              Cancel
+            <% end %>
+            
+            <%= form.submit "Create School Claim",
+                class: "inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Show/hide revocation reason field based on status
+document.addEventListener('DOMContentLoaded', function() {
+  const statusSelect = document.getElementById('school_claim_status');
+  const revocationField = document.getElementById('revocation-reason-field');
+  
+  function toggleRevocationField() {
+    if (statusSelect.value === 'revoked') {
+      revocationField.style.display = 'block';
+    } else {
+      revocationField.style.display = 'none';
+    }
+  }
+  
+  statusSelect.addEventListener('change', toggleRevocationField);
+  toggleRevocationField(); // Check initial state
+});
+</script>

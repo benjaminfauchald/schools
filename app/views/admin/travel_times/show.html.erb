@@ -1,0 +1,334 @@
+<% content_for :title, "Travel Time Details" %>
+
+
+<!-- Main Content -->
+  <div class="mx-auto py-8 px-6 sm:px-8 lg:px-12 max-w-7xl">
+    <div class="space-y-8">
+      <!-- Breadcrumb -->
+      <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+          <li class="inline-flex items-center">
+            <%= link_to admin_root_path, class: "inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600" do %>
+              <svg class="w-3 h-3 mr-2.5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+              </svg>
+              Admin Dashboard
+            <% end %>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <%= link_to "Travel Times", admin_travel_times_path, class: "ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2" %>
+            </div>
+          </li>
+          <li aria-current="page">
+            <div class="flex items-center">
+              <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Travel Time Details</span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Page Header -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                  <span class="text-2xl">
+                    <% case @travel_time.mode %>
+                    <% when 'driving' %>
+                      🚗
+                    <% when 'transit' %>
+                      🚌
+                    <% when 'walking' %>
+                      🚶
+                    <% when 'cycling' %>
+                      🚴
+                    <% else %>
+                      ⏱️
+                    <% end %>
+                  </span>
+                </div>
+              </div>
+              <div class="ml-4">
+                <h1 class="text-3xl font-bold text-gray-900">Travel Time #<%= @travel_time.id %></h1>
+                <div class="mt-1 flex items-center space-x-4">
+                  <!-- Status Badge -->
+                  <% if @travel_time.successful? %>
+                    <% if @travel_time.stale? %>
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                        <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
+                          <circle cx="4" cy="4" r="3"/>
+                        </svg>
+                        Stale Data (24h+)
+                      </span>
+                    <% else %>
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
+                          <circle cx="4" cy="4" r="3"/>
+                        </svg>
+                        Fresh Data
+                      </span>
+                    <% end %>
+                  <% else %>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                      <svg class="w-2 h-2 mr-1.5 fill-current" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="3"/>
+                      </svg>
+                      Computation Failed
+                    </span>
+                  <% end %>
+
+                  <!-- Category Badge -->
+                  <% if @travel_time.successful? %>
+                    <% case @travel_time.distance_category %>
+                    <% when 'Very Close' %>
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">Very Close</span>
+                    <% when 'Close' %>
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">Close</span>
+                    <% when 'Moderate' %>
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">Moderate</span>
+                    <% when 'Far' %>
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">Far</span>
+                    <% when 'Very Far' %>
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">Very Far</span>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-8">
+          <!-- Travel Information -->
+          <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div class="px-6 py-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-6">Travel Information</h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <dt class="text-sm font-medium text-gray-500 mb-2">Transportation Mode</dt>
+                  <dd class="text-lg font-medium text-gray-900 flex items-center">
+                    <span class="text-2xl mr-3">
+                      <% case @travel_time.mode %>
+                      <% when 'driving' %>
+                        🚗
+                      <% when 'transit' %>
+                        🚌
+                      <% when 'walking' %>
+                        🚶
+                      <% when 'cycling' %>
+                        🚴
+                      <% end %>
+                    </span>
+                    <%= @travel_time.mode_display %>
+                  </dd>
+                </div>
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-500 mb-2">Travel Duration</dt>
+                  <dd class="text-lg font-medium text-gray-900">
+                    <% if @travel_time.successful? %>
+                      <%= @travel_time.duration_display %>
+                      <span class="text-sm text-gray-500 ml-2">(<%= @travel_time.minutes %> minutes)</span>
+                    <% else %>
+                      <span class="text-red-600">Unable to calculate</span>
+                    <% end %>
+                  </dd>
+                </div>
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-500 mb-2">Origin Coordinates</dt>
+                  <dd class="text-sm font-mono text-gray-900">
+                    <%= @travel_time.origin_hash %>
+                  </dd>
+                </div>
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-500 mb-2">Distance Category</dt>
+                  <dd class="text-sm text-gray-900">
+                    <% if @travel_time.successful? %>
+                      <%= @travel_time.distance_category %>
+                    <% else %>
+                      <span class="text-gray-400">N/A</span>
+                    <% end %>
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Associated Place -->
+          <% if @travel_time.place %>
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+              <div class="px-6 py-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-6">Associated Place</h3>
+                
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 w-12 h-12">
+                    <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                      <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="ml-4 flex-1">
+                    <h4 class="text-lg font-medium text-gray-900">
+                      <%= link_to (@travel_time.place.name.presence || "Unnamed Place"), admin_place_path(@travel_time.place), class: "text-blue-600 hover:text-blue-700" %>
+                    </h4>
+                    
+                    <% if @travel_time.place.formatted_address.present? %>
+                      <p class="mt-1 text-sm text-gray-600">
+                        <%= @travel_time.place.formatted_address %>
+                      </p>
+                    <% end %>
+                    
+                    <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                      <% if @travel_time.place.lat.present? && @travel_time.place.lng.present? %>
+                        <span>📍 <%= @travel_time.place.lat.round(6) %>, <%= @travel_time.place.lng.round(6) %></span>
+                      <% end %>
+                      
+                      <% if @travel_time.place.rating.present? %>
+                        <span>⭐ <%= @travel_time.place.rating %>/5</span>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Computation Details -->
+          <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div class="px-6 py-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-6">Computation Details</h3>
+              
+              <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <dt class="text-sm font-medium text-gray-500 mb-2">Computed At</dt>
+                  <dd class="text-sm text-gray-900">
+                    <%= @travel_time.computed_at.strftime("%B %d, %Y at %I:%M %p") %>
+                  </dd>
+                </div>
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-500 mb-2">Data Age</dt>
+                  <dd class="text-sm text-gray-900">
+                    <%= @travel_time.age_hours.round(1) %> hours ago
+                    <% if @travel_time.stale? %>
+                      <span class="text-yellow-600">(Stale)</span>
+                    <% end %>
+                  </dd>
+                </div>
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-500 mb-2">Reasonable Duration</dt>
+                  <dd class="text-sm text-gray-900">
+                    <% if @travel_time.successful? %>
+                      <% if @travel_time.reasonable? %>
+                        <span class="text-green-600">✅ Yes</span>
+                      <% else %>
+                        <span class="text-red-600">❌ No (Unusually long)</span>
+                      <% end %>
+                    <% else %>
+                      <span class="text-gray-400">N/A</span>
+                    <% end %>
+                  </dd>
+                </div>
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-500 mb-2">Record ID</dt>
+                  <dd class="text-sm font-mono text-gray-900">
+                    <%= @travel_time.id %>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-8">
+          <!-- Actions -->
+          <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div class="px-6 py-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Actions</h3>
+              <div class="space-y-3">
+                <%= link_to edit_admin_travel_time_path(@travel_time),
+                    class: "w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                  Edit Travel Time
+                <% end %>
+                
+                <%= link_to admin_travel_times_path,
+                    class: "w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
+                  </svg>
+                  Back to Travel Times
+                <% end %>
+                
+                <hr class="border-gray-200">
+                
+                <%= link_to admin_travel_time_path(@travel_time),
+                    method: :delete,
+                    data: { confirm: "Are you sure you want to delete this travel time?" },
+                    class: "w-full inline-flex justify-center items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" do %>
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                  Delete Travel Time
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Technical Info -->
+          <div class="bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
+            <div class="px-6 py-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Technical Information</h3>
+              <dl class="space-y-3">
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Created</dt>
+                  <dd class="text-sm text-gray-900">
+                    <%= @travel_time.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+                  </dd>
+                </div>
+                
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                  <dd class="text-sm text-gray-900">
+                    <%= @travel_time.updated_at.strftime("%B %d, %Y at %I:%M %p") %>
+                  </dd>
+                </div>
+                
+                <% if @travel_time.place %>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Place ID</dt>
+                    <dd class="text-sm font-mono text-gray-900">
+                      <%= @travel_time.place_id %>
+                    </dd>
+                  </div>
+                <% end %>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

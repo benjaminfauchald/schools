@@ -1,0 +1,163 @@
+<% content_for :title, "Create New Travel Time" %>
+
+<!-- Main Content -->
+<div class="w-full py-8 px-4 sm:px-6 lg:px-8">
+  <div class="space-y-8">
+    <!-- Page Header -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div class="px-6 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Create New Travel Time</h1>
+            <p class="mt-2 text-sm text-gray-600">Add travel time information for a place</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div class="px-6 py-6">
+          <%= form_with model: [:admin, @travel_time], local: true, class: "space-y-6" do |form| %>
+            <% if @travel_time.errors.any? %>
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">
+                      <%= pluralize(@travel_time.errors.count, "error") %> prohibited this travel time from being saved:
+                    </h3>
+                    <div class="mt-2 text-sm text-red-700">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <% @travel_time.errors.full_messages.each do |message| %>
+                          <li><%= message %></li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Basic Information -->
+            <div class="space-y-6">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+                <div class="grid grid-cols-1 gap-6">
+                  <div>
+                    <%= form.label :place_id, "Place", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :place_id, 
+                        options_from_collection_for_select(@places, :id, :name), 
+                        { prompt: "Select a place..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+                  </div>
+
+                  <div>
+                    <%= form.label :origin_hash, "Origin Location", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.text_field :origin_hash, 
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "13.756,100.502" %>
+                    <p class="mt-2 text-sm text-gray-500">Coordinates of origin location (latitude,longitude)</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transportation & Timing -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Transportation & Timing</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <%= form.label :mode, "Transportation Mode", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.select :mode, 
+                        options_for_select([
+                          ['🚗 Driving', 'driving'],
+                          ['🚌 Public Transit', 'transit'],
+                          ['🚶 Walking', 'walking'],
+                          ['🚴 Cycling', 'cycling']
+                        ]), 
+                        { prompt: "Select transportation mode..." },
+                        { class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+                  </div>
+
+                  <div>
+                    <%= form.label :minutes, "Travel Time (minutes)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.number_field :minutes, 
+                        min: 1,
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+                        placeholder: "30" %>
+                    <p class="mt-2 text-sm text-gray-500">Leave blank if travel time is unknown or failed to compute</p>
+                  </div>
+
+                  <div class="md:col-span-2">
+                    <%= form.label :computed_at, "Computed At", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= form.datetime_local_field :computed_at, 
+                        value: @travel_time.computed_at&.strftime("%Y-%m-%dT%H:%M"),
+                        class: "block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" %>
+                    <p class="mt-2 text-sm text-gray-500">When this travel time was calculated. Defaults to current time.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Travel Time Categories Info -->
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h4 class="text-sm font-medium text-gray-900 mb-3">Travel Time Categories</h4>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                  <div class="text-center">
+                    <div class="font-medium text-green-600">Very Close</div>
+                    <div class="text-gray-500">0-15 min</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="font-medium text-blue-600">Close</div>
+                    <div class="text-gray-500">16-30 min</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="font-medium text-yellow-600">Moderate</div>
+                    <div class="text-gray-500">31-60 min</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="font-medium text-orange-600">Far</div>
+                    <div class="text-gray-500">61-90 min</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="font-medium text-red-600">Very Far</div>
+                    <div class="text-gray-500">90+ min</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Information Panel -->
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">About Travel Times</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                      <p>Travel times cache commute duration from various origins to places. They support multiple transportation modes and help users make informed decisions about location accessibility. The system automatically detects stale data (older than 24 hours) for refresh.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <%= link_to admin_travel_times_path, 
+                  class: "inline-flex justify-center py-3 px-6 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                Cancel
+              <% end %>
+              <%= form.submit "Create Travel Time", 
+                  class: "inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+  </div>
+</div>
