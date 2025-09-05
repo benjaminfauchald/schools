@@ -252,6 +252,12 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
     @facility_vocabulary = Vocabulary.find_by(code: 'facility')
     @facility_terms = @facility_vocabulary&.terms&.includes(:parent) || []
     
+    # Handle photo uploads separately
+    photos_uploaded = false
+    if params[:school] && params[:school][:photos].present?
+      photos_uploaded = handle_photo_uploads(params[:school][:photos])
+    end
+    
     # Extract taxonomy parameters separately from all params
     all_params = all_school_params
     taxonomy_params = all_params.extract!(:curriculum, :accreditation, :language, :program, :facility)
@@ -270,12 +276,20 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       changed_fields = school_params.keys
       changed_fields << 'academic_programs' if taxonomy_params.slice(:curriculum, :accreditation, :language, :program).to_h.any? { |_, v| v.present? }
       changed_fields << 'facilities' if taxonomy_params[:facility].present?
+      changed_fields << 'photos' if photos_uploaded
       
       create_audit_log(@school, 'update', changed_fields)
       
       respond_to do |format|
         format.html { redirect_to school_owner_school_path(@school), notice: 'School information updated successfully.' }
-        format.json { render json: { success: true, message: 'School information updated successfully.' } }
+        format.json { 
+          render json: { 
+            success: true, 
+            message: 'School information updated successfully.',
+            photos_uploaded: photos_uploaded,
+            photos_count: @school.uploaded_photos.count
+          } 
+        }
       end
     else
       # Collect all error messages
@@ -365,9 +379,52 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
   
   def delete_photo
     @school = current_school
-    photo = @school.photos.find(params[:photo_id])
     
-    if photo.purge
+    # Handle both old Active Storage photos and new MediaItem photos
+    if params[:media_item_id]
+      delete_media_item
+    elsif params[:photo_id]
+      # Legacy Active Storage photo handling
+      photo = @school.photos.find(params[:photo_id])
+      
+      if photo.purge
+        create_audit_log(@school, 'delete', ['photo'])
+        respond_to do |format|
+          format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school, anchor: 'photos'), notice: 'Photo deleted successfully.') }
+          format.json { render json: { success: true, message: 'Photo deleted successfully.' } }
+        end
+      else
+        respond_to do |format|
+          format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school, anchor: 'photos'), alert: 'Failed to delete photo.') }
+          format.json { render json: { success: false, message: 'Failed to delete photo.' } }
+        end
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school, anchor: 'photos'), alert: 'Photo ID required.') }
+        format.json { render json: { success: false, message: 'Photo ID required.' } }
+      end
+    end
+  rescue ActiveRecord::RecordNotFound
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school, anchor: 'photos'), alert: 'Photo not found.') }
+      format.json { render json: { success: false, message: 'Photo not found.' } }
+    end
+  end
+  
+  def delete_media_item
+    @school = current_school
+    media_item = @school.place.media_items.find(params[:media_item_id])
+    
+    unless media_item.from_school_upload?
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school, anchor: 'photos'), alert: 'Cannot delete this photo.') }
+        format.json { render json: { success: false, message: 'Cannot delete this photo.' } }
+      end
+      return
+    end
+    
+    if media_item.destroy
       create_audit_log(@school, 'delete', ['photo'])
       respond_to do |format|
         format.html { redirect_back(fallback_location: edit_school_owner_school_path(@school, anchor: 'photos'), notice: 'Photo deleted successfully.') }
@@ -1129,6 +1186,34 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
   
   private
   
+  def handle_photo_uploads(photo_files)
+    return false unless @school.place
+    
+    uploaded_count = 0
+    
+    photo_files.each_with_index do |photo_file, index|
+      next if photo_file.blank?
+      
+      begin
+        media_item = @school.place.media_items.create!(
+          kind: 'photo',
+          source: 'school_upload',
+          alt_text: "#{@school.name} uploaded photo",
+          sort_order: @school.place.media_items.photos.maximum(:sort_order).to_i + index + 1
+        )
+        
+        media_item.file.attach(photo_file)
+        uploaded_count += 1
+        
+        Rails.logger.info "Successfully uploaded photo for school #{@school.id}: #{photo_file.original_filename}"
+      rescue => e
+        Rails.logger.error "Failed to upload photo for school #{@school.id}: #{e.message}"
+      end
+    end
+    
+    uploaded_count > 0
+  end
+  
   def find_photo_by_key(photo_key)
     return nil unless @school.place&.photos&.present?
     
@@ -1147,8 +1232,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       :address_line_1, :address_line_2, :district, :province, :postcode, :country_code,
       :facebook_url, :line_id, :whatsapp_number, :youtube_url, :linkedin_url, :twitter_url, :instagram_url,
       :founded_year, :ownership, :avg_class_size, :student_teacher_ratio,
-      :boarding, :school_bus, :language_support_notes, :tone_of_voice,
-      photos: []
+      :boarding, :school_bus, :language_support_notes, :tone_of_voice
     )
   end
   
@@ -1159,7 +1243,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       :facebook_url, :line_id, :whatsapp_number, :youtube_url, :linkedin_url, :twitter_url, :instagram_url,
       :founded_year, :ownership, :avg_class_size, :student_teacher_ratio,
       :boarding, :school_bus, :language_support_notes, :tone_of_voice,
-      photos: [], curriculum: [], accreditation: [], language: [], program: [], facility: []
+      curriculum: [], accreditation: [], language: [], program: [], facility: []
     )
   end
   

@@ -78,7 +78,7 @@
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
         <div class="px-6 py-6">
           <%= form_with url: admin_media_items_path, method: :get, local: true, class: "space-y-4" do |f| %>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div>
                 <%= f.label :search, "Search", class: "block text-sm font-medium text-gray-700 mb-2" %>
                 <%= f.text_field :search, 
@@ -93,7 +93,7 @@
                     options_for_select([
                       ['All Types', ''],
                       ['Logo', 'logo'],
-                      ['Campus Photo', 'campus_photo'],
+                      ['Photo', 'photo'],
                       ['Brochure', 'brochure'],
                       ['Fee Schedule', 'fee_schedule_pdf'],
                       ['Video', 'video'],
@@ -109,6 +109,19 @@
                 <%= f.label :place_id, "Place", class: "block text-sm font-medium text-gray-700 mb-2" %>
                 <%= f.select :place_id, 
                     options_for_select([['All Places', '']] + @popular_places.map { |id, name| [name, id] }, params[:place_id]),
+                    {},
+                    { class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
+              </div>
+              
+              <div>
+                <%= f.label :source, "Source", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.select :source, 
+                    options_for_select([
+                      ['All Sources', ''],
+                      ['Google Places', 'google_places'],
+                      ['School Upload', 'school_upload'],
+                      ['Admin Upload', 'admin_upload']
+                    ], params[:source]),
                     {},
                     { class: "block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg" } %>
               </div>
@@ -143,7 +156,7 @@
                     Place
                   </th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type & Order
+                    Type & Source
                   </th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created
@@ -159,7 +172,8 @@
                     <td class="px-6 py-4">
                       <div class="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
                         <% if media_item.image? %>
-                          <img src="<%= media_item.url %>" alt="<%= media_item.display_alt_text %>" 
+                          <% image_src = media_item.uploaded? ? media_item.thumbnail_url(size: 64) : media_item.url %>
+                          <img src="<%= image_src %>" alt="<%= media_item.display_alt_text %>" 
                                class="w-full h-full object-cover"
                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                           <div class="hidden w-full h-full items-center justify-center text-gray-400" style="display: none;">
@@ -199,22 +213,10 @@
                     </td>
                     <td class="px-6 py-4">
                       <% if media_item.place %>
-                        <div class="flex items-center">
-                          <div class="flex-shrink-0 w-8 h-8">
-                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                              </svg>
-                            </div>
-                          </div>
-                          <div class="ml-2">
-                            <div class="text-sm font-medium text-gray-900">
-                              <%= link_to (media_item.place.name.presence || "Unnamed Place"), admin_place_path(media_item.place), class: "text-blue-600 hover:text-blue-700" %>
-                            </div>
-                            <div class="text-xs text-gray-500">ID: <%= media_item.place_id %></div>
-                          </div>
+                        <div class="text-sm font-medium text-gray-900">
+                          <%= link_to (media_item.place.name.presence || "Unnamed Place"), admin_place_path(media_item.place), class: "text-blue-600 hover:text-blue-700" %>
                         </div>
+                        <div class="text-xs text-gray-500">ID: <%= media_item.place_id %></div>
                       <% else %>
                         <span class="text-gray-400">No place assigned</span>
                       <% end %>
@@ -227,6 +229,19 @@
                         <div class="text-xs text-gray-500 mt-1">
                           Sort: <%= media_item.sort_order || 0 %>
                         </div>
+                        <% if media_item.source.present? %>
+                          <div class="mt-1">
+                            <% source_color = case media_item.source
+                                              when 'google_places' then 'bg-green-100 text-green-800'
+                                              when 'school_upload' then 'bg-blue-100 text-blue-800'
+                                              when 'admin_upload' then 'bg-purple-100 text-purple-800'
+                                              else 'bg-gray-100 text-gray-800'
+                                              end %>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= source_color %>">
+                              <%= media_item.source.humanize %>
+                            </span>
+                          </div>
+                        <% end %>
                       </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">

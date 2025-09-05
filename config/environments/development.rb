@@ -3,6 +3,10 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  config.hosts << "listing.connectica.no"
+
+
+
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
 
@@ -14,7 +18,7 @@ Rails.application.configure do
 
   # Enable server timing.
   config.server_timing = true
-
+  
   # Enable/disable Action Controller caching. By default Action Controller caching is disabled.
   # Run rails dev:cache to toggle Action Controller caching.
   if Rails.root.join("tmp/caching-dev.txt").exist?

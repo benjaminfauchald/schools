@@ -3,8 +3,7 @@
 class School < ApplicationRecord
   belongs_to :place, optional: true
   
-  # Active Storage attachments
-  has_many_attached :photos
+  # Photos are now managed through MediaItems - remove Active Storage attachment
   
   # Store accessor for preferences JSONB column
   store_accessor :preferences, :tone_of_voice
@@ -35,6 +34,23 @@ class School < ApplicationRecord
            :international_phone_number, :website, :url, :opening_hours, :reviews,
            :google_maps_url, :coordinates, to: :place, prefix: false, allow_nil: true
   delegate :name, to: :place, prefix: :google, allow_nil: true
+  
+  # Delegate photo management to MediaItems through Place
+  def photos
+    place&.media_items&.photos&.ordered || MediaItem.none
+  end
+  
+  def uploaded_photos
+    place&.media_items&.photos&.from_school_upload&.ordered || MediaItem.none
+  end
+  
+  def google_photos
+    place&.media_items&.photos&.from_google_places&.ordered || MediaItem.none
+  end
+  
+  def all_photos
+    photos
+  end
   
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true

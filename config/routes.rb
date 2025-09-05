@@ -48,6 +48,7 @@ Rails.application.routes.draw do
         get :facilities
         patch :update_facilities
         delete 'photos/:photo_id', action: :delete_photo, as: :delete_photo
+        delete 'media_items/:media_item_id', action: :delete_media_item, as: :delete_media_item
         patch :toggle_photo_visibility
         get :fetch_videos
         patch :toggle_video_visibility
@@ -122,6 +123,19 @@ Rails.application.routes.draw do
     end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  
+  # Block WordPress scanner routes and other common bot patterns
+  get '*path', to: 'application#not_found', constraints: lambda { |req| 
+    req.params[:rest_route].present? || 
+    req.path.include?('wp-') || 
+    req.path.include?('wordpress') ||
+    req.path.include?('xmlrpc.php') ||
+    req.path.include?('admin-ajax.php') ||
+    req.path.include?('.env') ||
+    req.path.include?('config.php') ||
+    req.user_agent&.include?('bot') || 
+    req.user_agent&.include?('scanner')
+  }
   
   # Root route - main school listing with distance filtering
   root 'schools#index'
