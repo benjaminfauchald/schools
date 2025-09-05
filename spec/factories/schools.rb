@@ -8,6 +8,11 @@ FactoryBot.define do
     website_url { Faker::Internet.url }
     lat { 13.7563 + rand(-0.1..0.1) } # Near Bangkok center
     lng { 100.5018 + rand(-0.1..0.1) } # Near Bangkok center
+    
+    # Ensure PostGIS geometry is updated after creation
+    after(:create) do |school|
+      school.send(:update_geography!) if school.lat.present? && school.lng.present?
+    end
     status { 'published' }
     founded_year { Faker::Number.between(from: 1950, to: Date.current.year) }
     ownership { %w[nonprofit private foundation other].sample }

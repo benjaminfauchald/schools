@@ -19,6 +19,15 @@
     <!-- Facebook JavaScript SDK -->
     <script>
       window.fbAsyncInit = function() {
+        // Only initialize Facebook SDK if we have HTTPS or in development with mock
+        const isHTTPS = window.location.protocol === 'https:';
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        if (!isHTTPS && !isDevelopment) {
+          console.log('Facebook SDK requires HTTPS in production');
+          return;
+        }
+        
         FB.init({
           appId      : '<%= ENV['FACEBOOK_APP_ID'] %>',
           cookie     : true,
@@ -28,10 +37,18 @@
           
         FB.AppEvents.logPageView();
         
-        // Check login status on page load
-        FB.getLoginStatus(function(response) {
-          statusChangeCallback(response);
-        });
+        // Only check login status if we have HTTPS or in development
+        if (isHTTPS || isDevelopment) {
+          try {
+            FB.getLoginStatus(function(response) {
+              statusChangeCallback(response);
+            });
+          } catch (error) {
+            console.log('Facebook getLoginStatus failed (likely HTTP issue):', error);
+          }
+        } else {
+          console.log('Skipping Facebook login status check - HTTPS required');
+        }
       };
 
       // Handle Facebook login status changes
@@ -100,14 +117,28 @@
       
       // Function to trigger Facebook login
       function loginWithFacebook() {
-        FB.login(function(response) {
-          if (response.authResponse) {
-            console.log('Facebook login successful');
-            statusChangeCallback(response);
-          } else {
-            console.log('Facebook login cancelled or failed');
-          }
-        }, {scope: 'email,public_profile'});
+        const isHTTPS = window.location.protocol === 'https:';
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        if (!isHTTPS && !isDevelopment) {
+          console.log('Facebook login requires HTTPS in production');
+          alert('Facebook login requires a secure connection (HTTPS). Please contact support.');
+          return;
+        }
+        
+        try {
+          FB.login(function(response) {
+            if (response.authResponse) {
+              console.log('Facebook login successful');
+              statusChangeCallback(response);
+            } else {
+              console.log('Facebook login cancelled or failed');
+            }
+          }, {scope: 'email,public_profile'});
+        } catch (error) {
+          console.error('Facebook login failed:', error);
+          alert('Facebook login is not available. Please try again later or contact support.');
+        }
       }
       
       // Make loginWithFacebook available globally

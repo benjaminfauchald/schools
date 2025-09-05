@@ -13,7 +13,22 @@ Capybara.register_driver :cuprite do |app|
   Capybara::Cuprite::Driver.new(app, {
     window_size: [1200, 800],
     inspector: true,
-    headless: !ENV['HEADLESS'].in?(['n', 'no', 'false'])
+    headless: !ENV['HEADLESS'].in?(['n', 'no', 'false']),
+    browser_options: {
+      'no-sandbox' => nil,
+      'disable-web-security' => nil,
+      'disable-features' => 'VizDisplayCompositor',
+      'allow-running-insecure-content' => nil,
+      'disable-blink-features' => 'AutomationControlled',
+      'disable-site-isolation-trials' => nil,
+      'ignore-certificate-errors' => nil
+    },
+    # Allow localStorage access and file URLs
+    process_timeout: 20,
+    timeout: 20,
+    url_blacklist: [],
+    url_whitelist: [],
+    ignore_https_errors: true
   })
 end
 
@@ -74,12 +89,12 @@ RSpec.configure do |config|
     if RSpec.configuration.reporter.failed_examples.empty?
       # All tests passed - set AnyBar to green
       send_to_anybar('green')
-      `osascript -e 'display notification "All tests passed! ✅" with title "RSpec"'`
+#      `osascript -e 'display notification "All tests passed! ✅" with title "RSpec"'`
     else
       # Some tests failed - set AnyBar to red
       send_to_anybar('red')
-      failed_count = RSpec.configuration.reporter.failed_examples.count
-      `osascript -e 'display notification "#{failed_count} tests failed ❌" with title "RSpec"'`
+#      failed_count = RSpec.configuration.reporter.failed_examples.count
+#      `osascript -e 'display notification "#{failed_count} tests failed ❌" with title "RSpec"'`
     end
   end
 

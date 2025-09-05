@@ -5,6 +5,13 @@ FactoryBot.define do
     vicinity { Faker::Address.street_address }
     lat { 13.7563 + rand(-0.1..0.1) } # Near Bangkok center
     lng { 100.5018 + rand(-0.1..0.1) } # Near Bangkok center
+    
+    # Ensure PostGIS geography is updated after creation  
+    after(:create) do |place|
+      if place.lat.present? && place.lng.present?
+        place.update_column(:location, "SRID=4326;POINT(#{place.lng} #{place.lat})")
+      end
+    end
     place_id { Faker::Alphanumeric.alphanumeric(number: 27) }
     business_status { 'OPERATIONAL' }
     rating { Faker::Number.decimal(l_digits: 1, r_digits: 1).clamp(1.0, 5.0) }
