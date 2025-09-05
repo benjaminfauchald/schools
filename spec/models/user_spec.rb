@@ -6,7 +6,7 @@ RSpec.describe User, type: :model do
     
     it { should validate_presence_of(:email) }
     it { should validate_uniqueness_of(:email).case_insensitive }
-    it { should validate_inclusion_of(:role).in_array(%w[school_owner admin]) }
+    it { should define_enum_for(:role).with_values(school_owner: 'school_owner', admin: 'admin').backed_by_column_of_type(:string) }
   end
 
   describe 'associations' do

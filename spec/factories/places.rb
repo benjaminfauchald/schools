@@ -3,8 +3,8 @@ FactoryBot.define do
     name { Faker::Company.name }
     formatted_address { Faker::Address.full_address }
     vicinity { Faker::Address.street_address }
-    lat { Faker::Address.latitude }
-    lng { Faker::Address.longitude }
+    lat { 13.7563 + rand(-0.1..0.1) } # Near Bangkok center
+    lng { 100.5018 + rand(-0.1..0.1) } # Near Bangkok center
     place_id { Faker::Alphanumeric.alphanumeric(number: 27) }
     business_status { 'OPERATIONAL' }
     rating { Faker::Number.decimal(l_digits: 1, r_digits: 1).clamp(1.0, 5.0) }

@@ -82,40 +82,35 @@ gem 'countries'
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
-
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
-
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
-  
   # Fake data generation for testing
   gem "faker", "~> 3.2"
-  
   # Load environment variables from .env file
   gem 'dotenv-rails'
-  
   # Development debugging tools
   gem 'pry-byebug'
+  # HTTP request mocking
+  gem 'webmock', '~> 3.18'
 end
 
 group :test do
   # RSpec testing framework
   gem 'rspec-rails', '~> 6.0'
-  
+  gem "guard"
+  gem "guard-rspec"
+  gem "listen"          # file watcher (uses macOS FSEvents)
+  gem "terminal-notifier-guard"
+
   # Test data factories
   gem 'factory_bot_rails', '~> 6.2'
-  
   # Matchers for common Rails functionality
   gem 'shoulda-matchers', '~> 5.3'
-  
   # System testing with browser automation
   gem 'capybara', '~> 3.39'
   gem 'cuprite', '~> 0.15'  # Headless Chrome driver
-  
-  # HTTP request mocking
-  gem 'webmock', '~> 3.18'
-  
   # Database cleaning between tests
   gem 'database_cleaner-active_record', '~> 2.1'
 end

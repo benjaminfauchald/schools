@@ -6,7 +6,7 @@ class DirectClaimsController < ApplicationController
     if user_signed_in?
       existing_claim = current_user.school_claims.find_by(school: @school)
       if existing_claim&.approved?
-        redirect_to school_owner_school_path(@school), 
+        redirect_to school_owner_school_path(id: @school.id), 
                     notice: 'You already manage this school.'
         return
       elsif existing_claim&.pending?
@@ -24,14 +24,20 @@ class DirectClaimsController < ApplicationController
     
     # Validate the form
     unless @direct_claim.valid?
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: @direct_claim.errors.full_messages }, status: :unprocessable_entity }
+      end
       return
     end
     
     # Check if user is signed in and trying to claim with different email
     if user_signed_in? && current_user.email != @direct_claim.email
       @direct_claim.errors.add(:email, "must match your account email (#{current_user.email})")
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: @direct_claim.errors.full_messages }, status: :unprocessable_entity }
+      end
       return
     end
     

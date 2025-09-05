@@ -1,13 +1,13 @@
 FactoryBot.define do
   factory :school do
-    name { Faker::Educator.secondary_school }
-    slug { name.parameterize }
+    sequence(:name) { |n| "#{Faker::Educator.secondary_school} #{n}" }
+    slug { "#{name.parameterize}-#{SecureRandom.hex(3)}" }
     about { Faker::Lorem.paragraph(sentence_count: 3) }
     phone { Faker::PhoneNumber.phone_number }
     email { Faker::Internet.email }
     website_url { Faker::Internet.url }
-    lat { Faker::Address.latitude }
-    lng { Faker::Address.longitude }
+    lat { 13.7563 + rand(-0.1..0.1) } # Near Bangkok center
+    lng { 100.5018 + rand(-0.1..0.1) } # Near Bangkok center
     status { 'published' }
     founded_year { Faker::Number.between(from: 1950, to: Date.current.year) }
     ownership { %w[nonprofit private foundation other].sample }

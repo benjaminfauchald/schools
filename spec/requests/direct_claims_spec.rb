@@ -25,7 +25,7 @@ RSpec.describe 'DirectClaims', type: :request do
         
         it 'redirects with notice' do
           get new_direct_claim_path(school_id: school.id)
-          expect(response).to redirect_to(school_owner_school_path(school))
+          expect(response).to redirect_to(school_owner_school_path(id: school.id))
           expect(flash[:notice]).to include('already manage')
         end
       end
