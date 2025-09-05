@@ -1,0 +1,37 @@
+FactoryBot.define do
+  factory :place do
+    name { Faker::Company.name }
+    formatted_address { Faker::Address.full_address }
+    vicinity { Faker::Address.street_address }
+    lat { Faker::Address.latitude }
+    lng { Faker::Address.longitude }
+    place_id { Faker::Alphanumeric.alphanumeric(number: 27) }
+    business_status { 'OPERATIONAL' }
+    rating { Faker::Number.decimal(l_digits: 1, r_digits: 1).clamp(1.0, 5.0) }
+    user_ratings_total { Faker::Number.between(from: 1, to: 100) }
+    
+    trait :closed do
+      business_status { 'CLOSED_TEMPORARILY' }
+    end
+    
+    trait :high_rated do
+      rating { Faker::Number.decimal(l_digits: 1, r_digits: 1).clamp(4.0, 5.0) }
+      user_ratings_total { Faker::Number.between(from: 50, to: 500) }
+    end
+    
+    trait :with_opening_hours do
+      opening_hours { 
+        {
+          "open_now" => true,
+          "periods" => [
+            {
+              "close" => {"day" => 1, "time" => "1700"},
+              "open" => {"day" => 1, "time" => "0800"}
+            }
+          ],
+          "weekday_text" => ["Monday: 8:00 AM – 5:00 PM"]
+        }
+      }
+    end
+  end
+end

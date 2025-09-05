@@ -632,8 +632,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
   add_foreign_key "ai_conversations", "schools"
   add_foreign_key "ai_conversations", "users"
   add_foreign_key "ai_messages", "ai_conversations"
-  add_foreign_key "document_contents", "places"
-  add_foreign_key "documents", "places", name: "documents_place_id_fkey"
+  # add_foreign_key "document_contents", "places"  # Commented out due to pgvector column issue
+  # add_foreign_key "documents", "places", name: "documents_place_id_fkey"  # Commented out due to missing table
   add_foreign_key "events", "places"
   add_foreign_key "magic_link_tokens", "users"
   add_foreign_key "media_items", "places"
@@ -651,8 +651,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
   add_foreign_key "temp_claims", "schools"
   add_foreign_key "terms", "terms", column: "parent_id"
   add_foreign_key "terms", "vocabularies"
-  add_foreign_key "transcript_segments", "transcripts"
-  add_foreign_key "transcripts", "places"
+  # add_foreign_key "transcript_segments", "transcripts"  # Commented out due to missing transcripts table with pgvector
+  # add_foreign_key "transcripts", "places"  # Commented out due to missing transcripts table with pgvector
   add_foreign_key "travel_times", "places"
   add_foreign_key "webhook_audit_logs", "users"
   add_foreign_key "youtube_videos", "places"

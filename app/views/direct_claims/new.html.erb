@@ -84,7 +84,7 @@
   </div>
 
   <!-- Claim Form -->
-  <%= form_with model: @direct_claim, url: create_direct_claim_path(school_id: @school.id), local: false, 
+  <%= form_with model: @direct_claim, url: url_for(controller: 'direct_claims', action: 'create', school_id: @school.id), local: false, 
       class: "space-y-6", 
       data: { 
         controller: "form-persistence claim-submission", 

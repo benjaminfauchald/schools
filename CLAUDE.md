@@ -161,6 +161,16 @@ bin/rubocop                           # Run code style checks
 bin/brakeman                          # Security vulnerability scanning
 ```
 
+### Testing Commands
+```bash
+bundle exec rspec                     # Run all tests
+bundle exec rspec spec/models         # Run unit tests only
+bundle exec rspec spec/requests       # Run integration tests only
+bundle exec rspec spec/system         # Run system tests only
+bundle exec rspec --tag js            # Run JavaScript-enabled tests only
+HEADLESS=no bundle exec rspec spec/system  # Run system tests with visible browser
+```
+
 ### Asset Management
 ```bash
 bin/rails tailwindcss:build          # Build Tailwind CSS

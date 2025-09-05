@@ -90,10 +90,34 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
   
   # Fake data generation for testing
-  gem "faker"
+  gem "faker", "~> 3.2"
   
   # Load environment variables from .env file
   gem 'dotenv-rails'
+  
+  # Development debugging tools
+  gem 'pry-byebug'
+end
+
+group :test do
+  # RSpec testing framework
+  gem 'rspec-rails', '~> 6.0'
+  
+  # Test data factories
+  gem 'factory_bot_rails', '~> 6.2'
+  
+  # Matchers for common Rails functionality
+  gem 'shoulda-matchers', '~> 5.3'
+  
+  # System testing with browser automation
+  gem 'capybara', '~> 3.39'
+  gem 'cuprite', '~> 0.15'  # Headless Chrome driver
+  
+  # HTTP request mocking
+  gem 'webmock', '~> 3.18'
+  
+  # Database cleaning between tests
+  gem 'database_cleaner-active_record', '~> 2.1'
 end
 
 group :development do
