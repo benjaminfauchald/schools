@@ -7,6 +7,7 @@ class SchoolClaim < ApplicationRecord
   validates :school_id, uniqueness: { scope: :user_id, message: 'already has a pending or approved claim' }
   validates :status, inclusion: { in: %w[pending approved rejected revoked] }
   validates :evidence_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }, allow_blank: true
+  validates :notes, length: { maximum: 1000 }, allow_blank: true
   
   enum :status, {
     pending: 'pending',

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_04_161125) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_05_082815) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -343,6 +343,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_04_161125) do
     t.datetime "revoked_at"
     t.bigint "revoked_by_id"
     t.text "revocation_reason"
+    t.text "notes"
     t.index ["revoked_at"], name: "index_school_claims_on_revoked_at"
     t.index ["revoked_by_id"], name: "index_school_claims_on_revoked_by_id"
     t.index ["school_id", "user_id"], name: "index_school_claims_on_school_id_and_user_id", unique: true

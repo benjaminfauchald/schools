@@ -21,6 +21,10 @@ class ApplicationController < ActionController::Base
     @places = Place.successful_fetches.with_ratings.limit(100)
     @first_place = @places.first
   end
+  
+  def not_found
+    render file: Rails.public_path.join('404.html'), status: :not_found, layout: false
+  end
 
   private
 

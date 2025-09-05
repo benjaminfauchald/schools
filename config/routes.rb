@@ -124,6 +124,19 @@ Rails.application.routes.draw do
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
   
+  # Block WordPress scanner routes and other common bot patterns
+  get '*path', to: 'application#not_found', constraints: lambda { |req| 
+    req.params[:rest_route].present? || 
+    req.path.include?('wp-') || 
+    req.path.include?('wordpress') ||
+    req.path.include?('xmlrpc.php') ||
+    req.path.include?('admin-ajax.php') ||
+    req.path.include?('.env') ||
+    req.path.include?('config.php') ||
+    req.user_agent&.include?('bot') || 
+    req.user_agent&.include?('scanner')
+  }
+  
   # Root route - main school listing with distance filtering
   root 'schools#index'
   
