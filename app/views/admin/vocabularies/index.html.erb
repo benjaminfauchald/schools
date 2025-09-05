@@ -159,7 +159,7 @@
                     <!-- Actions -->
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div class="flex items-center justify-end space-x-2">
-                        <%= link_to admin_vocabulary_path(vocabulary), 
+                        <%= link_to admin_vocabulary_path(id: vocabulary.id), 
                             class: "inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 transition-colors",
                             title: "View Vocabulary" do %>
                           <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +168,7 @@
                           </svg>
                           View
                         <% end %>
-                        <%= link_to edit_admin_vocabulary_path(vocabulary), 
+                        <%= link_to edit_admin_vocabulary_path(id: vocabulary.id), 
                             class: "inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 transition-colors",
                             title: "Edit Vocabulary" do %>
                           <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

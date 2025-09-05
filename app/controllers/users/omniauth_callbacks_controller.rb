@@ -1,5 +1,5 @@
 class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  skip_before_action :verify_authenticity_token, only: [:facebook, :mock_facebook]
+  skip_before_action :verify_authenticity_token, only: [:facebook, :mock_facebook, :sync_status]
   
   def facebook
     @user = User.from_omniauth(request.env["omniauth.auth"])
@@ -33,7 +33,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       info: OpenStruct.new({
         name: 'Benjamin Fauchald',
         email: 'benjamin@example.com',
-        image: 'https://avatars.githubusercontent.com/u/12345?v=4'  # Mock profile image
+        image: 'https://graph.facebook.com/mock_facebook_user/picture?type=normal'  # Mock Facebook profile image
       }),
       credentials: OpenStruct.new({
         token: 'mock_access_token',
@@ -57,7 +57,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       if session[:pending_school_contact]
         school_id = session[:pending_school_contact]
         session.delete(:pending_school_contact)
-        redirect_to school_path(school_id), notice: "Successfully signed in as Benjamin Fauchald (Mock)! You can now send your message to the school."
+        redirect_to school_path(id: school_id), notice: "Successfully signed in as Benjamin Fauchald (Mock)! You can now send your message to the school."
       else
         # Default redirect after mock Facebook OAuth
         redirect_to root_path, notice: "Successfully signed in as Benjamin Fauchald (Mock Facebook)!"
@@ -78,5 +78,75 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     else
       render json: { success: false }, status: :bad_request
     end
+  end
+  
+  # Sync Facebook login status from JavaScript SDK
+  def sync_status
+    Rails.logger.info "Facebook sync_status called with params: #{params.inspect}"
+    
+    facebook_user_id = params[:facebook_user_id]
+    access_token = params[:access_token]
+    name = params[:name]
+    email = params[:email]
+    picture_url = params[:picture_url]
+    
+    Rails.logger.info "Facebook sync parsed data: user_id=#{facebook_user_id}, name=#{name}, email=#{email}"
+    
+    if facebook_user_id.present?
+      # Find or create user based on Facebook ID
+      user = User.find_by(provider: 'facebook', uid: facebook_user_id)
+      
+      if user
+        # Update existing user's information
+        user.update!(
+          facebook_name: name,
+          facebook_profile_picture_url: picture_url
+        ) if name.present?
+        
+        # Sign in the user if not already signed in
+        unless user_signed_in? && current_user == user
+          sign_in user, event: :authentication
+        end
+        
+        render json: { success: true, user_id: user.id }
+      else
+        # User exists in Facebook but not in our system
+        # Create new user or link to existing email
+        existing_user = User.find_by(email: email) if email.present?
+        
+        if existing_user
+          # Link Facebook account to existing user
+          existing_user.update!(
+            provider: 'facebook',
+            uid: facebook_user_id,
+            facebook_name: name,
+            facebook_profile_picture_url: picture_url
+          )
+          sign_in existing_user, event: :authentication
+          render json: { success: true, user_id: existing_user.id, linked: true }
+        else
+          # Create new user - generate email if Facebook doesn't provide one
+          user_email = email.present? ? email : "facebook_#{facebook_user_id}@noemail.local"
+          
+          new_user = User.create!(
+            email: user_email,
+            provider: 'facebook',
+            uid: facebook_user_id,
+            facebook_name: name,
+            facebook_profile_picture_url: picture_url,
+            role: 'school_owner',
+            confirmed_at: Time.current,
+            password: Devise.friendly_token[0, 20]
+          )
+          sign_in new_user, event: :authentication
+          render json: { success: true, user_id: new_user.id, created: true }
+        end
+      end
+    else
+      render json: { success: false, error: 'Missing Facebook user ID' }, status: :bad_request
+    end
+  rescue StandardError => e
+    Rails.logger.error "Facebook sync error: #{e.message}"
+    render json: { success: false, error: 'Sync failed' }, status: :internal_server_error
   end
 end

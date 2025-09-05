@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_05_082815) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -573,6 +573,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_082815) do
     t.string "provider"
     t.string "uid"
     t.string "facebook_name"
+    t.string "facebook_profile_picture_url"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
@@ -587,6 +588,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_082815) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_vocabularies_on_code", unique: true
+  end
+
+  create_table "webhook_audit_logs", force: :cascade do |t|
+    t.string "webhook_type", null: false
+    t.string "facebook_user_id", null: false
+    t.bigint "user_id"
+    t.jsonb "payload", null: false
+    t.string "status", default: "processed"
+    t.text "error_message"
+    t.datetime "processed_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["facebook_user_id"], name: "index_webhook_audit_logs_on_facebook_user_id"
+    t.index ["processed_at"], name: "index_webhook_audit_logs_on_processed_at"
+    t.index ["user_id"], name: "index_webhook_audit_logs_on_user_id"
+    t.index ["webhook_type", "facebook_user_id"], name: "idx_webhook_audit_type_fb_user"
+    t.index ["webhook_type"], name: "index_webhook_audit_logs_on_webhook_type"
   end
 
   create_table "youtube_videos", force: :cascade do |t|
@@ -636,5 +654,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_082815) do
   add_foreign_key "transcript_segments", "transcripts"
   add_foreign_key "transcripts", "places"
   add_foreign_key "travel_times", "places"
+  add_foreign_key "webhook_audit_logs", "users"
   add_foreign_key "youtube_videos", "places"
 end

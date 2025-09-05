@@ -197,7 +197,7 @@
                           </div>
                           <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-900 truncate">
-                              <%= link_to claim.school.name, admin_school_claim_path(claim), class: "hover:text-blue-600" %>
+                              <%= link_to claim.school.name, admin_school_claim_path(id: claim.id), class: "hover:text-blue-600" %>
                             </p>
                             <p class="text-sm text-gray-500 flex items-center">
                               <%= claim.user.email %> • 
@@ -210,7 +210,7 @@
                             </p>
                           </div>
                           <div class="flex-shrink-0">
-                            <%= link_to "Review", admin_school_claim_path(claim), 
+                            <%= link_to "Review", admin_school_claim_path(id: claim.id), 
                                 class: "inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
                           </div>
                         </div>
@@ -257,7 +257,7 @@
                           </div>
                           <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-900 truncate">
-                              <%= link_to inquiry.name, admin_inquiry_path(inquiry), class: "hover:text-blue-600" %>
+                              <%= link_to inquiry.name, admin_inquiry_path(id: inquiry.id), class: "hover:text-blue-600" %>
                             </p>
                             <p class="text-sm text-gray-500">
                               <%= inquiry.school.name %> • 

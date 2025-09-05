@@ -162,7 +162,7 @@
                   <div class="flex-1 min-w-0">
                     <!-- Name & ID -->
                     <div class="flex items-center space-x-2">
-                      <%= link_to place.name.presence || "Unnamed Place", admin_place_path(place), 
+                      <%= link_to place.name.presence || "Unnamed Place", admin_place_path(id: place.id), 
                           class: "text-sm font-medium text-gray-900 hover:text-blue-600 truncate" %>
                       <span class="text-xs text-gray-400">#<%= place.id %></span>
                     </div>
@@ -240,7 +240,7 @@
                 
                 <!-- Actions -->
                 <div class="flex items-center space-x-1 ml-4">
-                  <%= link_to admin_place_path(place),
+                  <%= link_to admin_place_path(id: place.id),
                       class: "inline-flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors",
                       title: "View Details" do %>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,7 +249,7 @@
                     </svg>
                   <% end %>
                   
-                  <%= link_to edit_admin_place_path(place),
+                  <%= link_to edit_admin_place_path(id: place.id),
                       class: "inline-flex items-center justify-center w-8 h-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors",
                       title: "Edit Place" do %>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

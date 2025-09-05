@@ -11,6 +11,7 @@ class User < ApplicationRecord
   has_many :magic_link_tokens, dependent: :destroy
   has_many :ai_conversations, dependent: :destroy
   has_many :school_inquiries, dependent: :destroy
+  has_many :webhook_audit_logs, dependent: :destroy
 
   # Validations
   validates :role, inclusion: { in: %w[school_owner admin] }
@@ -29,8 +30,11 @@ class User < ApplicationRecord
     user = User.find_by(provider: auth.provider, uid: auth.uid)
     
     if user
-      # Update Facebook name if it's different
-      user.update(facebook_name: auth.info.name) if user.facebook_name != auth.info.name
+      # Update Facebook name and profile picture if they're different
+      updates = {}
+      updates[:facebook_name] = auth.info.name if user.facebook_name != auth.info.name
+      updates[:facebook_profile_picture_url] = auth.info.image if user.facebook_profile_picture_url != auth.info.image
+      user.update(updates) if updates.any?
       return user
     end
     
@@ -42,7 +46,8 @@ class User < ApplicationRecord
       user.update!(
         provider: auth.provider,
         uid: auth.uid,
-        facebook_name: auth.info.name
+        facebook_name: auth.info.name,
+        facebook_profile_picture_url: auth.info.image
       )
       return user
     end
@@ -53,6 +58,7 @@ class User < ApplicationRecord
       provider: auth.provider,
       uid: auth.uid,
       facebook_name: auth.info.name,
+      facebook_profile_picture_url: auth.info.image,
       role: 'school_owner', # Default role for new Facebook users
       confirmed_at: Time.current, # Skip email confirmation for OAuth users
       password: Devise.friendly_token[0, 20] # Random password (won't be used)
@@ -104,6 +110,80 @@ class User < ApplicationRecord
 
   def display_name
     email.split('@').first.humanize
+  end
+
+  # Facebook OAuth helper methods
+  def facebook_user?
+    provider == 'facebook' && uid.present?
+  end
+
+  def facebook_authenticated?
+    facebook_user? && uid.present?
+  end
+
+  def facebook_display_name
+    facebook_name.present? ? facebook_name : display_name
+  end
+
+  def profile_picture_url
+    facebook_profile_picture_url
+  end
+
+  # Facebook webhook methods
+  def delete_facebook_data!
+    Rails.logger.info "Deleting Facebook data for user #{id} (#{email})"
+    
+    # Remove Facebook OAuth data while preserving the user account
+    # This allows the user to still exist for business purposes (school ownership, inquiries)
+    # but removes their ability to authenticate via Facebook
+    update!(
+      provider: nil,
+      uid: nil,
+      facebook_name: nil,
+      facebook_profile_picture_url: nil
+    )
+    
+    Rails.logger.info "Successfully deleted Facebook data for user #{id}"
+  end
+
+  def deauthorize_facebook!
+    Rails.logger.info "Deauthorizing Facebook for user #{id} (#{email})"
+    
+    # Similar to delete_facebook_data! but could have different business logic
+    # For now, we'll implement the same behavior - remove OAuth capability
+    # but preserve user account and business relationships
+    update!(
+      provider: nil,
+      uid: nil,
+      facebook_name: nil,
+      facebook_profile_picture_url: nil
+    )
+    
+    Rails.logger.info "Successfully deauthorized Facebook for user #{id}"
+  end
+
+  def facebook_webhook_deletable?
+    # Determine if user's Facebook data can be safely deleted
+    # Always return true since we only delete OAuth data, not the user account
+    facebook_user?
+  end
+
+  # Get Facebook profile picture URL with fallback
+  def profile_picture_url
+    if facebook_user? && facebook_profile_picture_url.present?
+      facebook_profile_picture_url
+    else
+      nil # Could add a default avatar URL here if desired
+    end
+  end
+
+  # Get display name preferring Facebook name
+  def facebook_display_name
+    if facebook_user? && facebook_name.present?
+      facebook_name
+    else
+      display_name
+    end
   end
 
   # Process temp claim after registration

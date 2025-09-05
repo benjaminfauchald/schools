@@ -311,7 +311,7 @@
                     <div class="ml-3 flex-1">
                       <div class="flex items-center justify-between">
                         <h4 class="text-sm font-medium text-gray-900">
-                          <%= link_to place.name, admin_place_path(place), class: "text-blue-600 hover:text-blue-700" %>
+                          <%= link_to place.name, admin_place_path(id: place.id), class: "text-blue-600 hover:text-blue-700" %>
                         </h4>
                         <div class="flex items-center space-x-2">
                           <% if place.school %>

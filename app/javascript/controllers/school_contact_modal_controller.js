@@ -2,10 +2,19 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["modal", "form", "submitButton"]
-  static values = { schoolId: Number }
+  static values = { 
+    schoolId: Number,
+    userSignedIn: Boolean,
+    facebookAuthenticated: Boolean
+  }
 
   connect() {
     this.boundHandleEscape = this.handleEscape.bind(this)
+    
+    // Check if we need to restore form data after Facebook authentication
+    if (this.facebookAuthenticatedValue) {
+      setTimeout(() => this.restoreFormData(), 100)
+    }
   }
 
   disconnect() {
@@ -56,6 +65,12 @@ export default class extends Controller {
   submitForm(event) {
     event.preventDefault()
     console.log("Submitting form...")
+    
+    // Check Facebook authentication before proceeding
+    if (!this.facebookAuthenticatedValue) {
+      this.handleFacebookAuthRequired()
+      return
+    }
     
     const form = event.target
     const formData = new FormData(form)
@@ -115,11 +130,22 @@ export default class extends Controller {
       },
       body: wrappedData
     })
-    .then(response => response.json())
+    .then(response => {
+      if (response.status === 403 || response.status === 401) {
+        // Handle authentication required response
+        return response.json().then(data => {
+          this.handleFacebookAuthRequired()
+          throw new Error('Authentication required')
+        })
+      }
+      return response.json()
+    })
     .then(data => {
       if (data.success) {
         this.showSuccessMessage(data.message)
         this.closeModal()
+      } else if (data.requires_facebook_auth) {
+        this.handleFacebookAuthRequired()
       } else {
         this.showErrorMessage(data.errors ? data.errors.join(', ') : 'An error occurred')
         this.resetSubmitButton(submitButton)
@@ -206,5 +232,70 @@ export default class extends Controller {
   isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
+  }
+
+  handleFacebookAuthRequired() {
+    // Store form data in session storage for restoration after Facebook login
+    const form = document.querySelector('[data-school-contact-modal-target="form"]')
+    if (form) {
+      const formData = new FormData(form)
+      const formObject = {}
+      for (let [key, value] of formData.entries()) {
+        formObject[key] = value
+      }
+      sessionStorage.setItem('pendingModalContactForm', JSON.stringify(formObject))
+    }
+    
+    // Store school context for Facebook OAuth callback
+    fetch(`/users/auth/facebook/store_school`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ school_id: this.schoolIdValue })
+    }).then(() => {
+      // Close the modal before Facebook login
+      this.closeModal()
+      
+      // Use Facebook JavaScript SDK for authentication
+      if (typeof window.loginWithFacebook === 'function') {
+        window.loginWithFacebook()
+      } else {
+        // Fallback to OAuth redirect if SDK not available
+        window.location.href = '/users/auth/facebook'
+      }
+    }).catch(error => {
+      console.error('Error storing school context:', error)
+      this.showErrorMessage('Please sign in with Facebook to contact schools.')
+    })
+  }
+
+  // Method to restore form data after Facebook authentication
+  restoreFormData() {
+    const savedData = sessionStorage.getItem('pendingModalContactForm')
+    if (savedData) {
+      try {
+        const formObject = JSON.parse(savedData)
+        const form = document.querySelector('[data-school-contact-modal-target="form"]')
+        if (form) {
+          Object.keys(formObject).forEach(key => {
+            const input = form.querySelector(`[name="${key}"]`)
+            if (input) {
+              input.value = formObject[key]
+            }
+          })
+          // Auto-open modal and submit if data was restored
+          this.openModal()
+          setTimeout(() => {
+            form.dispatchEvent(new Event('submit'))
+          }, 500)
+        }
+        sessionStorage.removeItem('pendingModalContactForm')
+      } catch (error) {
+        console.error('Error restoring form data:', error)
+        sessionStorage.removeItem('pendingModalContactForm')
+      }
+    }
   }
 }

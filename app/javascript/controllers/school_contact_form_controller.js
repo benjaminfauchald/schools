@@ -108,7 +108,9 @@ export default class extends Controller {
   }
 
   handleFacebookAuth(event) {
-    // Store form data before redirect to Facebook
+    event.preventDefault()
+    
+    // Store form data before Facebook authentication
     const formData = new FormData(this.formTarget)
     const formValues = {}
     
@@ -125,7 +127,7 @@ export default class extends Controller {
       returnUrl: window.location.href
     }))
     
-    // Store school ID in session for server-side redirect
+    // Store school ID in session for server-side context
     fetch('/users/auth/facebook/store_school', {
       method: 'POST',
       headers: {
@@ -133,13 +135,25 @@ export default class extends Controller {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ school_id: this.schoolIdValue })
+    }).then(() => {
+      // Use Facebook JavaScript SDK for authentication
+      if (typeof window.loginWithFacebook === 'function') {
+        window.loginWithFacebook()
+      } else {
+        // Fallback to OAuth redirect if SDK not available
+        window.location.href = '/users/auth/facebook'
+      }
     }).catch(error => {
       if (this.debugModeValue) {
         console.warn('Failed to store school context:', error)
       }
+      // Still try Facebook auth even if storing context fails
+      if (typeof window.loginWithFacebook === 'function') {
+        window.loginWithFacebook()
+      } else {
+        window.location.href = '/users/auth/facebook'
+      }
     })
-    
-    // Let the link proceed to Facebook OAuth
   }
 
   showMessage(message, type) {

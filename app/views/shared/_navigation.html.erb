@@ -4,12 +4,20 @@
       <!-- Logo/Brand -->
       <div class="flex items-center">
         <%= link_to root_path, class: "flex items-center space-x-2" do %>
-          <span class="font-bold text-xl text-blue-600">Schools</span>
+          <span class="font-bold text-xl text-blue-600"><%= t('app.name') %></span>
         <% end %>
       </div>
       
       <!-- Navigation Links -->
       <div class="flex items-center space-x-4">
+        <!-- Language Switcher -->
+        <div class="flex items-center space-x-2 mr-4">
+          <%= link_to "EN", params.permit(:locale, :id, :school_id, :page).merge(locale: :en), 
+              class: "px-2 py-1 text-sm rounded #{I18n.locale == :en ? 'bg-blue-100 text-blue-800 font-medium' : 'text-gray-600 hover:text-blue-600'}" %>
+          <span class="text-gray-300">|</span>
+          <%= link_to "ไทย", params.permit(:locale, :id, :school_id, :page).merge(locale: :th), 
+              class: "px-2 py-1 text-sm rounded #{I18n.locale == :th ? 'bg-blue-100 text-blue-800 font-medium' : 'text-gray-600 hover:text-blue-600'}" %>
+        </div>
         <% if user_signed_in? %>
           <!-- User is signed in - show user menu -->
           <div class="relative" data-controller="user-dropdown">
@@ -17,7 +25,20 @@
                     class="flex items-center space-x-2 text-gray-700 hover:text-blue-600" 
                     data-user-dropdown-target="button"
                     data-action="click->user-dropdown#toggle">
-              <span class="text-sm"><%= current_user.display_name %></span>
+              <% if facebook_authenticated && current_user.profile_picture_url.present? %>
+                <!-- Show Facebook profile picture with name -->
+                <div class="flex items-center space-x-2">
+                  <img src="<%= current_user.profile_picture_url %>" 
+                       alt="<%= current_user.facebook_display_name %>" 
+                       class="w-8 h-8 rounded-full border-2 border-blue-500 shadow-sm"
+                       onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                  <span class="text-sm font-medium"><%= current_user.facebook_display_name %></span>
+                  <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Facebook</span>
+                </div>
+              <% else %>
+                <!-- Show regular text name -->
+                <span class="text-sm"><%= current_user.display_name %></span>
+              <% end %>
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
               </svg>
@@ -39,14 +60,14 @@
           </div>
         <% else %>
           <!-- User is not signed in - show Sign in and Settings -->
-          <%= link_to "Sign in", new_user_session_path, 
+          <%= link_to t('auth.sign_in'), new_user_session_path, 
               class: "text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" %>
           <%= link_to settings_path, class: "inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600" do %>
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
-            Settings
+            <%= t('navigation.settings') %>
           <% end %>
         <% end %>
       </div>

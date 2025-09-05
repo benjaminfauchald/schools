@@ -1,8 +1,20 @@
 Rails.application.routes.draw do
-  devise_for :users, controllers: {
-    registrations: 'users/registrations',
-    confirmations: 'users/confirmations',
+  # OmniAuth callbacks must be outside locale scope
+  devise_for :users, only: :omniauth_callbacks, controllers: {
     omniauth_callbacks: 'users/omniauth_callbacks'
+  }
+  
+  # Facebook sync endpoint (outside locale scope for JavaScript API calls)
+  devise_scope :user do
+    post 'users/auth/facebook/sync_status', to: 'users/omniauth_callbacks#sync_status'
+  end
+  
+  # Locale-based routing wrapper
+  scope "(:locale)", locale: /en|th/ do
+    
+  devise_for :users, skip: :omniauth_callbacks, controllers: {
+    registrations: 'users/registrations',
+    confirmations: 'users/confirmations'
   }
   
   # Additional Devise routes
@@ -21,6 +33,15 @@ Rails.application.routes.draw do
   
   # Magic Link Authentication
   get 'auth/dashboard/:token', to: 'magic_links#dashboard', as: :magic_link_dashboard
+  
+  # Facebook Webhooks
+  get 'facebook_webhooks/verify', to: 'facebook_webhooks#verify'
+  post 'facebook_webhooks/delete_data', to: 'facebook_webhooks#delete_data'
+  post 'facebook_webhooks/deauthorize', to: 'facebook_webhooks#deauthorize'
+  get 'facebook_webhooks/deletion_status/:facebook_user_id', to: 'facebook_webhooks#deletion_status'
+  
+  # Legacy route for delete_data (if already configured in Facebook)
+  post 'delete_data', to: 'facebook_webhooks#delete_data'
   
   # Direct Claims (auto-creates accounts)
   get 'schools/:school_id/claim', to: 'direct_claims#new', as: :new_direct_claim
@@ -178,6 +199,12 @@ Rails.application.routes.draw do
   get 'settings', to: 'settings#index'
   patch 'settings/location', to: 'settings#update_location'
 
+  # Terms of Service page
+  get 'tos', to: 'terms#show', as: :terms_of_service
+
+  # Privacy Policy page
+  get 'privacy-policy', to: 'privacy#show', as: :privacy_policy
+
   # ViewComponent previews (development only)
   if Rails.env.development?
     mount ViewComponent::Engine, at: "/rails/view_components"
@@ -193,4 +220,6 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+  
+  end # End of locale scope
 end

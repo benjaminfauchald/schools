@@ -54,5 +54,10 @@ module Schools
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+    
+    # Internationalization (i18n) configuration
+    config.i18n.available_locales = [:en, :th]
+    config.i18n.default_locale = :en
+    config.i18n.fallbacks = [I18n.default_locale]
   end
 end

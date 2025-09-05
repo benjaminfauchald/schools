@@ -2,7 +2,7 @@
   
   <!-- Navigation -->
   <div class="mb-6">
-    <%= link_to school_path(@school), class: "inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors" do %>
+    <%= link_to school_path(id: @school.id), class: "inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors" do %>
       <%= heroicon('arrow-left', css_class: 'w-4 h-4 mr-2') %>
       Back to <%= @school.name %>
     <% end %>

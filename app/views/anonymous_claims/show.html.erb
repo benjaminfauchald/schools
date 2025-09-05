@@ -126,7 +126,7 @@
   <!-- Footer Links -->
   <div class="text-center mt-8">
     <div class="space-x-4">
-      <%= link_to "Back to School", school_path(@temp_claim.school), 
+      <%= link_to "Back to School", school_path(id: @temp_claim.school.id), 
           class: "text-sm text-blue-600 hover:text-blue-800" %>
       <span class="text-gray-300">|</span>
       <%= link_to "Browse Schools", root_path, 

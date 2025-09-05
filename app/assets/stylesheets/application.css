@@ -195,3 +195,32 @@ trix-toolbar .trix-button--icon-attach {
 trix-toolbar .trix-button-group .trix-button + .trix-button {
   margin-left: 0.125rem !important;
 }
+
+/* Modal Styles */
+.fixed.inset-0 {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.modal-backdrop {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal-content {
+  opacity: 0;
+  transform: translateY(-50px) scale(0.95);
+  transition: all 0.3s ease;
+}
+
+.show .modal-backdrop {
+  opacity: 1;
+}
+
+.show .modal-content {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}

@@ -114,7 +114,7 @@ class SchoolsController < ApplicationController
         slug: school.slug,
         address: school.address,
         distance_km: distance.round(1),
-        url: school_path(school)
+        url: school_path(id: school.id)
       }
     end.sort_by { |school| school[:distance_km] }
 
@@ -199,7 +199,7 @@ class SchoolsController < ApplicationController
           slug: school.slug,
           address: school.address,
           distance_km: @filter_params[:show_all] ? nil : school.distance_km&.round(1),
-          url: school_path(school)
+          url: school_path(id: school.id)
         }
       end,
       pagination: {

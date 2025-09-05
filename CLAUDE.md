@@ -10,8 +10,60 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Ruby on Rails 8.0.2 application for managing OpenStreetMap (OSM) geographic data, specifically focusing on points of interest in Bangkok including schools and amenities. The application integrates with Google Places API to enrich OSM data and uses PostGIS for spatial database operations.
 
+**Facebook OAuth & Webhooks**: The application includes complete Facebook OAuth integration for user authentication and GDPR-compliant webhook endpoints for data deletion and deauthorization requests. See `FACEBOOK_WEBHOOK_SETUP.md` for configuration details.
+
 
 When you use a library, API or gem, first check the docs with MCP server ref and context7
+
+## JavaScript Console Debugging & Debug Mode
+
+The application includes a comprehensive debugging system for JavaScript development:
+
+### Debug Mode Configuration
+- **Environment Variable**: `DEBUG_MODE=on` in `.env` file controls debug logging
+- **Meta Tag Detection**: `<meta name="debug-mode" content="true/false">` in layout for JS access
+- **JavaScript Detection**: `const debugMode = document.querySelector('meta[name="debug-mode"]')?.content === 'true'`
+
+### Console Debugging Best Practices
+1. **Conditional Logging**: Only log debug messages when `DEBUG_MODE=on`
+   ```javascript
+   if (debugMode) {
+     console.log('🎯 [DEBUG] Debug message here', data);
+   }
+   ```
+
+2. **Structured Debug Messages**: Use consistent emoji prefixes and clear descriptions
+   ```javascript
+   console.log("🎯 Form submit intercepted", event)
+   console.log("🗺️ [GOOGLE MAPS DEBUG] Loading Google Maps API")
+   console.error("🎯 Fetch error:", error)
+   ```
+
+3. **Comprehensive Request Debugging**: For AJAX/fetch requests, log:
+   - Form data being sent: `Object.fromEntries(formData)`
+   - Request URL and method: `form.action`, `form.method`
+   - Response status and headers: `response.status`, `response.headers`
+   - Content-Type validation: Check if response is JSON before parsing
+   - CSRF token verification: Log token presence and format
+
+4. **Error Context**: Provide detailed error information instead of generic messages
+   ```javascript
+   .catch(error => {
+     console.error("🎯 Fetch error:", error)
+     this.showErrorModal([`Network error: ${error.message}`])
+   })
+   ```
+
+### Debug Mode Usage in Controllers
+- Google Maps Service: Enhanced loading detection and duplicate script prevention
+- Form Submission Controllers: Full request/response cycle logging
+- Onboarding Flow: Location detection and map initialization debugging
+- Facebook Integration: OAuth flow and sync status debugging
+
+### Production Safety
+- Debug logging automatically disabled when `DEBUG_MODE=off` or not set
+- No performance impact in production environments
+- Debug messages use clear prefixes for easy filtering
 
 Temporary File Management Rules
 1. Always Use /tmp Directory

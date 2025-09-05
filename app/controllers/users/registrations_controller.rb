@@ -2,8 +2,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
   before_action :configure_sign_up_params, only: [:create]
   before_action :configure_account_update_params, only: [:update]
   
-  protected
-
+  # Explicitly define which actions are available
+  def new
+    super
+  end
+  
   # Override Devise's create method to handle temp claims
   def create
     super do |resource|
@@ -17,6 +20,8 @@ class Users::RegistrationsController < Devise::RegistrationsController
       end
     end
   end
+
+  protected
 
   # Override the after_sign_up_path to redirect to appropriate page
   def after_sign_up_path_for(resource)

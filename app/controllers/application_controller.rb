@@ -5,8 +5,11 @@ class ApplicationController < ActionController::Base
   # Include Puppeteer location backdoor for testing
   include PuppeteerLocationBackdoor
 
-  # Add helper methods for location calculations
-  helper_method :calculate_distance, :format_distance
+  # Internationalization
+  before_action :set_locale
+
+  # Add helper methods for location calculations and authentication
+  helper_method :calculate_distance, :format_distance, :facebook_authenticated, :debug_mode_enabled
 
   # Redirect users after sign in based on their role
   def after_sign_in_path_for(resource)
@@ -67,5 +70,32 @@ class ApplicationController < ActionController::Base
       lat: params[:home_lat].to_f,
       lng: params[:home_lng].to_f
     }
+  end
+
+  # Check if current user is authenticated with Facebook
+  def facebook_authenticated
+    user_signed_in? && current_user&.provider == 'facebook'
+  end
+
+  # Check if debug mode is enabled
+  def debug_mode_enabled
+    ENV['DEBUG_MODE'] == 'on'
+  end
+
+  # Set locale from params, session, or browser
+  def set_locale
+    I18n.locale = params[:locale] || session[:locale] || extract_locale_from_accept_language_header || I18n.default_locale
+    session[:locale] = I18n.locale
+  end
+
+  private
+
+  def extract_locale_from_accept_language_header
+    return nil unless request.env['HTTP_ACCEPT_LANGUAGE']
+    
+    request.env['HTTP_ACCEPT_LANGUAGE']
+           .scan(/^[a-z]{2}/)
+           .map(&:to_sym)
+           .find { |locale| I18n.available_locales.include?(locale) }
   end
 end

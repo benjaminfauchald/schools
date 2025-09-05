@@ -45,19 +45,46 @@ class DirectClaimsController < ApplicationController
     ).call
     
     if result[:success]
-      # Store claim info for success page
-      session[:claim_result] = {
-        school_name: @school.name,
-        email: @direct_claim.email,
-        created_user: result[:created_user],
-        claim_id: result[:school_claim].id,
-        message: result[:message]
-      }
-      
-      redirect_to direct_claim_success_path
+      respond_to do |format|
+        format.html do
+          # Store claim info for success page (fallback)
+          session[:claim_result] = {
+            school_name: @school.name,
+            email: @direct_claim.email,
+            created_user: result[:created_user],
+            claim_id: result[:school_claim].id,
+            message: result[:message]
+          }
+          
+          redirect_to direct_claim_success_path
+        end
+        
+        format.json do
+          render json: {
+            success: true,
+            title: 'Claim Submitted Successfully!',
+            message: result[:message],
+            school_name: @school.name,
+            school_url: school_path(id: @school.id),
+            created_user: result[:created_user],
+            claim_id: result[:school_claim].id
+          }
+        end
+      end
     else
-      @direct_claim.errors.add(:base, result[:message])
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.html do
+          @direct_claim.errors.add(:base, result[:message])
+          render :new, status: :unprocessable_entity
+        end
+        
+        format.json do
+          render json: {
+            success: false,
+            errors: [@direct_claim.errors.full_messages, result[:message]].flatten.compact
+          }, status: :unprocessable_entity
+        end
+      end
     end
   end
   

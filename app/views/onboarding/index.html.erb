@@ -204,19 +204,38 @@
     <!-- Google Maps API -->
     <script>
       window.gm_authFailure = function() {
-        console.error('Google Maps authentication failed - check API key and billing');
-        document.getElementById('onboarding-map').innerHTML = '<div class="flex items-center justify-center h-full bg-red-50 text-red-600">Google Maps API authentication failed. Please check console for details.</div>';
+        console.error('🗺️ [GOOGLE MAPS AUTH ERROR] Google Maps authentication failed - check API key and billing');
+        const mapElement = document.getElementById('onboarding-map');
+        if (mapElement) {
+          mapElement.innerHTML = '<div class="flex items-center justify-center h-full bg-red-50 text-red-600 text-center p-4"><div><div class="mb-2 text-lg font-semibold">🚫 Google Maps Authentication Failed</div><div class="text-sm">Check console for details or contact support</div></div></div>';
+        }
       };
+      
+      // Global error handler for Google Maps loading
+      window.addEventListener('error', function(event) {
+        if (event.filename && event.filename.includes('maps.googleapis.com')) {
+          console.error('🗺️ [GOOGLE MAPS SCRIPT ERROR] Failed to load Google Maps:', event.error);
+        }
+      });
     </script>
     <script type="module">
       import { googleMapsService } from '/assets/services/google_maps_service.js';
       
+      // Use the centralized Google Maps service for loading
+      window.googleMapsServiceInstance = googleMapsService;
+      
       // Initialize onboarding map when Google Maps is ready
       googleMapsService.onReady(() => {
+        console.log('🗺️ [GOOGLE MAPS SERVICE] Google Maps API ready, initializing onboarding map');
         if (typeof initOnboardingMap === 'function') {
           initOnboardingMap();
+        } else {
+          console.warn('🗺️ [GOOGLE MAPS SERVICE] initOnboardingMap function not found');
         }
       });
+      
+      // Prevent the onboarding script from loading Google Maps separately
+      window.onboardingUsesGoogleMapsService = true;
     </script>
     
     <!-- Flowbite JS -->
@@ -229,18 +248,59 @@
       let marker = null;
       let geocoder = null;
       const googleApiKey = document.getElementById('onboarding-container').dataset.googleApiKey;
+      
+      // Debug mode detection and logging
+      const debugMode = document.querySelector('meta[name="debug-mode"]')?.content === 'true';
+      
+      function debugLog(message, ...args) {
+        if (debugMode) {
+          console.log(`🎯 [ONBOARDING DEBUG] ${message}`, ...args);
+        }
+      }
+      
+      function debugError(message, ...args) {
+        console.error(`🎯 [ONBOARDING ERROR] ${message}`, ...args);
+      }
+      
+      function debugWarn(message, ...args) {
+        console.warn(`🎯 [ONBOARDING WARN] ${message}`, ...args);
+      }
+      
+      debugLog('Onboarding script loaded');
+      debugLog('Debug mode enabled:', debugMode);
+      debugLog('Google API Key found:', !!googleApiKey);
+      debugLog('Google API Key length:', googleApiKey ? googleApiKey.length : 0);
 
       // Initialize when DOM is loaded
       document.addEventListener('DOMContentLoaded', function() {
+        debugLog('DOM content loaded, initializing onboarding');
         initializeOnboarding();
       });
 
       function initializeOnboarding() {
-        // Address form submission
-        document.getElementById('address-form').addEventListener('submit', function(e) {
-          e.preventDefault();
-          geocodeAddress();
+        debugLog('initializeOnboarding() called');
+        
+        // Check if required elements exist
+        const addressForm = document.getElementById('address-form');
+        const showMapButton = document.getElementById('show-map-button');
+        const confirmLocationButton = document.getElementById('confirm-location-button');
+        
+        debugLog('Required elements check:', {
+          addressForm: !!addressForm,
+          showMapButton: !!showMapButton,
+          confirmLocationButton: !!confirmLocationButton
         });
+        
+        // Address form submission
+        if (addressForm) {
+          addressForm.addEventListener('submit', function(e) {
+            debugLog('Address form submitted');
+            e.preventDefault();
+            geocodeAddress();
+          });
+        } else {
+          debugError('Address form not found');
+        }
 
         // Map buttons
         document.getElementById('show-map-button').addEventListener('click', showMap);
@@ -351,12 +411,24 @@
       }
 
       function showMap() {
+        debugLog('showMap() called');
         hideAllSteps();
-        document.querySelector('[data-onboarding-location-target="mapStep"]').classList.remove('hidden');
+        
+        const mapStep = document.querySelector('[data-onboarding-location-target="mapStep"]');
+        if (mapStep) {
+          mapStep.classList.remove('hidden');
+          debugLog('Map step shown');
+        } else {
+          debugError('Map step element not found');
+          return;
+        }
         
         // Initialize map if not already done
         if (!map) {
+          debugLog('Map not initialized, calling initializeMap()');
           initializeMap();
+        } else {
+          debugLog('Map already initialized');
         }
       }
 
@@ -429,14 +501,50 @@
         button.innerHTML = 'Find Location';
       }
 
-      function initializeMap() {
+      async function initializeMap() {
+        debugLog('initializeMap() called');
+        
+        // Use the centralized Google Maps service if available
+        if (window.googleMapsServiceInstance) {
+          debugLog('Using centralized Google Maps service');
+          try {
+            await window.googleMapsServiceInstance.loadGoogleMaps();
+            debugLog('Google Maps loaded via service');
+          } catch (error) {
+            debugError('Failed to load Google Maps via service:', error);
+            showError('Failed to load Google Maps. Please refresh the page and try again.');
+            return;
+          }
+        }
+        
+        // Check if Google Maps API is available
+        if (!window.google || !window.google.maps) {
+          debugError('Google Maps API not available');
+          showError('Google Maps API is not loaded. Please refresh the page and try again.');
+          return;
+        }
+        
+        debugLog('Google Maps API is available');
+        
         const mapElement = document.getElementById('onboarding-map');
-        if (!mapElement) return;
+        if (!mapElement) {
+          debugError('Map element with ID "onboarding-map" not found');
+          return;
+        }
+        
+        debugLog('Map element found:', mapElement);
+        debugLog('Map element dimensions:', {
+          width: mapElement.offsetWidth,
+          height: mapElement.offsetHeight,
+          display: getComputedStyle(mapElement).display,
+          visibility: getComputedStyle(mapElement).visibility
+        });
         
         // Default to Bangkok coordinates
         const defaultCenter = { lat: 13.7563, lng: 100.5018 };
+        debugLog('Default map center:', defaultCenter);
         
-        map = new google.maps.Map(mapElement, {
+        const mapOptions = {
           zoom: 11,
           center: defaultCenter,
           mapTypeControl: true,
@@ -444,30 +552,55 @@
           fullscreenControl: true<% if ENV['GOOGLE_MAPS_MAP_ID'].present? %>,
           mapId: '<%= ENV['GOOGLE_MAPS_MAP_ID'] %>'
           <% end %>
-        });
+        };
         
-        geocoder = new google.maps.Geocoder();
+        debugLog('Map options:', mapOptions);
+        
+        try {
+          map = new google.maps.Map(mapElement, mapOptions);
+          debugLog('Google Map created successfully:', map);
+        } catch (error) {
+          debugError('Failed to create Google Map:', error);
+          showError('Failed to initialize map. Please check your internet connection and try again.');
+          return;
+        }
+        
+        try {
+          geocoder = new google.maps.Geocoder();
+          debugLog('Google Maps Geocoder created successfully');
+        } catch (error) {
+          debugError('Failed to create Google Maps Geocoder:', error);
+        }
         
         // Add click listener to map
         map.addListener('click', function(event) {
+          debugLog('Map clicked at:', event.latLng.toJSON());
           placeMarkerAtLocation(event.latLng);
         });
         
+        debugLog('Map click listener added');
+        
         // Try to get user's current location if available
         if (navigator.geolocation) {
+          debugLog('Geolocation API available, requesting current position');
           navigator.geolocation.getCurrentPosition(
             function(position) {
               const userLocation = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
               };
+              debugLog('User location obtained:', userLocation);
               map.setCenter(userLocation);
               map.setZoom(15);
+              debugLog('Map centered on user location');
             },
             function(error) {
-              console.log('Geolocation failed:', error);
+              debugWarn('Geolocation failed:', error);
+              debugLog('Using default Bangkok location');
             }
           );
+        } else {
+          debugWarn('Geolocation API not available');
         }
       }
       
@@ -551,7 +684,10 @@
       }
 
       window.initOnboardingMap = function() {
-        console.log('Google Maps API loaded for onboarding');
+        debugLog('initOnboardingMap() called - Google Maps API ready');
+        debugLog('window.google available:', !!window.google);
+        debugLog('window.google.maps available:', !!(window.google && window.google.maps));
+        debugLog('Ready to initialize maps when user clicks "Use Map Instead"');
       };
     </script>
   </body>

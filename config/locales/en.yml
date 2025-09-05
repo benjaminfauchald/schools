@@ -29,6 +29,102 @@
 
 en:
   hello: "Hello world"
+  
+  app:
+    name: "Schools"
+  
+  navigation:
+    settings: "Settings"
+    back_to_schools: "Back to Schools"
+    sign_up_to_claim: "Sign Up to Claim"
+    claim_this_school: "Claim This School"
+  
+  auth:
+    sign_in: "Sign in"
+    sign_out: "Sign out"
+    continue_with_facebook: "Continue with Facebook"
+    sign_up_with_facebook: "Sign up with Facebook"
+    or_continue_with: "Or continue with"
+    or_sign_up_with_email: "Or sign up with email"
+    facebook_benefits: "Quick sign-up • Secure authentication • No password required"
+    facebook_signup_benefits: "✓ Instant verification • ✓ No password needed • ✓ Secure & fast"
+    sign_in_to_account: "Sign in to your account"
+    create_your_account: "Create your account"
+    join_community: "Join our community to claim and manage your school"
+    successfully_signed_in: "Successfully signed in with Facebook!"
+    successfully_signed_in_mock: "Successfully signed in as Benjamin Fauchald (Mock)!"
+  
+  forms:
+    labels:
+      name: "Name"
+      email: "Email"
+      phone: "Phone (optional)"
+      message: "Message to school"
+      children_count: "Number of children to enroll"
+    
+    placeholders:
+      full_name: "Your full name"
+      email: "your.email@example.com"
+      phone: "+66 xxx xxx xxx"
+      message: "Hi! I'm interested in enrolling my child at your school. Could you please provide more information about..."
+    
+    submit:
+      send_message: "Send Message to School"
+      send_message_facebook: "Continue with Facebook to Send Message"
+    
+    validation:
+      required: "is required"
+      invalid_email: "is not a valid email address"
+      too_long: "is too long"
+  
+  schools:
+    contact:
+      title: "Contact School"
+      subtitle: "Get in touch directly with %{school_name}"
+      facebook_info_html: "To ensure quality inquiries and help schools connect with genuine families, please fill out the form below. You'll need to <strong>sign in with Facebook</strong> before submitting."
+      facebook_verification_html: "We use Facebook login to verify genuine inquiries and protect schools from spam."
+      success_message: "Your message has been sent successfully! The school will contact you soon."
+      error_message: "There was an error sending your message:"
+      
+    claim:
+      own_title: "Own this school?"
+      own_description: "If you represent %{school_name}, you can claim this listing to manage and update the information."
+      school_owner_title: "School Owner?"
+      school_owner_description: "If you represent this school, sign up to claim and manage this listing."
+    
+    hero:
+      ask_about_button: "Ask About This School"
+  
+  ai_chat:
+    title: "Ask About %{school_name}"
+    subtitle: "Get instant answers about this school"
+    input_placeholder: "Ask about curriculum, fees, facilities..."
+    ask_button: "Ask About This School"
+    sending: "Sending..."
+    error_message: "Sorry, I encountered an error. Please try again."
+  
+  facilities:
+    title: "Campus Facilities"
+    subtitle: "Modern facilities supporting student learning and development"
+    
+  academic_programs:
+    title: "Academic Programs"
+    subtitle: "Comprehensive curriculum designed for student success"
+  
+  contact_modal:
+    title: "Contact %{school_name}"
+    facebook_required_title: "Please sign in with Facebook to send your message"
+    facebook_required_description: "To ensure quality inquiries and help schools connect with genuine families, please sign in with Facebook before submitting."
+  
+  errors:
+    network_error: "Network error. Please check your connection and try again."
+    authentication_required: "Please sign in with Facebook to send your message."
+    validation_error: "Please fill in all required fields correctly."
+  
+  success:
+    message_sent: "Your message has been sent successfully! The school will contact you soon."
+    facebook_auth: "Successfully signed in! You can now send your message."
+  
   views:
     pagination:
       first: "First"

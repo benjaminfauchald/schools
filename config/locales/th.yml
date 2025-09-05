@@ -1,0 +1,105 @@
+th:
+  hello: "สวัสดีโลก"
+  
+  app:
+    name: "โรงเรียน"
+  
+  navigation:
+    settings: "การตั้งค่า"
+    back_to_schools: "กลับสู่โรงเรียน"
+    sign_up_to_claim: "สมัครสมาชิกเพื่ออ้างสิทธิ์"
+    claim_this_school: "อ้างสิทธิ์โรงเรียนนี้"
+  
+  auth:
+    sign_in: "เข้าสู่ระบบ"
+    sign_out: "ออกจากระบบ"
+    continue_with_facebook: "เข้าสู่ระบบด้วย Facebook"
+    sign_up_with_facebook: "สมัครสมาชิกด้วย Facebook"
+    or_continue_with: "หรือเข้าสู่ระบบด้วย"
+    or_sign_up_with_email: "หรือสมัครสมาชิกด้วยอีเมล"
+    facebook_benefits: "สมัครเร็ว • ปลอดภัย • ไม่ต้องใช้รหัสผ่าน"
+    facebook_signup_benefits: "✓ ยืนยันตัวตนทันที • ✓ ไม่ต้องใช้รหัสผ่าน • ✓ ปลอดภัยและรวดเร็ว"
+    sign_in_to_account: "เข้าสู่ระบบบัญชีของคุณ"
+    create_your_account: "สร้างบัญชีของคุณ"
+    join_community: "เข้าร่วมชุมชนของเราเพื่อยืนยันและจัดการโรงเรียนของคุณ"
+    successfully_signed_in: "เข้าสู่ระบบด้วย Facebook สำเร็จแล้ว!"
+    successfully_signed_in_mock: "เข้าสู่ระบบในฐานะ Benjamin Fauchald (ทดสอบ) สำเร็จแล้ว!"
+  
+  forms:
+    labels:
+      name: "ชื่อ"
+      email: "อีเมล"
+      phone: "โทรศัพท์ (ไม่บังคับ)"
+      message: "ข้อความถึงโรงเรียน"
+      children_count: "จำนวนเด็กที่ต้องการสมัคร"
+    
+    placeholders:
+      full_name: "ชื่อเต็มของคุณ"
+      email: "your.email@example.com"
+      phone: "066 xxx xxxx"
+      message: "สวัสดีค่ะ! ฉันสนใจที่จะให้ลูกเข้าเรียนที่โรงเรียนของคุณ กรุณาให้ข้อมูลเพิ่มเติมเกี่ยวกับ..."
+    
+    submit:
+      send_message: "ส่งข้อความถึงโรงเรียน"
+      send_message_facebook: "ดำเนินการต่อด้วย Facebook เพื่อส่งข้อความ"
+    
+    validation:
+      required: "จำเป็นต้องกรอก"
+      invalid_email: "รูปแบบอีเมลไม่ถูกต้อง"
+      too_long: "ยาวเกินไป"
+  
+  schools:
+    contact:
+      title: "ติดต่อโรงเรียน"
+      subtitle: "ติดต่อโดยตรงกับ %{school_name}"
+      facebook_info_html: "เพื่อให้แน่ใจว่าได้รับคำถามที่มีคุณภาพ และช่วยให้โรงเรียนเชื่อมต่อกับครอบครัวที่แท้จริง กรุณากรอกแบบฟอร์มด้านล่าง คุณจะต้อง<strong>เข้าสู่ระบบด้วย Facebook</strong> ก่อนส่ง"
+      facebook_verification_html: "เราใช้การเข้าสู่ระบบ Facebook เพื่อตรวจสอบคำถามที่แท้จริงและป้องกันสแปมให้กับโรงเรียน"
+      success_message: "ข้อความของคุณถูกส่งเรียบร้อยแล้ว! โรงเรียนจะติดต่อคุณเร็วๆ นี้"
+      error_message: "เกิดข้อผิดพลาดในการส่งข้อความของคุณ:"
+      
+    claim:
+      own_title: "เป็นเจ้าของโรงเรียนนี้หรือไม่?"
+      own_description: "หากคุณเป็นตัวแทนของ %{school_name} คุณสามารถอ้างสิทธิ์รายการนี้เพื่อจัดการและอัพเดทข้อมูล"
+      school_owner_title: "เจ้าของโรงเรียน?"
+      school_owner_description: "หากคุณเป็นตัวแทนของโรงเรียนนี้ สมัครสมาชิกเพื่ออ้างสิทธิ์และจัดการรายการนี้"
+    
+    hero:
+      ask_about_button: "ถามเกี่ยวกับโรงเรียนนี้"
+  
+  ai_chat:
+    title: "ถามเกี่ยวกับ %{school_name}"
+    subtitle: "รับคำตอบทันทีเกี่ยวกับโรงเรียนนี้"
+    input_placeholder: "ถามเกี่ยวกับหลักสูตร ค่าเรียน สิ่งอำนวยความสะดวก..."
+    ask_button: "ถามเกี่ยวกับโรงเรียนนี้"
+    sending: "กำลังส่ง..."
+    error_message: "ขออภัย เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"
+  
+  facilities:
+    title: "สิ่งอำนวยความสะดวกในมหาวิทยาลัย"
+    subtitle: "สิ่งอำนวยความสะดวกที่ทันสมัยเพื่อสนับสนุนการเรียนรู้และพัฒนาของนักเรียน"
+    
+  academic_programs:
+    title: "หลักสูตรการเรียน"
+    subtitle: "หลักสูตรที่ครอบคลุมซึ่งออกแบบมาเพื่อความสำเร็จของนักเรียน"
+  
+  contact_modal:
+    title: "ติดต่อ %{school_name}"
+    facebook_required_title: "กรุณาเข้าสู่ระบบด้วย Facebook เพื่อส่งข้อความของคุณ"
+    facebook_required_description: "เพื่อให้แน่ใจว่าได้รับคำถามที่มีคุณภาพ และช่วยให้โรงเรียนเชื่อมต่อกับครอบครัวที่แท้จริง กรุณาเข้าสู่ระบบด้วย Facebook ก่อนส่ง"
+  
+  errors:
+    network_error: "ข้อผิดพลาดเครือข่าย กรุณาตรวจสอบการเชื่อมต่อและลองใหม่อีกครั้ง"
+    authentication_required: "กรุณาเข้าสู่ระบบด้วย Facebook เพื่อส่งข้อความของคุณ"
+    validation_error: "กรุณากรอกข้อมูลที่จำเป็นให้ถูกต้องครบถ้วน"
+  
+  success:
+    message_sent: "ข้อความของคุณถูกส่งเรียบร้อยแล้ว! โรงเรียนจะติดต่อคุณเร็วๆ นี้"
+    facebook_auth: "เข้าสู่ระบบสำเร็จแล้ว! ตอนนี้คุณสามารถส่งข้อความได้แล้ว"
+  
+  views:
+    pagination:
+      first: "หน้าแรก"
+      last: "หน้าสุดท้าย" 
+      previous: "ก่อนหน้า"
+      next: "ถัดไป"
+      truncate: "…"

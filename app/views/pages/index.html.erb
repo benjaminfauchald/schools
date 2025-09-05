@@ -19,7 +19,7 @@
   
   <!-- Navigation -->
   <div class="mb-6">
-    <%= link_to school_path(@school), class: "inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors" do %>
+    <%= link_to school_path(id: @school.id), class: "inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors" do %>
       <%= heroicon('arrow-left', css_class: 'w-4 h-4 mr-2') %>
       Back to <%= @school.name %>
     <% end %>
@@ -58,7 +58,7 @@
                   <% end %>
                   
                   <h3 class="text-lg font-semibold text-black mb-2">
-                    <%= link_to page.title, school_page_path(@school, page), 
+                    <%= link_to page.title, school_page_path(school_id: @school.id, id: page.id), 
                                 class: "hover:text-blue-600 transition-colors" %>
                   </h3>
                   
@@ -80,7 +80,7 @@
                 <div class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                   <div class="flex-1">
                     <h3 class="text-lg font-semibold text-black mb-1">
-                      <%= link_to page.title, school_page_path(@school, page),
+                      <%= link_to page.title, school_page_path(school_id: @school.id, id: page.id),
                                   class: "hover:text-blue-600 transition-colors" %>
                     </h3>
                     <p class="text-sm text-gray-600">

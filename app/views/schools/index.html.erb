@@ -127,7 +127,7 @@
             <div class="p-6">
               <div class="flex items-start justify-between mb-4">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">
-                  <%= link_to school.name, school_path(school), 
+                  <%= link_to school.name, school_path(id: school.id), 
                       class: "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors" %>
                 </h3>
                 <% unless @filter_params[:show_all] %>
@@ -151,7 +151,7 @@
               <% end %>
               
               <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
-                <%= link_to school_path(school), 
+                <%= link_to school_path(id: school.id), 
                     class: "inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors" do %>
                   View Details
                   <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">

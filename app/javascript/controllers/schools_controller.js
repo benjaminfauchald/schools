@@ -98,7 +98,8 @@ export default class extends Controller {
         home_lng: this.homeLngValue
       })
 
-      const response = await fetch(`/schools/filtered?${params}`, {
+      const locale = document.body.dataset.locale || 'en'
+      const response = await fetch(`/${locale}/schools/filtered?${params}`, {
         headers: {
           'Accept': 'application/json',
           'X-Requested-With': 'XMLHttpRequest'

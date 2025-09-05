@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-rails-env="<%= Rails.env %>">
   <head>
     <title><%= content_for(:title) || "Schools" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -10,8 +10,117 @@
     
     <%# Google Maps API Key for centralized loading %>
     <meta name="google-maps-api-key" content="<%= Rails.application.credentials.dig(:google_maps, :api_key) || ENV['GOOGLE_PLACES_API_KEY'] || '' %>">
+    
+    <%# Debug mode for JavaScript console logging %>
+    <meta name="debug-mode" content="<%= ENV['DEBUG_MODE'] == 'on' ? 'true' : 'false' %>">
 
     <%= yield :head %>
+    
+    <!-- Facebook JavaScript SDK -->
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '<%= ENV['FACEBOOK_APP_ID'] %>',
+          cookie     : true,
+          xfbml      : true,
+          version    : 'v18.0'
+        });
+          
+        FB.AppEvents.logPageView();
+        
+        // Check login status on page load
+        FB.getLoginStatus(function(response) {
+          statusChangeCallback(response);
+        });
+      };
+
+      // Handle Facebook login status changes
+      function statusChangeCallback(response) {
+        console.log('Facebook login status:', response);
+        
+        if (response.status === 'connected') {
+          // User is logged into Facebook and your app
+          console.log('User is connected to Facebook and your app');
+          handleFacebookConnected(response.authResponse);
+        } else if (response.status === 'not_authorized') {
+          // User is logged into Facebook but not your app
+          console.log('User is logged into Facebook but not authorized for your app');
+        } else {
+          // User is not logged into Facebook
+          console.log('User is not logged into Facebook');
+        }
+      }
+      
+      // Handle when user is connected to Facebook
+      function handleFacebookConnected(authResponse) {
+        // Get user's profile information
+        FB.api('/me', {fields: 'name,email,picture'}, function(response) {
+          console.log('Facebook user info:', response);
+          
+          // Send this info to Rails backend to sync with session
+          fetch('/users/auth/facebook/sync_status', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+              facebook_user_id: authResponse.userID,
+              access_token: authResponse.accessToken,
+              name: response.name,
+              email: response.email,
+              picture_url: response.picture ? response.picture.data.url : null
+            })
+          }).then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                console.log('Facebook status synced with Rails backend');
+                
+                // Check if there's a pending contact form to restore
+                const pendingContactForm = sessionStorage.getItem('pendingContactForm');
+                const pendingModalContactForm = sessionStorage.getItem('pendingModalContactForm');
+                
+                if (pendingContactForm || pendingModalContactForm) {
+                  // Refresh the page to update authentication status and restore forms
+                  window.location.reload();
+                } else {
+                  // Just refresh navigation to show profile picture
+                  const navElement = document.querySelector('[data-controller*="navigation"]');
+                  if (navElement) {
+                    window.location.reload();
+                  }
+                }
+              }
+            })
+            .catch(error => {
+              console.error('Error syncing Facebook status:', error);
+            });
+        });
+      }
+      
+      // Function to trigger Facebook login
+      function loginWithFacebook() {
+        FB.login(function(response) {
+          if (response.authResponse) {
+            console.log('Facebook login successful');
+            statusChangeCallback(response);
+          } else {
+            console.log('Facebook login cancelled or failed');
+          }
+        }, {scope: 'email,public_profile'});
+      }
+      
+      // Make loginWithFacebook available globally
+      window.loginWithFacebook = loginWithFacebook;
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "https://connect.facebook.net/en_US/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+    </script>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
@@ -42,15 +151,19 @@
     <%= Sentry.get_trace_propagation_meta.html_safe %>
   </head>
 
-  <body>
+  <body data-locale="<%= I18n.locale %>" class="min-h-screen flex flex-col">
     <!-- Location check (redirects to onboarding if needed) -->
     <div data-controller="location" <%= raw session[:puppeteer_location] ? "data-puppeteer-location='#{session[:puppeteer_location].to_json}'" : '' %>></div>
 
     <!-- Navigation Bar -->
     <%= render 'shared/navigation' unless controller.class.module_parent_name == 'Admin' %>
 
-    <main class="container mx-auto mt-6 px-5 flex">
+    <!-- Main Content Area -->
+    <main class="container mx-auto mt-6 px-5 flex flex-1">
       <%= yield %>
     </main>
+
+    <!-- Footer - Always at bottom -->
+    <%= render 'shared/footer' unless controller.class.module_parent_name == 'Admin' %>
   </body>
 </html>
