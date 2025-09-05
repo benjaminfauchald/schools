@@ -44,6 +44,7 @@ guard :rspec, cmd: "bundle exec rspec" do
   watch(%r{^app/views/(.+)\.(erb|haml|slim)$})     { "spec/system" }
   watch(%r{^app/helpers/(.+)\.rb$})                { "spec/helpers" }
   watch(%r{^app/(view_components|components)/(.+)\.rb$}) { "spec/components" }
+  watch(%r{^app/(view_components|components)/(.+)\.(erb|haml|slim)$}) { "spec/components" }
 
   # Stimulus controllers (adjust path if you use js/ts)
   watch(%r{^app/javascript/controllers/(.+)\.(js|ts)$}) { "spec/system" }

@@ -12,25 +12,20 @@
         <div>
           <div class="flex items-center mb-4">
             <%= section_icon_svg(group_data[:icon]) %>
-            <div class="ml-2">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                <%= group_name %>
-              </h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                <%= pluralize(group_data[:items].count, 'facility') %>
-              </p>
-            </div>
+            <h3 class="ml-2 text-lg font-semibold text-gray-900 dark:text-white">
+              <%= group_name %>
+            </h3>
           </div>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <%= pluralize(group_data[:items].count, 'facility') %>
+          </p>
 
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          <div class="flex flex-wrap gap-2">
             <% group_data[:items].each do |facility| %>
-              <div class="group relative">
-                <%= render Schools::TagBadgeComponent.new(
-                      term: facility,
-                      variant: :facility,
-                      size: :small
-                    ) %>
-              </div>
+              <%= render Schools::TagBadgeComponent.new(
+                    term: facility,
+                    variant: :facility
+                  ) %>
             <% end %>
           </div>
         </div>
