@@ -1,9 +1,9 @@
 class FacebookSignatureValidator
   def initialize(request, app_secret = nil)
     @request = request
-    @app_secret = app_secret || ENV['FACEBOOK_APP_SECRET']
+    @app_secret = app_secret || ENV["FACEBOOK_APP_SECRET"]
     @body = @request.raw_post || @request.body.read
-    @signature_header = @request.headers['X-Hub-Signature-256'] || @request.headers['HTTP_X_HUB_SIGNATURE_256']
+    @signature_header = @request.headers["X-Hub-Signature-256"] || @request.headers["HTTP_X_HUB_SIGNATURE_256"]
   end
 
   def valid_signature?
@@ -21,7 +21,7 @@ class FacebookSignatureValidator
   end
 
   def compute_signature
-    OpenSSL::HMAC.hexdigest('SHA256', @app_secret, @body)
+    OpenSSL::HMAC.hexdigest("SHA256", @app_secret, @body)
   end
 
   def error_message
@@ -36,7 +36,7 @@ class FacebookSignatureValidator
 
   def extract_signature_from_header
     return nil if @signature_header.blank?
-    
+
     # Facebook sends signature as "sha256=<actual_signature>"
     match = @signature_header.match(/^sha256=([a-f0-9]+)$/)
     match ? match[1] : nil

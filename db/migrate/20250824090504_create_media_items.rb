@@ -9,8 +9,8 @@ class CreateMediaItems < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :media_items, [:place_id, :kind]
-    add_index :media_items, [:place_id, :sort_order]
+
+    add_index :media_items, [ :place_id, :kind ]
+    add_index :media_items, [ :place_id, :sort_order ]
   end
 end

@@ -14,11 +14,11 @@ class Schools::PhotoGalleryComponent < ViewComponent::Base
   end
 
   def photos
-    @photos ||= media_items.select { |item| item.kind == 'photo' }.sort_by(&:sort_order)
+    @photos ||= media_items.select { |item| item.kind == "photo" }.sort_by(&:sort_order)
   end
 
   def logo
-    @logo ||= media_items.find { |item| item.kind == 'logo' }
+    @logo ||= media_items.find { |item| item.kind == "logo" }
   end
 
   def hero_photo

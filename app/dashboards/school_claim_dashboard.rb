@@ -18,7 +18,7 @@ class SchoolClaimDashboard < Administrate::BaseDashboard
     revoked_by_id: Field::Number,
     revocation_reason: Field::Text,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

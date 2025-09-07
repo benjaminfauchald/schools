@@ -1,31 +1,31 @@
 module Admin
   class VocabulariesController < Admin::ApplicationController
-    before_action :set_vocabulary, only: [:show, :edit, :update, :destroy]
-    
+    before_action :set_vocabulary, only: [ :show, :edit, :update, :destroy ]
+
     def index
       search_term = params[:search]
-      
+
       @vocabularies = Vocabulary.includes(:terms).all
-      
+
       # Apply search filter
       if search_term.present?
         @vocabularies = @vocabularies.where(
-          "vocabularies.code ILIKE ? OR vocabularies.label ILIKE ? OR vocabularies.description ILIKE ?", 
+          "vocabularies.code ILIKE ? OR vocabularies.label ILIKE ? OR vocabularies.description ILIKE ?",
           "%#{search_term}%", "%#{search_term}%", "%#{search_term}%"
         )
       end
-      
+
       # Apply status filter
       if params[:usage].present?
         case params[:usage]
-        when 'used'
+        when "used"
           @vocabularies = @vocabularies.joins(terms: :taggings).distinct
-        when 'unused'
+        when "unused"
           @vocabularies = @vocabularies.left_joins(terms: :taggings)
                            .where(taggings: { id: nil })
         end
       end
-      
+
       @vocabularies = @vocabularies.ordered.limit(50)
       @total_vocabularies = Vocabulary.count
       @used_vocabularies = Vocabulary.joins(terms: :taggings).distinct.count
@@ -42,9 +42,9 @@ module Admin
 
     def create
       @vocabulary = Vocabulary.new(vocabulary_params)
-      
+
       if @vocabulary.save
-        redirect_to admin_vocabulary_path(@vocabulary), notice: 'Vocabulary was successfully created.'
+        redirect_to admin_vocabulary_path(@vocabulary), notice: "Vocabulary was successfully created."
       else
         render :new, status: :unprocessable_entity
       end
@@ -56,7 +56,7 @@ module Admin
 
     def update
       if @vocabulary.update(vocabulary_params)
-        redirect_to admin_vocabulary_path(@vocabulary), notice: 'Vocabulary was successfully updated.'
+        redirect_to admin_vocabulary_path(@vocabulary), notice: "Vocabulary was successfully updated."
       else
         render :edit, status: :unprocessable_entity
       end
@@ -64,10 +64,10 @@ module Admin
 
     def destroy
       if @vocabulary.terms.joins(:taggings).any?
-        redirect_to admin_vocabularies_path, alert: 'Cannot delete vocabulary with terms that are in use.'
+        redirect_to admin_vocabularies_path, alert: "Cannot delete vocabulary with terms that are in use."
       else
         @vocabulary.destroy
-        redirect_to admin_vocabularies_path, notice: 'Vocabulary was successfully deleted.'
+        redirect_to admin_vocabularies_path, notice: "Vocabulary was successfully deleted."
       end
     end
 
@@ -80,7 +80,7 @@ module Admin
         @vocabulary = Vocabulary.find_by!(code: params[:id])
       end
     rescue ActiveRecord::RecordNotFound
-      redirect_to admin_vocabularies_path, alert: 'Vocabulary not found.'
+      redirect_to admin_vocabularies_path, alert: "Vocabulary not found."
     end
 
     def vocabulary_params

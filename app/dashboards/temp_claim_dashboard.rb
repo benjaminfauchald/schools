@@ -18,7 +18,7 @@ class TempClaimDashboard < Administrate::BaseDashboard
     expires_at: Field::DateTime,
     status: Field::Select.with_options(searchable: false, collection: ->(field) { %w[pending_registration registered expired] }),
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

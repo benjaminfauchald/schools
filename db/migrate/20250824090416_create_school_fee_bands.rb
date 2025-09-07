@@ -8,8 +8,8 @@ class CreateSchoolFeeBands < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :school_fee_bands, [:school_fee_schedule_id, :grade_from, :grade_to], 
+
+    add_index :school_fee_bands, [ :school_fee_schedule_id, :grade_from, :grade_to ],
               name: 'index_school_fee_bands_on_schedule_and_grades', unique: true
   end
 end

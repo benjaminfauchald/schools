@@ -11,8 +11,8 @@ class CreateEvents < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :events, [:place_id, :starts_at]
+
+    add_index :events, [ :place_id, :starts_at ]
     add_index :events, :starts_at
   end
 end

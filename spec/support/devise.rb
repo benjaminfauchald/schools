@@ -5,16 +5,17 @@ RSpec.configure do |config|
   config.include Devise::Test::ControllerHelpers, type: :controller
   config.include Devise::Test::IntegrationHelpers, type: :request
   config.include Devise::Test::IntegrationHelpers, type: :system
-  
+  config.include Devise::Test::ControllerHelpers, type: :component
+
   # For feature tests (if using Capybara)
   config.include Warden::Test::Helpers, type: :system
   config.include Warden::Test::Helpers, type: :feature
-  
+
   # Clean up after each test (only for system/feature tests that use Warden)
   config.after :each, type: :system do
     Warden.test_reset!
   end
-  
+
   config.after :each, type: :feature do
     Warden.test_reset!
   end

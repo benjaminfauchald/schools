@@ -15,7 +15,7 @@ class SchoolGradeOfferingDashboard < Administrate::BaseDashboard
     notes: Field::Text,
     school: Field::BelongsTo,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

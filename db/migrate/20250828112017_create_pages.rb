@@ -17,11 +17,11 @@ class CreatePages < ActiveRecord::Migration[8.0]
     end
 
     # Indexes for performance
-    add_index :pages, [:school_id, :slug], unique: true
-    add_index :pages, [:school_id, :status]
-    add_index :pages, [:school_id, :page_type]
+    add_index :pages, [ :school_id, :slug ], unique: true
+    add_index :pages, [ :school_id, :status ]
+    add_index :pages, [ :school_id, :page_type ]
     add_index :pages, :published_at
-    add_index :pages, [:status, :published_at]
+    add_index :pages, [ :status, :published_at ]
     add_index :pages, :sort_order
   end
 end

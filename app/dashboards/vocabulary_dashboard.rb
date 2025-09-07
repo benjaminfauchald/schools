@@ -14,7 +14,7 @@ class VocabularyDashboard < Administrate::BaseDashboard
     label: Field::String,
     terms: Field::HasMany,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

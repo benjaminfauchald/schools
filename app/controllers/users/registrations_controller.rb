@@ -1,12 +1,12 @@
 class Users::RegistrationsController < Devise::RegistrationsController
-  before_action :configure_sign_up_params, only: [:create]
-  before_action :configure_account_update_params, only: [:update]
-  
+  before_action :configure_sign_up_params, only: [ :create ]
+  before_action :configure_account_update_params, only: [ :update ]
+
   # Explicitly define which actions are available
   def new
     super
   end
-  
+
   # Override Devise's create method to handle temp claims
   def create
     super do |resource|
@@ -15,7 +15,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
         if resource.process_temp_claim!(session[:temp_claim_token])
           session.delete(:temp_claim_token)
           # Set a flash message that will be shown after email confirmation
-          session[:post_confirmation_message] = 'Your school claim has been submitted for approval!'
+          session[:post_confirmation_message] = "Your school claim has been submitted for approval!"
         end
       end
     end
@@ -29,7 +29,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
       # If there's still a temp claim token, something went wrong
       session.delete(:temp_claim_token)
     end
-    
+
     # Check if user has pending claims to show appropriate message
     if resource.school_claims.pending.any?
       school_owner_dashboard_index_path

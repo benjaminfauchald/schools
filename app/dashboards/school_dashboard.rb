@@ -51,7 +51,7 @@ class SchoolDashboard < Administrate::BaseDashboard
     line_id: Field::String,
     whatsapp_number: Field::String,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

@@ -14,7 +14,7 @@ class AuditLogDashboard < Administrate::BaseDashboard
     changed_fields: Field::String.with_options(searchable: false),
     user_id: Field::Number,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

@@ -14,9 +14,9 @@ class CreateSchoolInquiries < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :school_inquiries, :status
     add_index :school_inquiries, :email
-    add_index :school_inquiries, [:school_id, :created_at]
+    add_index :school_inquiries, [ :school_id, :created_at ]
   end
 end

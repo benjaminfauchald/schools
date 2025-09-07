@@ -41,7 +41,7 @@ class Schools::InteractiveMapComponent < ViewComponent::Base
 
   def default_center
     # Bangkok city center as fallback
-    [13.7563, 100.5018]
+    [ 13.7563, 100.5018 ]
   end
 
   def school_lat

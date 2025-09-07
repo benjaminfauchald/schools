@@ -13,7 +13,7 @@ class Schools::TagBadgeComponent < ViewComponent::Base
 
   def css_classes
     base_classes = "inline-flex items-center font-medium rounded-full"
-    
+
     # Size variants
     size_classes = case size
     when :sm
@@ -23,7 +23,7 @@ class Schools::TagBadgeComponent < ViewComponent::Base
     when :lg
       "px-3 py-1 text-base"
     end
-    
+
     # Color variants based on vocabulary context
     color_classes = case variant
     when :curriculum
@@ -41,10 +41,10 @@ class Schools::TagBadgeComponent < ViewComponent::Base
     else # default
       "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
     end
-    
+
     "#{base_classes} #{size_classes} #{color_classes}"
   end
-  
+
   def term_label
     term.label
   end

@@ -8,7 +8,7 @@ class AddWebCrawlingFieldsToPlaces < ActiveRecord::Migration[8.0]
     add_column :places, :website_crawl_data, :json unless column_exists?(:places, :website_crawl_data)
     add_column :places, :website_structured_data, :json unless column_exists?(:places, :website_structured_data)
     add_column :places, :website_crawling_error, :text unless column_exists?(:places, :website_crawling_error)
-    
+
     # Add indexes for performance (check existence)
     add_index :places, :website_crawling_status unless index_exists?(:places, :website_crawling_status)
     add_index :places, :website_crawled_at unless index_exists?(:places, :website_crawled_at)

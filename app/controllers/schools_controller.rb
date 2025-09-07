@@ -1,8 +1,8 @@
 # SchoolsController manages the main school listing with distance-based filtering
 # Supports AJAX requests for real-time filtering without page reloads
 class SchoolsController < ApplicationController
-  before_action :check_home_location, only: [:index]
-  before_action :find_school, only: [:show]
+  before_action :check_home_location, only: [ :index ]
+  before_action :find_school, only: [ :show ]
 
   def show
     # Eager load all related data to avoid N+1 queries
@@ -17,16 +17,16 @@ class SchoolsController < ApplicationController
       current_taggings: { term: :vocabulary },
       place: :media_items
     ).find(@school.id)
-    
+
     # Find related point data if available
     @related_point = find_related_point(@school) if @school.place
-    
+
     # Initialize data merger for intelligent data combination
     @merged_data = SchoolDataMerger.new(@school, @school.place, @related_point).merged_data
-    
+
     # Set page metadata
     @page_title = @school.name
-    @page_description = @merged_data.additional_details[:about] || 
+    @page_description = @merged_data.additional_details[:about] ||
                        "Learn about #{@school.name} - curriculum, facilities, fees, and more."
     @page_keywords = generate_page_keywords(@school)
   end
@@ -35,12 +35,12 @@ class SchoolsController < ApplicationController
     # For HTML requests, the location controller will handle redirects to onboarding
     # For JSON/AJAX requests, we need location parameters
     @home_location = get_home_location_from_client
-    
+
     if request.format.json? && !@home_location
       render json: { error: "Home location required" }, status: :bad_request
       return
     end
-    
+
     if @home_location
       @filter_params = filter_params
       @schools = filtered_schools
@@ -63,7 +63,7 @@ class SchoolsController < ApplicationController
 
   def filtered
     @home_location = get_home_location_from_client
-    
+
     unless @home_location
       render json: { error: "Home location required" }, status: :bad_request
       return
@@ -79,14 +79,14 @@ class SchoolsController < ApplicationController
 
   def search
     @home_location = get_home_location_from_client
-    
+
     unless @home_location
       render json: { error: "Home location required" }, status: :bad_request
       return
     end
 
     query = params[:q]&.strip
-    
+
     unless query.present?
       render json: { schools: [] }
       return
@@ -102,12 +102,12 @@ class SchoolsController < ApplicationController
     # Calculate distance for each school and sort by distance
     schools_with_distance = @schools.map do |school|
       distance = School.calculate_haversine_distance(
-        @home_location[:lat], 
-        @home_location[:lng], 
-        school.place_lat, 
+        @home_location[:lat],
+        @home_location[:lng],
+        school.place_lat,
         school.place_lng
       )
-      
+
       {
         id: school.id,
         name: school.name,
@@ -123,28 +123,28 @@ class SchoolsController < ApplicationController
 
   def ai_chat
     find_school
-    
+
     message = params[:message]&.strip
     unless message.present?
       render json: { error: "Message is required" }, status: :bad_request
       return
     end
-    
+
     begin
       # Create school context for AI
       school_context = build_school_context(@school)
-      
+
       # Simple AI response (you can integrate with OpenAI or other AI services)
       response = generate_ai_response(message, school_context, @school)
-      
-      render json: { 
+
+      render json: {
         response: response,
-        school_name: @school.name 
+        school_name: @school.name
       }
     rescue => e
       Rails.logger.error "AI Chat error: #{e.message}"
-      render json: { 
-        error: "Sorry, I'm having trouble processing your request right now. Please try again later." 
+      render json: {
+        error: "Sorry, I'm having trouble processing your request right now. Please try again later."
       }, status: :internal_server_error
     end
   end
@@ -154,9 +154,9 @@ class SchoolsController < ApplicationController
   def filter_params
     params.permit(:radius, :show_all, :page, :per_page).tap do |p|
       p[:radius] = (p[:radius]&.to_i || 50).clamp(1, 100)
-      p[:show_all] = p[:show_all] == 'true'
-      p[:page] = [p[:page].to_i, 1].max
-      p[:per_page] = [p[:per_page]&.to_i || 25, 200].min.clamp(10, 200) # Allow 10-200 per page
+      p[:show_all] = p[:show_all] == "true"
+      p[:page] = [ p[:page].to_i, 1 ].max
+      p[:per_page] = [ p[:per_page]&.to_i || 25, 200 ].min.clamp(10, 200) # Allow 10-200 per page
     end
   end
 
@@ -179,15 +179,15 @@ class SchoolsController < ApplicationController
 
   def school_select_fields
     if @filter_params[:show_all]
-      'schools.id, schools.name, schools.slug, places.formatted_address as address, NULL as distance_km'
+      "schools.id, schools.name, schools.slug, places.formatted_address as address, NULL as distance_km"
     else
-      'schools.id, schools.name, schools.slug, places.formatted_address as address, 
+      'schools.id, schools.name, schools.slug, places.formatted_address as address,
        ST_Distance(ST_SetSRID(ST_MakePoint(places.lng, places.lat), 4326), ST_SetSRID(ST_MakePoint(?, ?), 4326)) / 1000.0 as distance_km'
     end
   end
 
   def search_select_fields
-    'schools.id, schools.name, schools.slug, places.formatted_address as address, places.lat as place_lat, places.lng as place_lng'
+    "schools.id, schools.name, schools.slug, places.formatted_address as address, places.lat as place_lat, places.lng as place_lng"
   end
 
   def schools_json_response
@@ -236,10 +236,10 @@ class SchoolsController < ApplicationController
     if params[:home_lat].present? && params[:home_lng].present?
       lat = params[:home_lat].to_f
       lng = params[:home_lng].to_f
-      
+
       # Basic validation
       return nil unless valid_coordinates?(lat, lng)
-      
+
       { lat: lat, lng: lng }
     end
   end
@@ -250,8 +250,8 @@ class SchoolsController < ApplicationController
 
   def check_home_location
     # Skip location check for Puppeteer requests
-    return if puppeteer_request?
-    
+    nil if puppeteer_request?
+
     # This will be handled by the location Stimulus controller
     # which redirects to onboarding if no home location exists
   end
@@ -264,11 +264,11 @@ class SchoolsController < ApplicationController
       @school = School.find_by!(slug: params[:id])
     end
   end
-  
+
   # Find related point data by proximity
   def find_related_point(school)
     return nil unless school.place&.lat && school.place&.lng
-    
+
     # Find the closest point within 500 meters, handling SRID mismatches
     Point.where(
       "ST_DWithin(ST_Transform(way, 4326), ST_SetSRID(ST_MakePoint(?, ?), 4326), ?)",
@@ -281,21 +281,21 @@ class SchoolsController < ApplicationController
     Rails.logger.warn "PostGIS SRID error when finding related point: #{e.message}"
     nil
   end
-  
+
   # Generate SEO keywords from school data
   def generate_page_keywords(school)
-    keywords = [school.name]
+    keywords = [ school.name ]
     keywords << school.district if school.district.present?
     keywords << school.province if school.province.present?
-    
+
     # Add curriculum keywords from taxonomy
-    curricula = school.current_terms.select { |term| term.vocabulary.code == 'curriculum' }
+    curricula = school.current_terms.select { |term| term.vocabulary.code == "curriculum" }
     curricula.each { |curriculum| keywords << curriculum.label }
-    
+
     # Add common education keywords
     keywords += %w[school education bangkok thailand international curriculum]
-    
-    keywords.uniq.join(', ')
+
+    keywords.uniq.join(", ")
   end
 
   def build_school_context(school)
@@ -310,9 +310,9 @@ class SchoolsController < ApplicationController
       current_taggings: { term: :vocabulary },
       place: :media_items
     ).find(school.id)
-    
+
     merged_data = SchoolDataMerger.new(school_with_data, school_with_data.place, nil).merged_data
-    
+
     context = {
       name: school.name,
       address: school_with_data.place&.formatted_address,
@@ -334,19 +334,19 @@ class SchoolsController < ApplicationController
         }
       end
     }
-    
+
     context.compact
   end
 
   def generate_ai_response(message, school_context, school)
     # This is a simple rule-based response system
     # You can replace this with OpenAI API integration
-    
+
     message_lower = message.downcase
     school_name = school.name
-    
+
     # Curriculum questions
-    if message_lower.include?('curriculum') || message_lower.include?('program')
+    if message_lower.include?("curriculum") || message_lower.include?("program")
       curricula = school_context[:curriculum] || []
       if curricula.any?
         return "**Academic Programs at #{school_name}:**\n\n#{school_name} offers the following curriculum programs:\n\n#{curricula.map { |c| "• #{c}" }.join("\n")}\n\nEach program is designed to provide students with a comprehensive education that prepares them for higher education and future careers."
@@ -354,9 +354,9 @@ class SchoolsController < ApplicationController
         return "I don't have detailed curriculum information for #{school_name} at the moment. I'd recommend contacting the school directly for specific program details."
       end
     end
-    
+
     # Fee questions
-    if message_lower.include?('fee') || message_lower.include?('cost') || message_lower.include?('tuition') || message_lower.include?('price')
+    if message_lower.include?("fee") || message_lower.include?("cost") || message_lower.include?("tuition") || message_lower.include?("price")
       fees = school_context[:fee_schedules] || []
       if fees.any?
         fee_info = fees.map do |fee|
@@ -367,9 +367,9 @@ class SchoolsController < ApplicationController
         return "I don't have specific fee information for #{school_name}. Please contact the school directly for detailed tuition and fee information."
       end
     end
-    
+
     # Facilities questions
-    if message_lower.include?('facilities') || message_lower.include?('facility')
+    if message_lower.include?("facilities") || message_lower.include?("facility")
       facilities = school_context[:facilities] || []
       if facilities.any?
         return "**Facilities at #{school_name}:**\n\n#{facilities.map { |f| "• #{f}" }.join("\n")}\n\nThese facilities support student learning and development across various subjects and activities."
@@ -377,9 +377,9 @@ class SchoolsController < ApplicationController
         return "I don't have detailed facilities information for #{school_name} at the moment. Please contact the school for more information about their campus facilities."
       end
     end
-    
+
     # Language questions
-    if message_lower.include?('language') || message_lower.include?('english') || message_lower.include?('thai')
+    if message_lower.include?("language") || message_lower.include?("english") || message_lower.include?("thai")
       languages = school_context[:languages] || []
       if languages.any?
         return "**Languages at #{school_name}:**\n\n#{languages.map { |l| "• #{l}" }.join("\n")}\n\nThe school provides instruction and support in these languages to help students develop multilingual competencies."
@@ -387,9 +387,9 @@ class SchoolsController < ApplicationController
         return "I don't have specific language program information for #{school_name}. Please contact the school for details about their language instruction."
       end
     end
-    
+
     # Age/grade questions
-    if message_lower.include?('age') || message_lower.include?('grade') || message_lower.include?('level')
+    if message_lower.include?("age") || message_lower.include?("grade") || message_lower.include?("level")
       grade_info = school_context[:grade_offerings]
       if grade_info
         return "**Grade Levels at #{school_name}:**\n\n• **Age Range**: #{grade_info[:min_age]} to #{grade_info[:max_age]} years old\n• **Grades**: #{grade_info[:grades]}\n\nThe school serves students across these age ranges with age-appropriate curriculum and activities."
@@ -397,9 +397,9 @@ class SchoolsController < ApplicationController
         return "I don't have specific grade level information for #{school_name}. Please contact the school for details about their age ranges and grade offerings."
       end
     end
-    
+
     # Location questions
-    if message_lower.include?('location') || message_lower.include?('address') || message_lower.include?('where')
+    if message_lower.include?("location") || message_lower.include?("address") || message_lower.include?("where")
       address = school_context[:address]
       if address
         return "**Location of #{school_name}:**\n\n📍 #{address}\n\nYou can find detailed directions and transportation options on our school page."
@@ -407,8 +407,8 @@ class SchoolsController < ApplicationController
         return "Please check the school's contact information section for location details."
       end
     end
-    
+
     # General/default response
-    return "**About #{school_name}:**\n\nI can help you learn more about #{school_name}! I can provide information about:\n\n• **Academic programs** and curriculum\n• **Tuition fees** and costs\n• **Facilities** and campus amenities\n• **Languages** of instruction\n• **Grade levels** and age ranges\n• **Location** and address\n\nWhat specific aspect of #{school_name} would you like to know more about?"
+    "**About #{school_name}:**\n\nI can help you learn more about #{school_name}! I can provide information about:\n\n• **Academic programs** and curriculum\n• **Tuition fees** and costs\n• **Facilities** and campus amenities\n• **Languages** of instruction\n• **Grade levels** and age ranges\n• **Location** and address\n\nWhat specific aspect of #{school_name} would you like to know more about?"
   end
 end

@@ -16,7 +16,7 @@ class TaggingDashboard < Administrate::BaseDashboard
     valid_from: Field::Date,
     valid_to: Field::Date,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

@@ -2,7 +2,7 @@ namespace :user_data do
   desc "Clear all location-related data and reset user preferences"
   task clear_locations: :environment do
     puts "🗑️  Clearing location data..."
-    
+
     # Since localStorage is client-side, this task provides instructions
     puts "\n📱 To clear user home locations from browsers:"
     puts "   Method 1: JavaScript Console"
@@ -14,7 +14,7 @@ namespace :user_data do
     puts "   Method 3: Settings Page"
     puts "   → Visit /settings and click 'Clear Location'"
     puts ""
-    
+
     # Clear any server-side location data (if we had any)
     puts "✅ Server-side location data cleared (none currently stored)"
     puts "✅ Task completed"
@@ -69,25 +69,25 @@ namespace :user_data do
         lng: 100.5018
       },
       {
-        name: "Sukhumvit Area", 
+        name: "Sukhumvit Area",
         address: "Sukhumvit Road, Bangkok, Thailand",
         lat: 13.7308,
         lng: 100.5418
       },
       {
         name: "Silom District",
-        address: "Silom Road, Bangkok, Thailand", 
+        address: "Silom Road, Bangkok, Thailand",
         lat: 13.7248,
         lng: 100.5346
       }
     ]
-    
+
     puts "🧪 Test Location Data"
     puts "=" * 30
     puts ""
     puts "You can use these in your browser console:"
     puts ""
-    
+
     test_locations.each_with_index do |location, index|
       puts "#{index + 1}. #{location[:name]}:"
       js_code = {
@@ -95,13 +95,13 @@ namespace :user_data do
         lng: location[:lng],
         formatted_address: location[:address],
         timestamp: Time.current.iso8601,
-        source: 'test'
+        source: "test"
       }
-      
+
       puts "   localStorage.setItem('homeLocation', '#{js_code.to_json.gsub("'", "\\'")}')"
       puts ""
     end
-    
+
     puts "✅ Test data generated"
   end
 end

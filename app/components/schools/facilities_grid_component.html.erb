@@ -55,13 +55,24 @@
               </div>
             <% end %>
             
-            <% if facility_groups['Sports & Recreation'] %>
+            <% if facility_groups['Other Facilities'] %>
               <div class="w-32 p-3">
                 <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                  <%= facility_groups['Sports & Recreation'][:items].count %>
+                  <%= facility_groups['Other Facilities'][:items].count %>
                 </div>
                 <div class="text-xs text-orange-600 dark:text-orange-400 uppercase tracking-wider">
                   Sports
+                </div>
+              </div>
+            <% end %>
+            
+            <% if facility_groups['Dining & Nutrition'] %>
+              <div class="w-32 p-3">
+                <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                  <%= facility_groups['Dining & Nutrition'][:items].count %>
+                </div>
+                <div class="text-xs text-yellow-600 dark:text-yellow-400 uppercase tracking-wider">
+                  Dining
                 </div>
               </div>
             <% end %>

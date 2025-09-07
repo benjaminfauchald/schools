@@ -15,7 +15,7 @@ class TravelTimeDashboard < Administrate::BaseDashboard
     origin_hash: Field::String,
     place: Field::BelongsTo,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

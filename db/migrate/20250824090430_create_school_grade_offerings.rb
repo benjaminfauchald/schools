@@ -9,7 +9,7 @@ class CreateSchoolGradeOfferings < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :school_grade_offerings, [:min_age, :max_age]
+
+    add_index :school_grade_offerings, [ :min_age, :max_age ]
   end
 end

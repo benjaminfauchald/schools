@@ -44,7 +44,7 @@ class PointDashboard < Administrate::BaseDashboard
     website: Field::String,
     wheelchair: Field::Boolean,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

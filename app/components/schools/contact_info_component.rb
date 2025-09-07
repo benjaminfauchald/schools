@@ -27,9 +27,9 @@ class Schools::ContactInfoComponent < ViewComponent::Base
 
     if contact_info[:phone]
       items << {
-        label: 'Phone',
+        label: "Phone",
         value: contact_info[:phone],
-        icon: 'phone',
+        icon: "phone",
         link: "tel:#{contact_info[:phone].gsub(/\D/, '')}",
         format: :phone
       }
@@ -37,9 +37,9 @@ class Schools::ContactInfoComponent < ViewComponent::Base
 
     if contact_info[:email]
       items << {
-        label: 'Email',
+        label: "Email",
         value: contact_info[:email],
-        icon: 'envelope',
+        icon: "envelope",
         link: "mailto:#{contact_info[:email]}",
         format: :email
       }
@@ -47,9 +47,9 @@ class Schools::ContactInfoComponent < ViewComponent::Base
 
     if contact_info[:website]
       items << {
-        label: 'Website',
+        label: "Website",
         value: contact_info[:website],
-        icon: 'globe',
+        icon: "globe",
         link: contact_info[:website],
         format: :url
       }
@@ -57,9 +57,9 @@ class Schools::ContactInfoComponent < ViewComponent::Base
 
     if contact_info[:facebook_url]
       items << {
-        label: 'Facebook',
+        label: "Facebook",
         value: contact_info[:facebook_url],
-        icon: 'square-2-stack',
+        icon: "square-2-stack",
         link: contact_info[:facebook_url],
         format: :url
       }
@@ -67,9 +67,9 @@ class Schools::ContactInfoComponent < ViewComponent::Base
 
     if contact_info[:line_id].present?
       items << {
-        label: 'Line',
+        label: "Line",
         value: "@#{contact_info[:line_id]}",
-        icon: 'chat-bubble-left-right',
+        icon: "chat-bubble-left-right",
         link: "https://line.me/ti/p/~#{contact_info[:line_id]}",
         format: :social
       }
@@ -77,9 +77,9 @@ class Schools::ContactInfoComponent < ViewComponent::Base
 
     if contact_info[:whatsapp_number]
       items << {
-        label: 'WhatsApp',
+        label: "WhatsApp",
         value: contact_info[:whatsapp_number],
-        icon: 'chat-bubble-oval-left',
+        icon: "chat-bubble-oval-left",
         link: "https://wa.me/#{contact_info[:whatsapp_number].gsub(/\D/, '')}",
         format: :phone
       }
@@ -93,9 +93,9 @@ class Schools::ContactInfoComponent < ViewComponent::Base
 
     if contact_info[:address]
       items << {
-        label: 'Address',
+        label: "Address",
         value: contact_info[:address],
-        icon: 'map-pin',
+        icon: "map-pin",
         link: contact_info[:google_maps_url],
         format: nil
       }
@@ -103,7 +103,7 @@ class Schools::ContactInfoComponent < ViewComponent::Base
 
     if location_data[:district]
       items << {
-        label: 'District',
+        label: "District",
         value: location_data[:district],
         icon: nil,
         format: nil
@@ -112,7 +112,7 @@ class Schools::ContactInfoComponent < ViewComponent::Base
 
     if location_data[:province]
       items << {
-        label: 'Province',
+        label: "Province",
         value: location_data[:province],
         icon: nil,
         format: nil
@@ -121,5 +121,4 @@ class Schools::ContactInfoComponent < ViewComponent::Base
 
     items
   end
-
 end

@@ -16,8 +16,8 @@ class CreateSchoolFeeSchedules < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :school_fee_schedules, [:school_id, :academic_year], unique: true
+
+    add_index :school_fee_schedules, [ :school_id, :academic_year ], unique: true
     add_index :school_fee_schedules, :is_published
   end
 end

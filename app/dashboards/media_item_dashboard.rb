@@ -15,7 +15,7 @@ class MediaItemDashboard < Administrate::BaseDashboard
     sort_order: Field::Number,
     url: Field::String,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

@@ -32,7 +32,7 @@ gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
 
-gem 'rake', '13.1.0'
+gem "rake", "13.1.0"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -47,37 +47,37 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 
 # Facebook API integration
-gem 'koala', '~> 3.5'
+gem "koala", "~> 3.5"
 
 # Download and process images
-gem 'down', '~> 5.0'
+gem "down", "~> 5.0"
 
 # Document processing with Apache Tika (yomu2 is a maintained fork)
-gem 'yomu2', '~> 0.3.2'
+gem "yomu2", "~> 0.3.2"
 
 # Vector database support for AI integration
-gem 'pgvector', '~> 0.3.2'
+gem "pgvector", "~> 0.3.2"
 
 # HTTP client for API requests
-gem 'httparty', '~> 0.21'
+gem "httparty", "~> 0.21"
 
 
 
-gem 'rgeo'
-gem 'rgeo-activerecord'
+gem "rgeo"
+gem "rgeo-activerecord"
 
-gem 'administrate'
-gem 'devise'
-gem 'omniauth'
-gem 'omniauth-facebook'
-gem 'omniauth-rails_csrf_protection'
-gem 'view_component'
-gem 'foreman'
+gem "administrate"
+gem "devise"
+gem "omniauth"
+gem "omniauth-facebook"
+gem "omniauth-rails_csrf_protection"
+gem "view_component"
+gem "foreman"
 gem "sentry-ruby"
 gem "sentry-rails"
 
-#gem 'iso3166'
-gem 'countries'
+# gem 'iso3166'
+gem "countries"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -89,30 +89,34 @@ group :development, :test do
   # Fake data generation for testing
   gem "faker", "~> 3.2"
   # Load environment variables from .env file
-  gem 'dotenv-rails'
+  gem "dotenv-rails"
   # Development debugging tools
-  gem 'pry-byebug'
+  gem "pry-byebug"
   # HTTP request mocking
-  gem 'webmock', '~> 3.18'
+  gem "webmock", "~> 3.18"
 end
 
-group :test do
-  # RSpec testing framework
-  gem 'rspec-rails', '~> 6.0'
+group :development do
+  # File watching and auto-testing
   gem "guard"
   gem "guard-rspec"
   gem "listen"          # file watcher (uses macOS FSEvents)
   gem "terminal-notifier-guard"
+end
+
+group :test do
+  # RSpec testing framework
+  gem "rspec-rails", "~> 6.0"
 
   # Test data factories
-  gem 'factory_bot_rails', '~> 6.2'
+  gem "factory_bot_rails", "~> 6.2"
   # Matchers for common Rails functionality
-  gem 'shoulda-matchers', '~> 5.3'
+  gem "shoulda-matchers", "~> 5.3"
   # System testing with browser automation
-  gem 'capybara', '~> 3.39'
-  gem 'cuprite', '~> 0.15'  # Headless Chrome driver
+  gem "capybara", "~> 3.39"
+  gem "cuprite", "~> 0.15"  # Headless Chrome driver
   # Database cleaning between tests
-  gem 'database_cleaner-active_record', '~> 2.1'
+  gem "database_cleaner-active_record", "~> 2.1"
 end
 
 group :development do
@@ -123,6 +127,6 @@ end
 gem "activerecord-postgis-adapter", "~> 11.0"
 
 # Pagination
-gem 'kaminari'
+gem "kaminari"
 
 gem "letter_opener", "~> 1.10", group: :development

@@ -8,13 +8,13 @@ class SchoolOwner::DashboardController < SchoolOwner::ApplicationController
                              .recent
     @recent_activity = recent_activity_for_user
   end
-  
+
   private
-  
+
   def recent_activity_for_user
     # Get recent activities for user's schools (if audit_logs exists)
     return [] unless defined?(AuditLog)
-    
+
     AuditLog.where(auditable: current_user.owned_schools)
             .or(AuditLog.where(user: current_user))
             .includes(:auditable)

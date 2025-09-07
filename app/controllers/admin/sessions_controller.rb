@@ -13,6 +13,6 @@ class Admin::SessionsController < Devise::SessionsController
 
   # Permit additional parameters if needed
   def configure_sign_in_params
-    devise_parameter_sanitizer.permit(:sign_in, keys: [:email])
+    devise_parameter_sanitizer.permit(:sign_in, keys: [ :email ])
   end
 end

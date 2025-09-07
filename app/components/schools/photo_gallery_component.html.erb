@@ -41,8 +41,10 @@
           
           <!-- Photo overlay -->
           <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
-            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-90 rounded-full p-2">
-              <%= helpers.heroicon('magnifying-glass-plus', css_class: 'w-5 h-5 text-gray-700') %>
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+              <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+              </svg>
             </div>
           </div>
           
@@ -69,48 +71,56 @@
 </div>
 
 <!-- Photo Modal -->
-<div id="<%= modal_id %>" class="fixed inset-0 z-50 hidden">
-  <!-- Backdrop -->
-  <div class="absolute inset-0 bg-black bg-opacity-90 transition-opacity" onclick="closePhotoModal_<%= object_id %>()"></div>
+<div id="<%= modal_id %>" class="fixed inset-0 z-50 hidden bg-black/90" onclick="closePhotoModal_<%= object_id %>()">
   
-  <!-- Modal Content -->
-  <div class="relative h-full flex items-center justify-center p-4">
-    <!-- Close Button -->
-    <button onclick="closePhotoModal_<%= object_id %>()" 
-            class="absolute top-4 right-4 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 text-white transition-all duration-200">
-      <%= helpers.heroicon('x-mark', css_class: 'w-6 h-6') %>
+  <!-- Close Button -->
+  <button onclick="event.stopPropagation(); closePhotoModal_<%= object_id %>();" 
+          class="fixed top-6 right-6 z-[60] bg-gray-900/90 hover:bg-gray-900 backdrop-blur-sm rounded-full p-3 text-white hover:text-gray-200 shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+          title="Close photo gallery"
+          aria-label="Close photo gallery">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+  
+  <!-- Photo Counter -->
+  <div class="fixed top-6 left-6 z-[60] bg-gray-900/90 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-medium shadow-xl">
+    <span id="current-photo-number">1</span> of <%= photos.count %>
+  </div>
+  
+  <!-- Left Navigation Arrow -->
+  <% if photos.count > 1 %>
+    <button onclick="event.stopPropagation(); previousPhoto_<%= object_id %>();" 
+            class="fixed left-6 top-1/2 transform -translate-y-1/2 z-[60] bg-gray-900/90 hover:bg-gray-900 backdrop-blur-sm rounded-full p-4 text-white hover:text-gray-200 shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+            title="Previous photo"
+            aria-label="Previous photo">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
     </button>
     
-    <!-- Photo Counter -->
-    <div class="absolute top-4 left-4 z-10 bg-black bg-opacity-60 text-white px-3 py-2 rounded-lg text-sm">
-      <span id="current-photo-number">1</span> / <%= photos.count %>
-    </div>
-    
-    <!-- Navigation Arrows -->
-    <% if photos.count > 1 %>
-      <button onclick="previousPhoto_<%= object_id %>()" 
-              class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-3 text-white transition-all duration-200">
-        <%= helpers.heroicon('chevron-left', css_class: 'w-6 h-6') %>
-      </button>
-      
-      <button onclick="nextPhoto_<%= object_id %>()" 
-              class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-3 text-white transition-all duration-200">
-        <%= helpers.heroicon('chevron-right', css_class: 'w-6 h-6') %>
-      </button>
-    <% end %>
-    
-    <!-- Main Photo Display -->
-    <div class="w-full max-w-5xl max-h-full flex items-center justify-center">
-      <img id="modal-photo" 
-           src="" 
-           alt="" 
-           class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
-    </div>
-    
-    <!-- Photo Info -->
-    <div class="absolute bottom-4 left-4 right-4 z-10 bg-black bg-opacity-60 text-white p-4 rounded-lg">
-      <p id="modal-photo-alt" class="text-sm font-medium"></p>
-    </div>
+    <!-- Right Navigation Arrow -->
+    <button onclick="event.stopPropagation(); nextPhoto_<%= object_id %>();" 
+            class="fixed right-6 top-1/2 transform -translate-y-1/2 z-[60] bg-gray-900/90 hover:bg-gray-900 backdrop-blur-sm rounded-full p-4 text-white hover:text-gray-200 shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+            title="Next photo"
+            aria-label="Next photo">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  <% end %>
+  
+  <!-- Main Photo Display -->
+  <div class="w-full h-full flex items-center justify-center px-20 py-20" onclick="event.stopPropagation()">
+    <img id="modal-photo" 
+         src="" 
+         alt="" 
+         class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+  </div>
+  
+  <!-- Photo Info -->
+  <div class="fixed bottom-6 left-6 right-6 z-[60] bg-gray-900/90 backdrop-blur-sm text-white p-4 rounded-lg shadow-xl">
+    <p id="modal-photo-alt" class="text-sm font-medium text-center"></p>
   </div>
 </div>
 

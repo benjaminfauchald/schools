@@ -34,21 +34,21 @@ class Schools::VideoGalleryComponent < ViewComponent::Base
   end
 
   def youtube_thumbnail_url(video)
-    video_id = video[:video_id] || video['video_id']
+    video_id = video[:video_id] || video["video_id"]
     "https://img.youtube.com/vi/#{video_id}/hqdefault.jpg"
   end
 
   def youtube_embed_url(video)
-    video_id = video[:video_id] || video['video_id']
+    video_id = video[:video_id] || video["video_id"]
     "https://www.youtube.com/embed/#{video_id}?autoplay=1&rel=0"
   end
 
   def video_title(video)
-    video[:title] || video['title'] || 'Video'
+    video[:title] || video["title"] || "Video"
   end
 
   def video_description(video)
-    description = video[:description] || video['description'] || ''
+    description = video[:description] || video["description"] || ""
     description.length > 100 ? "#{description[0..97]}..." : description
   end
 end

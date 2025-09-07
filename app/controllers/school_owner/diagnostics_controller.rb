@@ -1,16 +1,16 @@
 class SchoolOwner::DiagnosticsController < ApplicationController
   before_action :authenticate_user!
   before_action :ensure_school_owner
-  
+
   def schema_info
     # This will help us understand what we're working with
     render json: {
       school_columns: School.column_names,
-      school_column_types: School.columns_hash.transform_values { |col| 
-        { 
-          type: col.type, 
+      school_column_types: School.columns_hash.transform_values { |col|
+        {
+          type: col.type,
           sql_type: col.sql_type,
-          default: col.default 
+          default: col.default
         }
       },
       associations: {

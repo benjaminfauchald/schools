@@ -4,7 +4,7 @@ class AddDeviseToAdmins < ActiveRecord::Migration[8.0]
       # Only add columns that don't already exist
       # Skip email since it already exists
       # t.string :email,              null: false, default: "" # SKIP - already exists
-      
+
       t.string   :encrypted_password, null: false, default: ""
       t.string   :reset_password_token
       t.datetime :reset_password_sent_at

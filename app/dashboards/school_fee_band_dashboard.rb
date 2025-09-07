@@ -14,7 +14,7 @@ class SchoolFeeBandDashboard < Administrate::BaseDashboard
     grade_to: Field::Number,
     school_fee_schedule: Field::BelongsTo,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

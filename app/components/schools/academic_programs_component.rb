@@ -36,10 +36,10 @@ class Schools::AcademicProgramsComponent < ViewComponent::Base
   def curriculum_groups
     # Group curricula by type for better organization
     {
-      'International Baccalaureate' => curricula.select { |c| c.slug.include?('ib_') },
-      'UK Curriculum' => curricula.select { |c| c.slug.include?('uk_') },
-      'US Curriculum' => curricula.select { |c| c.slug.include?('us_') },
-      'Other Programs' => curricula.reject { |c| c.slug.match?(/^(ib_|uk_|us_)/) }
+      "International Baccalaureate" => curricula.select { |c| c.slug.include?("ib_") },
+      "UK Curriculum" => curricula.select { |c| c.slug.include?("uk_") },
+      "US Curriculum" => curricula.select { |c| c.slug.include?("us_") },
+      "Other Programs" => curricula.reject { |c| c.slug.match?(/^(ib_|uk_|us_)/) }
     }.reject { |_, terms| terms.empty? }
   end
 
@@ -48,45 +48,57 @@ class Schools::AcademicProgramsComponent < ViewComponent::Base
 
     if curricula.any?
       sections << {
-        title: 'Curriculum',
-        icon: 'academic-cap',
+        title: "Curriculum",
+        icon: "academic-cap",
         items: curricula,
         variant: :curriculum,
-        description: 'Academic programs and educational frameworks'
+        description: "Academic programs and educational frameworks"
       }
     end
 
     if accreditations.any?
       sections << {
-        title: 'Accreditations',
-        icon: 'star',
+        title: "Accreditations",
+        icon: "star",
         items: accreditations,
         variant: :accreditation,
-        description: 'Official certifications and recognitions'
+        description: "Official certifications and recognitions"
       }
     end
 
     if languages.any?
       sections << {
-        title: 'Languages',
-        icon: 'globe',
+        title: "Languages",
+        icon: "globe",
         items: languages,
         variant: :language,
-        description: 'Languages of instruction and support'
+        description: "Languages of instruction and support"
       }
     end
 
     if programs.any?
       sections << {
-        title: 'Special Programs',
-        icon: 'building-office',
+        title: "Special Programs",
+        icon: "building-office",
         items: programs,
         variant: :program,
-        description: 'Additional support and enrichment programs'
+        description: "Additional support and enrichment programs"
       }
     end
 
     sections
+  end
+
+  def show_curricula?
+    curricula.any?
+  end
+
+  def show_languages?
+    languages.any?
+  end
+
+  def show_accreditations?
+    accreditations.any?
   end
 
   def section_icon_svg(icon_name)

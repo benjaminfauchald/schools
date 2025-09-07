@@ -12,7 +12,7 @@ class CreateTempClaims < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :temp_claims, :token, unique: true
     add_index :temp_claims, :email
     add_index :temp_claims, :status

@@ -1,32 +1,32 @@
 module Admin
   class EventsController < Admin::ApplicationController
-    before_action :set_event, only: [:show, :edit, :update, :destroy]
-    
+    before_action :set_event, only: [ :show, :edit, :update, :destroy ]
+
     def index
       search_term = params[:search]
-      
+
       @events = Event.includes(:place).all
-      
+
       # Apply search filter
       if search_term.present?
         @events = @events.joins(:place).where(
-          "events.title ILIKE ? OR events.description ILIKE ? OR places.name ILIKE ?", 
+          "events.title ILIKE ? OR events.description ILIKE ? OR places.name ILIKE ?",
           "%#{search_term}%", "%#{search_term}%", "%#{search_term}%"
         )
       end
-      
+
       # Apply status filter
       if params[:status].present?
         case params[:status]
-        when 'upcoming'
+        when "upcoming"
           @events = @events.upcoming
-        when 'ongoing'
+        when "ongoing"
           @events = @events.ongoing
-        when 'past'
+        when "past"
           @events = @events.past
         end
       end
-      
+
       @events = @events.order(:starts_at).limit(50)
       @total_events = Event.count
       @upcoming_events = Event.upcoming.count
@@ -40,36 +40,36 @@ module Admin
 
     def new
       @event = Event.new
-      @places = Place.joins(:school).order('places.name')
+      @places = Place.joins(:school).order("places.name")
     end
 
     def create
       @event = Event.new(event_params)
-      
+
       if @event.save
-        redirect_to admin_event_path(@event), notice: 'Event was successfully created.'
+        redirect_to admin_event_path(@event), notice: "Event was successfully created."
       else
-        @places = Place.joins(:school).order('places.name')
+        @places = Place.joins(:school).order("places.name")
         render :new, status: :unprocessable_entity
       end
     end
 
     def edit
-      @places = Place.joins(:school).order('places.name')
+      @places = Place.joins(:school).order("places.name")
     end
 
     def update
       if @event.update(event_params)
-        redirect_to admin_event_path(@event), notice: 'Event was successfully updated.'
+        redirect_to admin_event_path(@event), notice: "Event was successfully updated."
       else
-        @places = Place.joins(:school).order('places.name')
+        @places = Place.joins(:school).order("places.name")
         render :edit, status: :unprocessable_entity
       end
     end
 
     def destroy
       @event.destroy
-      redirect_to admin_events_path, notice: 'Event was successfully deleted.'
+      redirect_to admin_events_path, notice: "Event was successfully deleted."
     end
 
     private
@@ -77,7 +77,7 @@ module Admin
     def set_event
       @event = Event.find(params[:id])
     rescue ActiveRecord::RecordNotFound
-      redirect_to admin_events_path, alert: 'Event not found.'
+      redirect_to admin_events_path, alert: "Event not found."
     end
 
     def event_params

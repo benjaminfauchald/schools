@@ -15,9 +15,9 @@ class CreateYoutubeVideos < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :youtube_videos, [:place_id, :video_id], unique: true
-    add_index :youtube_videos, [:place_id, :visible]
-    add_index :youtube_videos, [:place_id, :sort_order]
+
+    add_index :youtube_videos, [ :place_id, :video_id ], unique: true
+    add_index :youtube_videos, [ :place_id, :visible ]
+    add_index :youtube_videos, [ :place_id, :sort_order ]
   end
 end

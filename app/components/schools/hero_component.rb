@@ -21,7 +21,7 @@ class Schools::HeroComponent < ViewComponent::Base
 
   def rating_display
     return unless hero_data[:rating]
-    
+
     rating = hero_data[:rating]
     {
       stars: rating[:stars_display],
@@ -37,34 +37,34 @@ class Schools::HeroComponent < ViewComponent::Base
 
   def contact_actions
     actions = []
-    
+
     # Only show claim button for unclaimed schools - no other buttons
     if should_show_claim_button?
       actions << claim_button_action
     end
-    
+
     actions
   end
 
   def should_show_claim_button?
     return false unless school
     return false if school.active_claims?
-    
+
     if helpers.user_signed_in?
       user = helpers.current_user
       return false unless user&.school_owner?
       # Don't show if user can already edit this school or has pending/active claim
-      !user.can_edit_school?(school) && !user.school_claims.where(school: school).where(status: ['pending', 'approved'], revoked_at: nil).exists?
+      !user.can_edit_school?(school) && !user.school_claims.where(school: school).where(status: [ "pending", "approved" ], revoked_at: nil).exists?
     else
       # Show for anonymous users if school has no active claims
       true
     end
   end
-  
+
   def claim_button_action
     {
-      label: 'Claim This School',
-      icon: 'building-office-2',
+      label: "Claim This School",
+      icon: "building-office-2",
       url: helpers.new_direct_claim_path(school_id: school.id),
       primary: true,
       claim_button: true
@@ -77,13 +77,13 @@ class Schools::HeroComponent < ViewComponent::Base
 
   def action_button_classes(action)
     if action[:claim_button]
-      'bg-green-600 hover:bg-green-700 text-white shadow-lg'
+      "bg-green-600 hover:bg-green-700 text-white shadow-lg"
     elsif action[:contact_button]
-      'bg-blue-600 hover:bg-blue-700 text-white shadow-lg'
+      "bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
     elsif action[:primary]
-      'bg-blue-600 hover:bg-blue-700 text-white'
+      "bg-blue-600 hover:bg-blue-700 text-white"
     else
-      'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
+      "bg-white hover:bg-gray-50 text-gray-900 border border-gray-300"
     end
   end
 

@@ -23,7 +23,7 @@ class SchoolFeeScheduleDashboard < Administrate::BaseDashboard
     school_fee_bands: Field::HasMany,
     transport_fee_annual: Field::String.with_options(searchable: false),
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

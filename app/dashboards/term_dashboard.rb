@@ -20,7 +20,7 @@ class TermDashboard < Administrate::BaseDashboard
     taggings: Field::HasMany,
     vocabulary: Field::BelongsTo,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

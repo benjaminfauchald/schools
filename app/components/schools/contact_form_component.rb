@@ -8,11 +8,11 @@ class Schools::ContactFormComponent < ViewComponent::Base
     @school_inquiry = SchoolInquiry.new
   end
 
-  private
-
-  attr_reader :school, :contact_info, :user_signed_in, :facebook_authenticated, :debug_mode, :school_inquiry
-
   def render?
     school.present?
   end
+
+  private
+
+  attr_reader :school, :contact_info, :user_signed_in, :facebook_authenticated, :debug_mode, :school_inquiry
 end

@@ -1,5 +1,5 @@
 class PlacesController < ApplicationController
-  before_action :find_place, only: [:show]
+  before_action :find_place, only: [ :show ]
 
   def show
     @place = @place_record
@@ -23,7 +23,7 @@ class PlacesController < ApplicationController
 
     home_lat = params[:home_lat].to_f
     home_lng = params[:home_lng].to_f
-    
+
     calculate_distance(home_lat, home_lng, @place_record.lat, @place_record.lng)
   end
 end

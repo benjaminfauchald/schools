@@ -15,45 +15,45 @@ class Schools::FacilitiesGridComponent < ViewComponent::Base
 
   def facility_groups
     @facility_groups ||= {
-      'Academic Facilities' => {
+      "Academic Facilities" => {
         items: facilities.select { |f| academic_facilities.include?(f.slug) },
-        icon: 'academic-cap',
-        color: 'blue'
+        icon: "academic-cap",
+        color: "blue"
       },
-      'Sports & Recreation' => {
+      "Sports & Recreation" => {
         items: facilities.select { |f| sports_facilities.include?(f.slug) },
-        icon: 'trophy',
-        color: 'green'
+        icon: "trophy",
+        color: "green"
       },
-      'Dining & Nutrition' => {
+      "Dining & Nutrition" => {
         items: facilities.select { |f| dining_facilities.include?(f.slug) },
-        icon: 'cake',
-        color: 'orange'
+        icon: "cake",
+        color: "orange"
       },
-      'Health & Wellness' => {
+      "Health & Wellness" => {
         items: facilities.select { |f| health_facilities.include?(f.slug) },
-        icon: 'heart',
-        color: 'red'
+        icon: "heart",
+        color: "red"
       },
-      'Technology & Innovation' => {
+      "Technology & Innovation" => {
         items: facilities.select { |f| tech_facilities.include?(f.slug) },
-        icon: 'computer-desktop',
-        color: 'purple'
+        icon: "computer-desktop",
+        color: "purple"
       },
-      'Arts & Culture' => {
+      "Arts & Culture" => {
         items: facilities.select { |f| arts_facilities.include?(f.slug) },
-        icon: 'musical-note',
-        color: 'pink'
+        icon: "musical-note",
+        color: "pink"
       },
-      'Campus Services' => {
+      "Campus Services" => {
         items: facilities.select { |f| service_facilities.include?(f.slug) },
-        icon: 'building-office',
-        color: 'gray'
+        icon: "building-office",
+        color: "gray"
       },
-      'Other Facilities' => {
+      "Other Facilities" => {
         items: facilities.reject { |f| categorized_facilities.include?(f.slug) },
-        icon: 'squares-plus',
-        color: 'indigo'
+        icon: "squares-plus",
+        color: "indigo"
       }
     }.select { |_, group| group[:items].any? }
   end

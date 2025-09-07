@@ -3,7 +3,7 @@ class AddOmniauthToUsers < ActiveRecord::Migration[8.0]
     add_column :users, :provider, :string
     add_column :users, :uid, :string
     add_column :users, :facebook_name, :string
-    
-    add_index :users, [:provider, :uid], unique: true
+
+    add_index :users, [ :provider, :uid ], unique: true
   end
 end

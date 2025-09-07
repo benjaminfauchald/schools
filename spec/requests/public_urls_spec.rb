@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Public URLs', type: :request do
   # Create test data needed for URL testing
-  let!(:school) { create(:school, :with_media, status: 'published') }
+  let!(:school) { create(:school, status: 'published') }
   let!(:place) { school.place }
   let!(:page) { create(:page, school: school, title: 'About Us', content: 'Test content', status: 'published') }
 
@@ -10,9 +10,9 @@ RSpec.describe 'Public URLs', type: :request do
   let(:test_coordinates) { { lat: 13.7563, lng: 100.5018 } }
 
   before do
-    # Mock Puppeteer detection to bypass onboarding redirects  
+    # Mock Puppeteer detection to bypass onboarding redirects
     allow_any_instance_of(ApplicationController).to receive(:puppeteer_request?).and_return(true)
-    
+
     # Mock location methods in SchoolsController specifically
     allow_any_instance_of(SchoolsController).to receive(:get_home_location_from_client).and_return(test_coordinates)
   end
@@ -25,9 +25,9 @@ RSpec.describe 'Public URLs', type: :request do
     end
 
     it 'returns 200 for onboarding' do
-      # Temporarily disable Puppeteer mock for onboarding test  
+      # Temporarily disable Puppeteer mock for onboarding test
       allow_any_instance_of(ApplicationController).to receive(:puppeteer_request?).and_return(false)
-      
+
       get '/onboarding'
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('location')
@@ -46,7 +46,7 @@ RSpec.describe 'Public URLs', type: :request do
     end
 
     it 'returns 200 for privacy policy' do
-      get privacy_policy_path  
+      get privacy_policy_path
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Privacy')
     end
@@ -65,7 +65,7 @@ RSpec.describe 'Public URLs', type: :request do
     end
 
     it 'returns 200 for schools filtered' do
-      get '/schools/filtered', params: { 
+      get '/schools/filtered', params: {
         home_lat: test_coordinates[:lat],
         home_lng: test_coordinates[:lng],
         radius: 50
@@ -93,7 +93,7 @@ RSpec.describe 'Public URLs', type: :request do
     it 'returns 200 for school page show' do
       # The page might not be found, so check if it redirects or returns 200
       get school_page_path(school_id: school.id, id: page.id)
-      expect([200, 302, 404]).to include(response.status)
+      expect([ 200, 302, 404 ]).to include(response.status)
       # If successful, should include the page title
       if response.status == 200
         expect(response.body).to include(page.title)
@@ -109,7 +109,7 @@ RSpec.describe 'Public URLs', type: :request do
     it 'redirects claim success page without session data' do
       # Without session data, this should redirect or show an error page
       get direct_claim_success_path
-      expect([200, 302, 404]).to include(response.status)
+      expect([ 200, 302, 404 ]).to include(response.status)
       # This page requires session data, so without it, behavior is acceptable
     end
   end
@@ -147,7 +147,7 @@ RSpec.describe 'Public URLs', type: :request do
       expect(response.body).to include('Schools')
     end
 
-    it 'returns 200 for TH locale root' do  
+    it 'returns 200 for TH locale root' do
       get root_path(locale: 'th')
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Schools')
@@ -160,7 +160,7 @@ RSpec.describe 'Public URLs', type: :request do
     end
 
     it 'returns 200 for TH locale school page' do
-      get school_path(id: school.id, locale: 'th') 
+      get school_path(id: school.id, locale: 'th')
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(school.name)
     end
@@ -170,7 +170,7 @@ RSpec.describe 'Public URLs', type: :request do
     it 'handles missing location gracefully' do
       # Clear location cookies
       cookies.delete(:home_location)
-      
+
       get root_path
       expect(response).to have_http_status(:ok)
       # Should still render but might redirect to onboarding
@@ -184,7 +184,7 @@ RSpec.describe 'Public URLs', type: :request do
     it 'handles non-existent place gracefully' do
       get place_path(id: 99999)
       # The app might redirect instead of returning 404, both are acceptable
-      expect([302, 404]).to include(response.status)
+      expect([ 302, 404 ]).to include(response.status)
     end
 
     it 'returns 200 for schools search with no results' do
@@ -193,7 +193,7 @@ RSpec.describe 'Public URLs', type: :request do
     end
 
     it 'returns 200 for schools filtered with no results' do
-      get '/schools/filtered', params: { 
+      get '/schools/filtered', params: {
         home_lat: 0.0,  # Middle of ocean - no schools
         home_lng: 0.0,
         radius: 1
@@ -215,7 +215,7 @@ RSpec.describe 'Public URLs', type: :request do
         start_time = Time.current
         get route
         load_time = Time.current - start_time
-        
+
         expect(response).to have_http_status(:ok)
         expect(load_time).to be < 5.0 # Should load within 5 seconds
       end

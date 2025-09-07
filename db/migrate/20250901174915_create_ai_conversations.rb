@@ -9,8 +9,8 @@ class CreateAiConversations < ActiveRecord::Migration[8.0]
       t.datetime :last_message_at
 
       t.timestamps
-      
-      t.index [:school_id, :user_id]
+
+      t.index [ :school_id, :user_id ]
       t.index :last_message_at
       t.index :status
     end

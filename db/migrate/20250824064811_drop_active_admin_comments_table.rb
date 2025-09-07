@@ -8,9 +8,9 @@ class DropActiveAdminCommentsTable < ActiveRecord::Migration[8.0]
       t.string :author_type
       t.bigint :author_id
       t.timestamps
-      t.index [:author_type, :author_id], name: "index_active_admin_comments_on_author"
-      t.index [:namespace], name: "index_active_admin_comments_on_namespace"
-      t.index [:resource_type, :resource_id], name: "index_active_admin_comments_on_resource"
+      t.index [ :author_type, :author_id ], name: "index_active_admin_comments_on_author"
+      t.index [ :namespace ], name: "index_active_admin_comments_on_namespace"
+      t.index [ :resource_type, :resource_id ], name: "index_active_admin_comments_on_resource"
     end
   end
 end

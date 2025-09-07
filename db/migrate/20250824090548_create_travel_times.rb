@@ -9,8 +9,8 @@ class CreateTravelTimes < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :travel_times, [:place_id, :origin_hash, :mode], unique: true
+
+    add_index :travel_times, [ :place_id, :origin_hash, :mode ], unique: true
     add_index :travel_times, :computed_at
   end
 end

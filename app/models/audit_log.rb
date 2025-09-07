@@ -3,91 +3,91 @@
 class AuditLog < ApplicationRecord
   belongs_to :auditable, polymorphic: true
   # Note: user_id will reference User model when it exists
-  
-  validates :action, presence: true, inclusion: { 
+
+  validates :action, presence: true, inclusion: {
     in: %w[create update delete submit approve reject suspend publish unpublish]
   }
   validates :auditable_type, :auditable_id, presence: true
-  
+
   scope :by_action, ->(action) { where(action: action) }
   scope :by_model, ->(model_type) { where(auditable_type: model_type) }
   scope :recent, ->(limit = 50) { order(created_at: :desc).limit(limit) }
   scope :for_record, ->(record) { where(auditable: record) }
   scope :by_user, ->(user_id) { where(user_id: user_id) }
-  
+
   # Get human-readable action description
   def action_description
     case action
-    when 'create'
-      'Created'
-    when 'update'
-      'Updated'
-    when 'delete'
-      'Deleted'
-    when 'submit'
-      'Submitted for review'
-    when 'approve'
-      'Approved'
-    when 'reject'
-      'Rejected'
-    when 'suspend'
-      'Suspended'
-    when 'publish'
-      'Published'
-    when 'unpublish'
-      'Unpublished'
+    when "create"
+      "Created"
+    when "update"
+      "Updated"
+    when "delete"
+      "Deleted"
+    when "submit"
+      "Submitted for review"
+    when "approve"
+      "Approved"
+    when "reject"
+      "Rejected"
+    when "suspend"
+      "Suspended"
+    when "publish"
+      "Published"
+    when "unpublish"
+      "Unpublished"
     else
       action.humanize
     end
   end
-  
+
   # Get changed field names as readable list
   def changed_fields_display
-    return 'No changes recorded' if changed_fields.blank?
-    
+    return "No changes recorded" if changed_fields.blank?
+
     fields = changed_fields.keys.map(&:humanize)
-    
+
     case fields.size
     when 1
       fields.first
     when 2
-      fields.join(' and ')
+      fields.join(" and ")
     else
       "#{fields[0...-1].join(', ')}, and #{fields.last}"
     end
   end
-  
+
   # Get summary of changes for display
   def change_summary
     return "#{action_description} #{auditable_type.underscore.humanize.downcase}" if changed_fields.blank?
-    
+
     "#{action_description} #{changed_fields_display.downcase}"
   end
-  
+
   # Check if this was a significant change (not just timestamps)
   def significant_change?
     return true if %w[create delete submit approve reject suspend publish unpublish].include?(action)
     return false if changed_fields.blank?
-    
+
     # Ignore timestamp-only changes
     significant_fields = changed_fields.keys - %w[updated_at created_at]
     significant_fields.any?
   end
-  
+
   # Get the previous value for a field
   def previous_value(field)
     changed_fields.dig(field.to_s, 0)
   end
-  
-  # Get the new value for a field  
+
+  # Get the new value for a field
   def new_value(field)
     changed_fields.dig(field.to_s, 1)
   end
-  
+
   # Time since this change was made
   def time_ago
     time_diff = Time.current - created_at
-    
+
     case time_diff
     when 0..59
       "#{time_diff.to_i} seconds ago"
@@ -99,11 +99,11 @@ class AuditLog < ApplicationRecord
       "#{(time_diff / 86400).to_i} days ago"
     end
   end
-  
+
   # Helper class method to create audit logs with proper change tracking
   def self.create_for_record(record, action, user_id = nil, custom_changes = nil)
     return unless record.present?
-    
+
     # Determine changes to record
     changes_hash = case custom_changes
     when Hash
@@ -111,28 +111,28 @@ class AuditLog < ApplicationRecord
       custom_changes
     when Array
       # Convert field names to Rails changes
-      if action == 'update' && record.previous_changes.present?
+      if action == "update" && record.previous_changes.present?
         record.previous_changes.slice(*custom_changes)
-      elsif action == 'update' && record.changes.present?
+      elsif action == "update" && record.changes.present?
         record.changes.slice(*custom_changes)
       else
         # For creates/deletes, create [nil, current_value] pairs
         custom_changes.each_with_object({}) do |field, hash|
           current_value = record.try(field)
-          hash[field] = action == 'delete' ? [current_value, nil] : [nil, current_value]
+          hash[field] = action == "delete" ? [ current_value, nil ] : [ nil, current_value ]
         end
       end
     else
       # Use all available changes from the model
       record.previous_changes.presence || record.changes || {}
     end
-    
+
     # Clean up timestamps unless specifically requested
-    changes_hash = changes_hash.except('updated_at', 'created_at') unless custom_changes.is_a?(Hash)
-    
+    changes_hash = changes_hash.except("updated_at", "created_at") unless custom_changes.is_a?(Hash)
+
     # Only create if there are changes or it's a significant action
     return if changes_hash.empty? && !%w[create delete submit approve reject suspend].include?(action.to_s)
-    
+
     create!(
       auditable: record,
       user_id: user_id,

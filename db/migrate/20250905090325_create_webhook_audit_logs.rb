@@ -15,6 +15,6 @@ class CreateWebhookAuditLogs < ActiveRecord::Migration[8.0]
     add_index :webhook_audit_logs, :facebook_user_id
     add_index :webhook_audit_logs, :webhook_type
     add_index :webhook_audit_logs, :processed_at
-    add_index :webhook_audit_logs, [:webhook_type, :facebook_user_id], name: 'idx_webhook_audit_type_fb_user'
+    add_index :webhook_audit_logs, [ :webhook_type, :facebook_user_id ], name: 'idx_webhook_audit_type_fb_user'
   end
 end

@@ -51,7 +51,7 @@ class PlaceDashboard < Administrate::BaseDashboard
     website: Field::String,
     wheelchair_accessible_entrance: Field::Boolean,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

@@ -35,17 +35,17 @@ class Schools::DataRowComponent < ViewComponent::Base
   end
 
   def display_url(url)
-    return url unless url.start_with?('http')
-    
+    return url unless url.start_with?("http")
+
     begin
       uri = URI.parse(url)
       # Extract just the domain name, removing www if present
-      domain = uri.host&.sub(/^www\./, '') || url
+      domain = uri.host&.sub(/^www\./, "") || url
       domain
     rescue URI::InvalidURIError
       # Fallback to simple regex if URI parsing fails
-      cleaned = url.gsub(%r{^https?://(www\.)?}, '')
-      cleaned.split('/').first || cleaned
+      cleaned = url.gsub(%r{^https?://(www\.)?}, "")
+      cleaned.split("/").first || cleaned
     end
   end
 
@@ -56,12 +56,12 @@ class Schools::DataRowComponent < ViewComponent::Base
 
   def value_content
     if link.present?
-      link_to formatted_value, link, 
+      link_to formatted_value, link,
               class: "text-blue-600 hover:text-blue-800",
-              target: ([:url, :social].include?(format) ? '_blank' : nil),
-              rel: ([:url, :social].include?(format) ? 'noopener noreferrer' : nil)
+              target: ([ :url, :social ].include?(format) ? "_blank" : nil),
+              rel: ([ :url, :social ].include?(format) ? "noopener noreferrer" : nil)
     else
-      content_tag :span, formatted_value, 
+      content_tag :span, formatted_value,
                   class: "text-black"
     end
   end

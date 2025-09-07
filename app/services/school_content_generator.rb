@@ -1,28 +1,28 @@
 # Service class for generating AI-powered content for schools using Azure OpenAI
 class SchoolContentGenerator
-  require 'net/http'
-  require 'uri'
-  require 'json'
+  require "net/http"
+  require "uri"
+  require "json"
 
   def initialize(school, title = nil, description = nil)
     @school = school
     @title = title || "About #{school.name}"
     @description = description || "Learn about our school's history, mission, and educational philosophy."
-    @api_key = ENV['AZURE_OPENAI_API_KEY']
-    @endpoint = ENV['AZURE_OPENAI_ENDPOINT']
-    @deployment = ENV['AZURE_OPENAI_API_DEPLOYMENT']
+    @api_key = ENV["AZURE_OPENAI_API_KEY"]
+    @endpoint = ENV["AZURE_OPENAI_ENDPOINT"]
+    @deployment = ENV["AZURE_OPENAI_API_DEPLOYMENT"]
   end
 
   def generate_page
     return unless @api_key.present? && @endpoint.present? && @deployment.present?
-    
+
     # Check if page already exists for this title
     slug = @title.parameterize
     return if @school.pages.where(slug: slug).exists?
 
     # Generate content using OpenAI
     content = generate_ai_content_only
-    
+
     return unless content.present?
 
     # Create the page
@@ -30,8 +30,8 @@ class SchoolContentGenerator
       title: @title,
       content: content[:html_content],
       page_type: determine_page_type(@title),
-      status: 'published',
-      author: 'AI Generated',
+      status: "published",
+      author: "AI Generated",
       meta_description: content[:meta_description],
       published_at: Time.current,
       sort_order: 0
@@ -47,7 +47,7 @@ class SchoolContentGenerator
       Rails.logger.error "Missing Azure OpenAI configuration: API_KEY=#{@api_key.present?}, ENDPOINT=#{@endpoint.present?}, DEPLOYMENT=#{@deployment.present?}"
       return nil
     end
-    
+
     # Compile school data for AI
     school_data = compile_school_data
 
@@ -74,19 +74,19 @@ class SchoolContentGenerator
       ownership: school.ownership,
       about: school.about,
       tone_of_voice: school.tone_of_voice,
-      
+
       # Location info
       address: school.display_address,
       district: school.district,
       province: school.province,
-      
+
       # Academic info
       grade_offerings: school.school_grade_offering&.grades,
       age_range: "#{school.school_grade_offering&.min_age&.to_i}-#{school.school_grade_offering&.max_age&.to_i}",
       boarding: school.boarding,
       school_bus: school.school_bus,
       language_support: school.language_support_notes,
-      
+
       # Facilities and programs
       curricula: school.curricula.pluck(:label),
       accreditations: school.accreditations.pluck(:label),
@@ -94,19 +94,19 @@ class SchoolContentGenerator
       languages: school.languages.pluck(:label),
       programs: school.programs.pluck(:label),
       extracurriculars: school.extracurriculars.pluck(:label),
-      
+
       # Fee information
       fee_range: school.tuition_range,
-      
+
       # Firecrawl data (primary source)
       website_crawl_data: school.website_crawl_data,
       website_structured_data: school.website_structured_data,
-      
+
       # Contact info
       phone: school.display_phone,
       email: school.email,
       website: school.display_website,
-      
+
       # Social media
       facebook_url: school.facebook_url,
       line_id: school.line_id,
@@ -116,32 +116,32 @@ class SchoolContentGenerator
 
   def generate_ai_content(school_data, title, description)
     prompt = build_master_prompt(school_data, title, description)
-    
+
     # Build Azure OpenAI endpoint URL
     azure_url = "#{endpoint}/openai/deployments/#{deployment}/chat/completions?api-version=2024-02-15-preview"
     uri = URI(azure_url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
-    
+
     request = Net::HTTP::Post.new(uri)
-    request['api-key'] = api_key  # Azure uses 'api-key' header instead of 'Authorization'
-    request['Content-Type'] = 'application/json'
-    
+    request["api-key"] = api_key  # Azure uses 'api-key' header instead of 'Authorization'
+    request["Content-Type"] = "application/json"
+
     # Build system message with tone of voice if available
     system_message = if school_data[:tone_of_voice].present?
       "You are a professional content writer specializing in educational institution marketing. Write engaging, informative content that highlights the unique aspects of each school. IMPORTANT: Adopt the following tone of voice throughout your writing: #{school_data[:tone_of_voice]}"
     else
-      'You are a professional content writer specializing in educational institution marketing. Write engaging, informative content that highlights the unique aspects of each school.'
+      "You are a professional content writer specializing in educational institution marketing. Write engaging, informative content that highlights the unique aspects of each school."
     end
-    
+
     request.body = {
       messages: [
         {
-          role: 'system',
+          role: "system",
           content: system_message
         },
         {
-          role: 'user',
+          role: "user",
           content: prompt
         }
       ],
@@ -151,11 +151,11 @@ class SchoolContentGenerator
 
     begin
       response = http.request(request)
-      
-      if response.code == '200'
+
+      if response.code == "200"
         result = JSON.parse(response.body)
-        content_text = result.dig('choices', 0, 'message', 'content')
-        
+        content_text = result.dig("choices", 0, "message", "content")
+
         return parse_ai_response(content_text) if content_text
       else
         Rails.logger.error "Azure OpenAI API error: #{response.code} - #{response.body}"
@@ -163,7 +163,7 @@ class SchoolContentGenerator
     rescue StandardError => e
       Rails.logger.error "Error calling Azure OpenAI API: #{e.message}"
     end
-    
+
     nil
   end
 
@@ -185,7 +185,7 @@ class SchoolContentGenerator
 
       Page Description: #{description}
 
-      
+#{'      '}
 
       School Information:
       - Name: #{school_data[:name]}
@@ -214,7 +214,7 @@ class SchoolContentGenerator
       - Phone: #{school_data[:phone] || 'Not specified'}
       - Email: #{school_data[:email] || 'Not specified'}
       - Website: #{school_data[:website] || 'Not specified'}
-- Website content: 
+- Website content:#{' '}
       #{crawl_data_summary}
 
 You are an expert content writer specializing in educational institution web content. Generate a well-structured HTML article using modern web design principles taking into account all the data you have on the school above.
@@ -237,12 +237,12 @@ HTML STRUCTURE TEMPLATE:
   <section class="prose prose-lg max-w-none">
     <h2 class="text-3xl font-semibold text-gray-800 mt-8 mb-4">[Section Title]</h2>
     <p class="text-gray-700 leading-relaxed mb-4">[Content paragraph]</p>
-    
+#{'    '}
     <!-- Use lists where appropriate -->
     <ul class="list-disc list-inside space-y-2 mb-6 text-gray-700">
       <li>[List item]</li>
     </ul>
-    
+#{'    '}
     <!-- Feature Cards (when listing programs/features) -->
     <div class="grid md:grid-cols-2 gap-6 my-8">
       <div class="bg-blue-50 rounded-lg p-6 border border-blue-100">
@@ -250,7 +250,7 @@ HTML STRUCTURE TEMPLATE:
         <p class="text-blue-800">[Feature description]</p>
       </div>
     </div>
-    
+#{'    '}
     <!-- Highlight Box for Important Info -->
     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-6 my-8 rounded-r-lg">
       <h3 class="text-lg font-semibold text-blue-900 mb-2">[Highlight Title]</h3>
@@ -327,45 +327,45 @@ Generate the complete HTML article now, ensuring every element has appropriate T
       META_DESCRIPTION_END
     PROMPT
     puts prompt
-    return prompt
+    prompt
   end
 
   def determine_page_type(title)
     case title.downcase
     when /about/
-      'about_us'
+      "about_us"
     when /swim|pool|aquatic/
-      'sports'
+      "sports"
     when /horse|equestrian|riding/
-      'activities'
+      "activities"
     when /academ|curriculum|education/
-      'academics'
+      "academics"
     when /sport|athletic|team|competition/
-      'sports'
+      "sports"
     when /activit|club|extracurricular/
-      'activities'
+      "activities"
     else
-      'blog'
+      "blog"
     end
   end
 
   def format_structured_data(structured_data)
     return "" unless structured_data.is_a?(Hash)
-    
+
     formatted_sections = []
-    
+
     # Format each section of structured data
     structured_data.each do |section_key, section_data|
       next unless section_data.is_a?(Hash) && section_data.any?
-      
+
       section_title = section_key.to_s.humanize.titlecase
       formatted_sections << "\n#{section_title}:"
-      
+
       section_data.each do |field_key, field_value|
         next unless field_value.present? && field_value != "N/A"
-        
+
         field_name = field_key.to_s.humanize
-        
+
         if field_value.is_a?(Array)
           formatted_sections << "- #{field_name}: #{field_value.join(', ')}"
         else
@@ -375,54 +375,54 @@ Generate the complete HTML article now, ensuring every element has appropriate T
         end
       end
     end
-    
+
     formatted_sections.join("\n")
   end
 
   def extract_meaningful_crawl_content(crawl_data)
     return "" unless crawl_data.is_a?(Array) && crawl_data.any?
-    
+
     # Extract and clean markdown content from all pages
     meaningful_content = crawl_data.map do |page|
       next "" unless page.is_a?(Hash) && page["markdown"].present?
-      
+
       markdown = page["markdown"]
-      
+
       # Remove analytics blocking and noise patterns - be more aggressive
       cleaned = markdown.dup
-      
+
       # Remove analytics blocking sections
       cleaned.gsub!(/app\.visitor-analytics\.io.*?ERR\\?_BLOCKED\\?_BY\\?_CLIENT.*?Reload\n*/m, "")
       cleaned.gsub!(/loadbalancer\.visitor-analytics\.io.*?ERR\\?_BLOCKED\\?_BY\\?_CLIENT.*?Reload\n*/m, "")
       cleaned.gsub!(/This page has been blocked by an extension.*?Reload\n*/m, "")
-      
+
       # Remove page structure noise
       cleaned.gsub!(/^top of page\s*\n*Skip to Main Content\s*\n*/m, "")
       cleaned.gsub!(/^bottom of page.*$/m, "")
-      
+
       # Remove cookie/privacy notices
       cleaned.gsub!(/We use cookies.*?Accept\s*\n*/m, "")
       cleaned.gsub!(/Privacy Policy.*?\n*/m, "")
       cleaned.gsub!(/Settings.*?Accept.*?Close\s*\n*/m, "")
-      
+
       # Remove base64 image placeholders
       cleaned.gsub!(/!\[\].*?<Base64-Image-Removed>.*?\)/m, "")
-      
+
       # Clean up extra whitespace
       cleaned.gsub!(/\n{3,}/, "\n\n")
       cleaned.gsub!(/\s+\n/, "\n")
       cleaned.strip!
-      
+
       # Only keep pages with substantial educational content
       has_educational_content = cleaned.match?(/school|education|student|academic|curriculum|program|class|learn|teach|grade/i)
-      
+
       if has_educational_content && cleaned.length > 200
         cleaned
       else
         ""
       end
     end.reject(&:empty?).join("\n\n")
-    
+
     # Return the cleaned, meaningful content
     meaningful_content.strip
   end
@@ -430,7 +430,7 @@ Generate the complete HTML article now, ensuring every element has appropriate T
   def parse_ai_response(content)
     html_match = content.match(/HTML_CONTENT_START\s*(.*?)\s*HTML_CONTENT_END/m)
     meta_match = content.match(/META_DESCRIPTION_START\s*(.*?)\s*META_DESCRIPTION_END/m)
-    
+
     return nil unless html_match
 
     {

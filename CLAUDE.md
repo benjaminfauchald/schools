@@ -437,3 +437,64 @@ end
 
 - Please use normal font black color everywhere on white background unless its a link
 - Style it with CSS so we can change it later if needed
+
+## ViewComponent Testing Best Practices
+
+### ❌ **WRONG: Do NOT test `render?` directly**
+
+```ruby
+# BAD - This will fail because render? is a private method in ViewComponent
+describe '#render?' do
+  it 'returns true when data exists' do
+    component = MyComponent.new(data: [item])
+    expect(component.render?).to be true  # ❌ NoMethodError: private method `render?`
+  end
+end
+```
+
+### ✅ **CORRECT: Test rendering behavior instead**
+
+```ruby
+# GOOD - Test the actual rendering behavior
+describe 'render behavior' do
+  it 'renders when data exists' do
+    component = MyComponent.new(data: [item])
+    rendered = render_inline(component)
+    expect(rendered.to_html.strip).not_to be_empty  # ✅ Tests actual output
+  end
+
+  it 'does not render when data is empty' do
+    component = MyComponent.new(data: [])
+    rendered = render_inline(component)
+    expect(rendered.to_html.strip).to be_empty  # ✅ Component returns nothing
+  end
+end
+```
+
+### Why This Approach is Better
+
+1. **Tests Actual Behavior**: Instead of testing internal implementation details (`render?`), we test what the user actually sees
+2. **Follows Black Box Testing**: We test inputs and outputs, not internal methods
+3. **More Reliable**: Changes to internal ViewComponent implementation won't break our tests
+4. **Better Error Messages**: When tests fail, you see exactly what HTML was (or wasn't) rendered
+
+### Testing Private Methods (When Necessary)
+
+If you absolutely need to test private methods for complex logic:
+
+```ruby
+# Use send() to access private methods
+describe 'private helper methods' do
+  let(:component) { MyComponent.new(data: data) }
+
+  it 'processes data correctly' do
+    result = component.send(:process_data)
+    expect(result).to eq(expected_result)
+  end
+end
+```
+
+## Best Practices and Workflow Notes
+
+- Always continue to fix tests until ALL tests are passing. Don't stop because you completed a task. All tests need to pass for you to be finished.
+- Always run Rubocop at the end. It needs to pass before you can consider your task finished

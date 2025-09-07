@@ -31,8 +31,8 @@ notification :terminal_notifier
 
 # Faster file watching on macOS
 guard :rspec, cmd: "bundle exec rspec" do
-  # run changed spec
-  watch(%r{^spec/.+_spec\.rb$})
+  # run changed spec (including any .rb file in spec/)
+  watch(%r{^spec/.+\.rb$}) { 'spec' }
 
   # model -> model spec
   watch(%r{^app/models/(.+)\.rb$})     { |m| "spec/models/#{m[1]}_spec.rb" }
@@ -44,10 +44,41 @@ guard :rspec, cmd: "bundle exec rspec" do
   watch(%r{^app/views/(.+)\.(erb|haml|slim)$})     { "spec/system" }
   watch(%r{^app/helpers/(.+)\.rb$})                { "spec/helpers" }
   watch(%r{^app/(view_components|components)/(.+)\.rb$}) { "spec/components" }
-  watch(%r{^app/(view_components|components)/(.+)\.(erb|haml|slim)$}) { "spec/components" }
+  watch(%r{^app/(view_components|components)/(.+)\.(erb|haml|slim)$}) { "spec" }
 
   # Stimulus controllers (adjust path if you use js/ts)
   watch(%r{^app/javascript/controllers/(.+)\.(js|ts)$}) { "spec/system" }
+
+  # Configuration files that might affect tests
+  watch(%r{^config/routes\.rb$}) { 'spec' }
+  watch(%r{^config/application\.rb$}) { 'spec' }
+  watch(%r{^config/environments/test\.rb$}) { 'spec' }
+  watch(%r{^config/initializers/.+\.rb$}) { 'spec' }
+
+  # Rake tasks that might affect application logic
+  watch(%r{^lib/tasks/.+\.rake$}) { 'spec' }
+
+  # Database changes
+  watch(%r{^db/migrate/.+\.rb$}) { 'spec' }
+  watch(%r{^db/schema\.rb$}) { 'spec' }
+  watch(%r{^db/seeds\.rb$}) { 'spec' }
+
+  # Gemfile changes
+  watch('Gemfile') { 'spec' }
+  watch('Gemfile.lock') { 'spec' }
+
+  # Mailers and email templates
+  watch(%r{^app/mailers/.+\.rb$}) { 'spec' }
+  watch(%r{^app/views/.+_mailer/.+\.(erb|html|text)$}) { 'spec' }
+
+  # Jobs (if you add background jobs)
+  watch(%r{^app/jobs/.+\.rb$}) { 'spec' }
+
+  # Services/POROs in app/services
+  watch(%r{^app/services/.+\.rb$}) { 'spec' }
+
+  # Locale files (since you have i18n)
+  watch(%r{^config/locales/.+\.yml$}) { 'spec/system' }
 
   # run everything if core helpers change
   watch('spec/spec_helper.rb') { 'spec' }

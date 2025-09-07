@@ -1,5 +1,5 @@
 # Test manual transcript creation to isolate the issue
-school = School.find(271) 
+school = School.find(271)
 video = school.place.youtube_videos.first
 
 puts '🧪 Testing manual transcript processing...'
@@ -8,7 +8,7 @@ puts "Video: #{video.title} (#{video.video_id})"
 # Create a test transcript
 transcript = video.place.transcripts.find_or_create_by(video_id: video.video_id) do |t|
   t.video_title = video.title
-  t.video_description = video.description  
+  t.video_description = video.description
   t.video_url = video.youtube_url
   t.status = 'pending'
 end

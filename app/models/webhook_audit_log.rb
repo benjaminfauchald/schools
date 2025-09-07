@@ -6,15 +6,15 @@ class WebhookAuditLog < ApplicationRecord
   validates :payload, presence: true
   validates :status, inclusion: { in: %w[processed failed invalid] }
 
-  scope :deletions, -> { where(webhook_type: 'deletion') }
-  scope :deauthorizations, -> { where(webhook_type: 'deauthorization') }
-  scope :successful, -> { where(status: 'processed') }
-  scope :failed, -> { where(status: 'failed') }
+  scope :deletions, -> { where(webhook_type: "deletion") }
+  scope :deauthorizations, -> { where(webhook_type: "deauthorization") }
+  scope :successful, -> { where(status: "processed") }
+  scope :failed, -> { where(status: "failed") }
   scope :recent, -> { order(processed_at: :desc) }
 
-  def self.log_deletion(facebook_user_id:, user: nil, payload:, status: 'processed', error_message: nil)
+  def self.log_deletion(facebook_user_id:, user: nil, payload:, status: "processed", error_message: nil)
     create!(
-      webhook_type: 'deletion',
+      webhook_type: "deletion",
       facebook_user_id: facebook_user_id,
       user: user,
       payload: payload,
@@ -24,9 +24,9 @@ class WebhookAuditLog < ApplicationRecord
     )
   end
 
-  def self.log_deauthorization(facebook_user_id:, user: nil, payload:, status: 'processed', error_message: nil)
+  def self.log_deauthorization(facebook_user_id:, user: nil, payload:, status: "processed", error_message: nil)
     create!(
-      webhook_type: 'deauthorization',
+      webhook_type: "deauthorization",
       facebook_user_id: facebook_user_id,
       user: user,
       payload: payload,
@@ -37,18 +37,18 @@ class WebhookAuditLog < ApplicationRecord
   end
 
   def successful?
-    status == 'processed'
+    status == "processed"
   end
 
   def failed?
-    status == 'failed'
+    status == "failed"
   end
 
   def deletion?
-    webhook_type == 'deletion'
+    webhook_type == "deletion"
   end
 
   def deauthorization?
-    webhook_type == 'deauthorization'
+    webhook_type == "deauthorization"
   end
 end

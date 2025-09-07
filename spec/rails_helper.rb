@@ -11,9 +11,9 @@ $VERBOSE = nil if Rails.env.test?
 # Configure Capybara for system tests
 Capybara.register_driver :cuprite do |app|
   Capybara::Cuprite::Driver.new(app, {
-    window_size: [1200, 800],
+    window_size: [ 1200, 800 ],
     inspector: true,
-    headless: !ENV['HEADLESS'].in?(['n', 'no', 'false']),
+    headless: !ENV['HEADLESS'].in?([ 'n', 'no', 'false' ]),
     browser_options: {
       'no-sandbox' => nil,
       'disable-web-security' => nil,
@@ -57,27 +57,30 @@ rescue => e
 end
 
 RSpec.configure do |config|
-
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
   config.use_transactional_fixtures = false
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
-  
+
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
-  
+
   # Include Capybara DSL in system tests
   config.include Capybara::DSL, type: :system
-  
+
   # Ensure system tests use Cuprite driver
   config.before(:each, type: :system) do
     driven_by :cuprite
   end
-  
+
   # Include Devise test helpers
   config.include Devise::Test::ControllerHelpers, type: :controller
   config.include Devise::Test::IntegrationHelpers, type: :request
   config.include Devise::Test::IntegrationHelpers, type: :system
+
+  # Include ViewComponent test helpers
+  config.include ViewComponent::TestHelpers, type: :component
+  config.include Capybara::RSpecMatchers, type: :component
 
   # AnyBar integration
   config.before(:suite) do
@@ -89,13 +92,12 @@ RSpec.configure do |config|
     if RSpec.configuration.reporter.failed_examples.empty?
       # All tests passed - set AnyBar to green
       send_to_anybar('green')
-#      `osascript -e 'display notification "All tests passed! ✅" with title "RSpec"'`
+    #      `osascript -e 'display notification "All tests passed! ✅" with title "RSpec"'`
     else
       # Some tests failed - set AnyBar to red
       send_to_anybar('red')
-#      failed_count = RSpec.configuration.reporter.failed_examples.count
-#      `osascript -e 'display notification "#{failed_count} tests failed ❌" with title "RSpec"'`
+      #      failed_count = RSpec.configuration.reporter.failed_examples.count
+      #      `osascript -e 'display notification "#{failed_count} tests failed ❌" with title "RSpec"'`
     end
   end
-
 end

@@ -17,7 +17,7 @@ class EventDashboard < Administrate::BaseDashboard
     title: Field::String,
     url: Field::String,
     created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    updated_at: Field::DateTime
   }.freeze
 
   # COLLECTION_ATTRIBUTES

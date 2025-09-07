@@ -6,7 +6,7 @@
 # you're free to overwrite the RESTful controller actions.
 module Admin
   class ApplicationController < Administrate::ApplicationController
-    layout 'admin'
+    layout "admin"
     before_action :authenticate_admin
     before_action :ensure_admin_access
 

@@ -2,7 +2,7 @@ require_relative "boot"
 
 require "rails"
 # Pick the frameworks you want:
-#require 'devise/orm/active_record'
+# require 'devise/orm/active_record'
 
 require "active_model/railtie"
 require "active_job/railtie"
@@ -29,9 +29,9 @@ module Schools
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
-    
+
     # Add fields directory to autoload paths for custom Administrate fields
-    config.autoload_paths += %W(#{config.root}/app/fields)
+    config.autoload_paths += %W[#{config.root}/app/fields]
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -40,24 +40,24 @@ module Schools
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
-    
+
     # Active Storage configuration
     config.active_storage.variant_processor = :mini_magick
-    
+
     # Add forms directory to autoload paths
-    config.autoload_paths << Rails.root.join('app', 'forms')
-    
+    config.autoload_paths << Rails.root.join("app", "forms")
+
     # Add Java to PATH for document processing (Apache Tika)
-    if File.exist?('/usr/local/opt/openjdk@21/bin/java')
-      ENV['PATH'] = "/usr/local/opt/openjdk@21/bin:#{ENV['PATH']}"
+    if File.exist?("/usr/local/opt/openjdk@21/bin/java")
+      ENV["PATH"] = "/usr/local/opt/openjdk@21/bin:#{ENV['PATH']}"
     end
 
     # Don't generate system test files.
     config.generators.system_tests = nil
-    
+
     # Internationalization (i18n) configuration
-    config.i18n.available_locales = [:en, :th]
+    config.i18n.available_locales = [ :en, :th ]
     config.i18n.default_locale = :en
-    config.i18n.fallbacks = [I18n.default_locale]
+    config.i18n.fallbacks = [ I18n.default_locale ]
   end
 end
