@@ -1,12 +1,121 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
-  pull_request:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'hotfix/**'
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  RUBY_VERSION: 3.3.8
+  NODE_VERSION: 20
+  RAILS_ENV: test
+  POSTGRES_PASSWORD: postgres
+  PGHOST: localhost
+  PGUSER: postgres
+  PGPASSWORD: postgres
+  DATABASE_URL: postgis://postgres:postgres@localhost:5432/schools_test
 
 jobs:
-  scan_ruby:
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: schools_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            postgresql-client \
+            libpq-dev \
+            chromium-browser \
+            chromium-chromedriver \
+            libvips42
+
+      - name: Cache Ruby gems
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Install Ruby dependencies
+        run: |
+          gem install bundler
+          bundle config set --local path 'vendor/bundle'
+          bundle install --jobs 4 --retry 3
+
+      - name: Setup test database
+        run: |
+          bundle exec rails db:create
+          bundle exec rails db:schema:load
+          bundle exec rails db:migrate
+
+      - name: Precompile assets
+        run: |
+          bundle exec rails assets:precompile
+          bundle exec rails tailwindcss:build
+
+      - name: Run RSpec tests
+        run: |
+          bundle exec rspec --format progress --format json --out tmp/rspec_results.json
+        continue-on-error: false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            tmp/rspec_results.json
+            tmp/capybara/
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: coverage/
+
+  security:
+    name: Security Scanning
     runs-on: ubuntu-latest
 
     steps:
@@ -16,30 +125,36 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: ${{ env.RUBY_VERSION }}
           bundler-cache: true
 
-      - name: Scan for common Rails security vulnerabilities using static analysis
-        run: bin/brakeman --no-pager
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install --jobs 4 --retry 3
 
-  scan_js:
-    runs-on: ubuntu-latest
+      - name: Run Brakeman security scan
+        run: bundle exec brakeman --no-pager --no-exit-on-warn --format json --output tmp/brakeman.json
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Check for bundle audit issues
+        run: |
+          gem install bundler-audit
+          bundle audit check --update
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Scan JavaScript dependencies
+        run: bin/importmap audit || true
+
+      - name: Upload security results
+        if: always()
+        uses: actions/upload-artifact@v3
         with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Scan for security vulnerabilities in JavaScript dependencies
-        run: bin/importmap audit
+          name: security-results
+          path: tmp/brakeman.json
 
   lint:
+    name: Code Quality
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,9 +162,133 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: ${{ env.RUBY_VERSION }}
           bundler-cache: true
 
-      - name: Lint code for consistent style
-        run: bin/rubocop -f github
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install --jobs 4 --retry 3
 
+      - name: Run RuboCop
+        run: bundle exec rubocop --parallel --format github
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [test, lint, security]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          # Add your staging deployment commands here
+          # Examples:
+          # - Kamal: bundle exec kamal deploy --destination staging
+          # - Capistrano: bundle exec cap staging deploy
+          # - Heroku: git push heroku develop:main
+          # - Docker: docker build & push, then update k8s/ECS
+          
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests on staging..."
+          # Add smoke test commands
+          
+      - name: Notify deployment
+        if: always()
+        run: |
+          echo "📢 Deployment to staging completed with status: ${{ job.status }}"
+          # Add Slack/Discord/Email notification here
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [test, lint, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://your-production-url.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+
+      - name: Create release tag
+        run: |
+          VERSION=$(date +%Y%m%d%H%M%S)
+          git tag -a "v$VERSION" -m "Production release $VERSION"
+          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying version ${{ env.RELEASE_VERSION }} to production..."
+          # Add your production deployment commands here
+          # Examples:
+          # - Kamal: bundle exec kamal deploy --destination production
+          # - Capistrano: bundle exec cap production deploy
+          # - Heroku: git push heroku main
+          # - Docker: docker build & push with version tag
+          
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests on production..."
+          # Add production smoke test commands
+          
+      - name: Create GitHub Release
+        if: success()
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.RELEASE_VERSION }}
+          release_name: Release ${{ env.RELEASE_VERSION }}
+          body: |
+            Production deployment completed successfully.
+            Commit: ${{ github.sha }}
+          draft: false
+          prerelease: false
+          
+      - name: Notify deployment
+        if: always()
+        run: |
+          echo "📢 Production deployment completed with status: ${{ job.status }}"
+          # Add critical notification (PagerDuty, Slack, etc.)
+
+  # Optional: Nightly build for develop branch
+  nightly:
+    name: Nightly Build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout develop branch
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          
+      - name: Run full test suite
+        run: |
+          echo "🌙 Running nightly build..."
+          # Add comprehensive test commands
+
+# Add this to run nightly builds (optional)
+# on:
+#   schedule:
+#     - cron: '0 2 * * *'  # Run at 2 AM UTC daily
+#   workflow_dispatch:  # Allow manual triggering

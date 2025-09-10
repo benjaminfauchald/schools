@@ -5,6 +5,11 @@ RSpec.describe 'School Inquiries', type: :request do
   let(:facebook_user) { create(:user, :facebook_user) }
   let(:regular_user) { create(:user) }
 
+  # Clear rate limit cache before each test to ensure test isolation
+  before do
+    Rails.cache.clear if Rails.cache.respond_to?(:clear)
+  end
+
   let(:valid_inquiry_params) do
     {
       school_inquiry: {
@@ -45,7 +50,7 @@ RSpec.describe 'School Inquiries', type: :request do
     end
 
     context 'when user is signed in but not Facebook authenticated' do
-      before { sign_in regular_user }
+      before { sign_in regular_user, scope: :user }
 
       it 'returns forbidden status' do
         post url, params: valid_inquiry_params, as: :json
@@ -69,7 +74,7 @@ RSpec.describe 'School Inquiries', type: :request do
     end
 
     context 'when user is Facebook authenticated' do
-      before { sign_in facebook_user }
+      before { sign_in facebook_user, scope: :user }
 
       context 'with valid parameters' do
         it 'returns success status' do
@@ -191,10 +196,10 @@ RSpec.describe 'School Inquiries', type: :request do
         let(:edge_case_params) do
           {
             school_inquiry: {
-              name: 'A' * 100,
+              name: 'A' * 100,  # Exactly at max length (100)
               email: 'test+tag@very-long-domain-name.example.com',
-              phone: '+1 (555) 123-4567 ext. 890',
-              message: 'X' * 2000,
+              phone: '+1 (555) 123-4567',  # Within 20 character limit
+              message: 'X' * 2000,  # Exactly at max length (2000)
               children_count: 10
             }
           }
@@ -242,7 +247,7 @@ RSpec.describe 'School Inquiries', type: :request do
     context 'when school does not exist' do
       let(:invalid_url) { school_school_inquiries_path(school_id: 999999) }
 
-      before { sign_in facebook_user }
+      before { sign_in facebook_user, scope: :user }
 
       it 'returns not found status' do
         post invalid_url, params: valid_inquiry_params, as: :json
@@ -283,7 +288,7 @@ RSpec.describe 'School Inquiries', type: :request do
   end
 
   describe 'parameter filtering' do
-    before { sign_in facebook_user }
+    before { sign_in facebook_user, scope: :user }
     let(:url) { school_school_inquiries_path(school_id: school.id) }
 
     context 'with additional unexpected parameters' do
@@ -323,7 +328,7 @@ RSpec.describe 'School Inquiries', type: :request do
   end
 
   describe 'rate limiting considerations' do
-    before { sign_in facebook_user }
+    before { sign_in facebook_user, scope: :user }
     let(:url) { school_school_inquiries_path(school_id: school.id) }
 
     it 'allows multiple inquiries from same user' do
@@ -338,7 +343,7 @@ RSpec.describe 'School Inquiries', type: :request do
   end
 
   describe 'content type handling' do
-    before { sign_in facebook_user }
+    before { sign_in facebook_user, scope: :user }
     let(:url) { school_school_inquiries_path(school_id: school.id) }
 
     it 'requires JSON content type' do
@@ -355,7 +360,7 @@ RSpec.describe 'School Inquiries', type: :request do
   end
 
   describe 'logging behavior' do
-    before { sign_in facebook_user }
+    before { sign_in facebook_user, scope: :user }
     let(:url) { school_school_inquiries_path(school_id: school.id) }
 
     it 'logs validation errors' do
@@ -373,14 +378,14 @@ RSpec.describe 'School Inquiries', type: :request do
   end
 
   describe 'inquiry data integrity' do
-    before { sign_in facebook_user }
+    before { sign_in facebook_user, scope: :user }
     let(:url) { school_school_inquiries_path(school_id: school.id) }
 
     it 'does not allow inquiry for non-existent school' do
-      expect {
-        post school_school_inquiries_path(school_id: 'nonexistent'),
-             params: valid_inquiry_params, as: :json
-      }.to raise_error(ActiveRecord::RecordNotFound)
+      # Try to post to non-existent school - should result in 404
+      post school_school_inquiries_path(school_id: 999999),
+           params: valid_inquiry_params, as: :json
+      expect(response).to have_http_status(:not_found)
     end
 
     it 'associates inquiry with correct user even with malicious params' do

@@ -498,3 +498,4 @@ end
 
 - Always continue to fix tests until ALL tests are passing. Don't stop because you completed a task. All tests need to pass for you to be finished.
 - Always run Rubocop at the end. It needs to pass before you can consider your task finished
+/file:.claude-on-rails/context.md

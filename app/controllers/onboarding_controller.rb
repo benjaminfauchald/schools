@@ -5,6 +5,14 @@ class OnboardingController < ApplicationController
     # Clean onboarding page for setting home location
   end
 
+  def complete
+    # Handle completion of onboarding
+    respond_to do |format|
+      format.html { redirect_to root_path, notice: "Welcome! Your home location has been set." }
+      format.json { render json: { status: "success", redirect_url: root_path } }
+    end
+  end
+
   private
 
   def check_puppeteer_bypass
@@ -13,19 +21,11 @@ class OnboardingController < ApplicationController
     Rails.logger.info "[ONBOARDING DEBUG] User-Agent: '#{user_agent}'"
     Rails.logger.info "[ONBOARDING DEBUG] Puppeteer check result: #{puppeteer_request?}"
 
+    # For puppeteer requests, just set the location data but don't redirect
+    # The location controller will handle the rest
     if puppeteer_request?
-      Rails.logger.info "[PUPPETEER BACKDOOR] Bypassing onboarding, redirecting to root"
-      # Set session data so JavaScript can find it
-      session[:puppeteer_location] = { lat: 13.6983415, lng: 100.5260653 }
-      redirect_to root_path
-    end
-  end
-
-  def complete
-    # Handle completion of onboarding
-    respond_to do |format|
-      format.html { redirect_to root_path, notice: "Welcome! Your home location has been set." }
-      format.json { render json: { status: "success", redirect_url: root_path } }
+      Rails.logger.info "[PUPPETEER BACKDOOR] Setting location data for onboarding page"
+      session[:puppeteer_location] = { lat: 13.7563, lng: 100.5018, formatted_address: "Bangkok, Thailand" }
     end
   end
 end

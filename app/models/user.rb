@@ -16,6 +16,11 @@ class User < ApplicationRecord
   # Validations
   validates :role, inclusion: { in: %w[school_owner admin] }
   validates :email, presence: true, uniqueness: true
+  validates :email, format: {
+    without: /<|>/,
+    message: "cannot contain HTML tags"
+  }, if: :email_changed?
+  validates :email, length: { maximum: 254 }, if: :email_changed?
   validates :provider, :uid, presence: true, if: -> { provider.present? || uid.present? }
 
   # Enums
@@ -26,38 +31,50 @@ class User < ApplicationRecord
 
   # OmniAuth methods
   def self.from_omniauth(auth)
+    # Sanitize input data to prevent XSS attacks - strip ALL HTML tags
+    sanitized_name = ActionController::Base.helpers.strip_tags(auth.info.name.to_s)
+    sanitized_email = ActionController::Base.helpers.strip_tags(auth.info.email.to_s).downcase.strip if auth.info.email.present?
+    sanitized_uid = auth.uid.to_s.gsub(/[^a-zA-Z0-9_-]/, "") # Remove any non-alphanumeric chars from UID
+
     # Try to find existing user by provider and uid first
-    user = User.find_by(provider: auth.provider, uid: auth.uid)
+    user = User.find_by(provider: auth.provider, uid: sanitized_uid)
 
     if user
-      # Update Facebook name and profile picture if they're different
+      # Update Facebook name and profile picture if they're different (sanitized)
       updates = {}
-      updates[:facebook_name] = auth.info.name if user.facebook_name != auth.info.name
+      updates[:facebook_name] = sanitized_name if user.facebook_name != sanitized_name
       updates[:facebook_profile_picture_url] = auth.info.image if user.facebook_profile_picture_url != auth.info.image
       user.update(updates) if updates.any?
       return user
     end
 
-    # Try to find existing user by email
-    user = User.find_by(email: auth.info.email)
+    # SECURITY FIX: Do NOT link OAuth to existing email accounts automatically
+    # This prevents account takeover where attacker with same email but different UID
+    # could take over an existing account
+    if sanitized_email.present?
+      existing_user = User.find_by(email: sanitized_email)
 
-    if user
-      # Link this OAuth account to existing user
-      user.update!(
-        provider: auth.provider,
-        uid: auth.uid,
-        facebook_name: auth.info.name,
-        facebook_profile_picture_url: auth.info.image
-      )
-      return user
+      if existing_user
+        # If user exists with this email but different provider/uid, this is a security risk
+        # Do NOT update their provider/uid - this would allow account takeover
+        Rails.logger.warn "OAuth login attempt for existing email #{sanitized_email} with different provider/uid"
+
+        # Return unpersisted user with error to trigger registration flow
+        user = User.new(email: sanitized_email)
+        user.errors.add(:email, "already exists. Please sign in with your existing account first, then link Facebook in settings.")
+        return user
+      end
     end
 
-    # Create new user
+    # Handle missing email by generating a placeholder
+    final_email = sanitized_email.presence || "fb_#{sanitized_uid}@facebook.local"
+
+    # Create new user with sanitized data
     User.create!(
-      email: auth.info.email,
+      email: final_email,
       provider: auth.provider,
-      uid: auth.uid,
-      facebook_name: auth.info.name,
+      uid: sanitized_uid,
+      facebook_name: sanitized_name,
       facebook_profile_picture_url: auth.info.image,
       role: "school_owner", # Default role for new Facebook users
       confirmed_at: Time.current, # Skip email confirmation for OAuth users

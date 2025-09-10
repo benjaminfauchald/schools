@@ -71,6 +71,46 @@ module ApplicationHelper
       content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
         content_tag :path, nil, fill_rule: "evenodd", d: "M4 16.5v-13h-.25a.75.75 0 010-1.5h12.5a.75.75 0 010 1.5H16v13h.25a.75.75 0 010 1.5H3.75a.75.75 0 010-1.5H4zm1.25-11.25a.5.5 0 00-.5.5v.5c0 .28.22.5.5.5h1.5a.5.5 0 00.5-.5v-.5a.5.5 0 00-.5-.5h-1.5zm0 3a.5.5 0 00-.5.5v.5c0 .28.22.5.5.5h1.5a.5.5 0 00.5-.5v-.5a.5.5 0 00-.5-.5h-1.5zm0 3a.5.5 0 00-.5.5v.5c0 .28.22.5.5.5h1.5a.5.5 0 00.5-.5v-.5a.5.5 0 00-.5-.5h-1.5zm5-6a.5.5 0 00-.5.5v.5c0 .28.22.5.5.5h1.5a.5.5 0 00.5-.5v-.5a.5.5 0 00-.5-.5h-1.5zm0 3a.5.5 0 00-.5.5v.5c0 .28.22.5.5.5h1.5a.5.5 0 00.5-.5v-.5a.5.5 0 00-.5-.5h-1.5zm0 3a.5.5 0 00-.5.5v.5c0 .28.22.5.5.5h1.5a.5.5 0 00.5-.5v-.5a.5.5 0 00-.5-.5h-1.5z", clip_rule: "evenodd"
       end
+    when "chat-bubble-left"
+      content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
+        content_tag :path, nil, fill_rule: "evenodd", d: "M2 10c0-3.967 3.69-7 8-7s8 3.033 8 7-3.69 7-8 7a8.097 8.097 0 01-1.75-.2A4.5 4.5 0 015 18.16v-2.26A6.985 6.985 0 012 10z", clip_rule: "evenodd"
+      end
+    when "information-circle"
+      content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
+        content_tag :path, nil, fill_rule: "evenodd", d: "M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z", clip_rule: "evenodd"
+      end
+    when "check-circle"
+      content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
+        content_tag :path, nil, fill_rule: "evenodd", d: "M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L8.093 10.5a.75.75 0 00-1.186.918l1.914 2.478a.75.75 0 001.199-.094l3.857-5.4z", clip_rule: "evenodd"
+      end
+    when "x-circle"
+      content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
+        content_tag :path, nil, fill_rule: "evenodd", d: "M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z", clip_rule: "evenodd"
+      end
+    when "trophy"
+      content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
+        content_tag :path, nil, fill_rule: "evenodd", d: "M5 2a1 1 0 011 1v1.1a4.002 4.002 0 003.2 6.2 8.001 8.001 0 0015.8 0 1 1 0 11-.8-.6A6.002 6.002 0 0114 5.1V3a1 1 0 011-1h1a3 3 0 013 3v.93a1.5 1.5 0 01-.44 1.06l-3 3a1.5 1.5 0 01-1.06.44H13v1.5a6.5 6.5 0 01-13 0V11H.5a1.5 1.5 0 01-1.06-.44l-3-3A1.5 1.5 0 01-4 6.5V5a3 3 0 013-3h1zm5 16.25A4.75 4.75 0 0014.75 13.5V12h-9.5v1.5A4.75 4.75 0 0010 18.25z", clip_rule: "evenodd"
+      end
+    when "cake"
+      content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
+        content_tag :path, nil, d: "M6 3a1 1 0 011-1h6a1 1 0 011 1v1.586l1.707 1.707A1 1 0 0115 7v4a1 1 0 01-1 1h-1v3a1 1 0 01-1 1H8a1 1 0 01-1-1v-3H6a1 1 0 01-1-1V7a1 1 0 01.293-.707L7 4.586V3zM8 5.414L6.586 6.828A1 1 0 016 7.414V10h8V7.414a1 1 0 01-.414-.586L12 5.414V4H8v1.414z"
+      end
+    when "heart"
+      content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
+        content_tag :path, nil, fill_rule: "evenodd", d: "M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z", clip_rule: "evenodd"
+      end
+    when "computer-desktop"
+      content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
+        content_tag :path, nil, fill_rule: "evenodd", d: "M2 4.25A2.25 2.25 0 014.25 2h11.5A2.25 2.25 0 0118 4.25v8.5A2.25 2.25 0 0115.75 15H4.25A2.25 2.25 0 012 12.75v-8.5zm2 7.25v1a.75.75 0 00.75.75h10.5a.75.75 0 00.75-.75v-1H4zm0-1.5h12V4.25a.75.75 0 00-.75-.75H4.75a.75.75 0 00-.75.75v5.75z", clip_rule: "evenodd"
+      end
+    when "musical-note"
+      content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
+        content_tag :path, nil, d: "M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.369 4.369 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"
+      end
+    when "squares-plus"
+      content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do
+        content_tag :path, nil, fill_rule: "evenodd", d: "M1 5.25A2.25 2.25 0 013.25 3h4.5A2.25 2.25 0 0110 5.25v4.5A2.25 2.25 0 017.75 12h-4.5A2.25 2.25 0 011 9.75v-4.5zm9 0A2.25 2.25 0 0112.25 3h4.5A2.25 2.25 0 0119 5.25v4.5A2.25 2.25 0 0116.75 12h-4.5A2.25 2.25 0 0110 9.75v-4.5zM1 14.25A2.25 2.25 0 013.25 12h4.5A2.25 2.25 0 0110 14.25v2.5A2.25 2.25 0 017.75 19h-4.5A2.25 2.25 0 011 16.75v-2.5zM12.25 12A2.25 2.25 0 0110 14.25v2.5A2.25 2.25 0 0112.25 19H14v1.25a.75.75 0 001.5 0V19h1.25a.75.75 0 000-1.5H15.5v-1.25a.75.75 0 00-1.5 0v1.25h-1.25z", clip_rule: "evenodd"
+      end
     else
       # Default icon if name not found
       content_tag :svg, class: icon_class, fill: "currentColor", viewBox: "0 0 20 20" do

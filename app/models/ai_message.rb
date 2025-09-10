@@ -4,9 +4,9 @@ class AiMessage < ApplicationRecord
   belongs_to :ai_conversation
 
   validates :ai_conversation, presence: true
-  validates :role, presence: true, inclusion: { in: %w[user assistant] }
+  validates :role, presence: true
   validates :content, presence: true
-  validates :message_type, inclusion: { in: %w[text suggested_question data_analysis] }
+  validates :message_type, presence: true
 
   enum :role, {
     user: "user",
@@ -21,7 +21,7 @@ class AiMessage < ApplicationRecord
 
   scope :recent, -> { order(:created_at) }
   scope :by_role, ->(role) { where(role: role) }
-  scope :with_sources, -> { where.not(source_references: [ nil, [], {} ]) }
+  scope :with_sources, -> { where.not(source_references: nil).where("jsonb_array_length(source_references::jsonb) > 0") }
   scope :by_conversation, ->(conversation_id) { where(ai_conversation_id: conversation_id) }
 
   # Get the school this message belongs to (through conversation)
@@ -166,7 +166,7 @@ class AiMessage < ApplicationRecord
   end
 
   def self.messages_with_sources
-    where.not(source_references: [ nil, [], {} ])
+    where.not(source_references: nil).where("jsonb_array_length(source_references::jsonb) > 0")
   end
 
   def self.by_message_type_stats

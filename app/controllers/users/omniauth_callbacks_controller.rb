@@ -84,10 +84,11 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   def sync_status
     Rails.logger.info "Facebook sync_status called with params: #{params.inspect}"
 
-    facebook_user_id = params[:facebook_user_id]
+    # Sanitize all input parameters to prevent XSS - strip ALL HTML tags
+    facebook_user_id = params[:facebook_user_id].to_s.gsub(/[^a-zA-Z0-9_-]/, "") if params[:facebook_user_id].present?
     access_token = params[:access_token]
-    name = params[:name]
-    email = params[:email]
+    name = ActionController::Base.helpers.strip_tags(params[:name].to_s) if params[:name].present?
+    email = ActionController::Base.helpers.strip_tags(params[:email].to_s).downcase.strip if params[:email].present?
     picture_url = params[:picture_url]
 
     Rails.logger.info "Facebook sync parsed data: user_id=#{facebook_user_id}, name=#{name}, email=#{email}"
@@ -97,7 +98,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       user = User.find_by(provider: "facebook", uid: facebook_user_id)
 
       if user
-        # Update existing user's information
+        # Update existing user's information with sanitized data
         user.update!(
           facebook_name: name,
           facebook_profile_picture_url: picture_url
@@ -111,22 +112,19 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
         render json: { success: true, user_id: user.id }
       else
         # User exists in Facebook but not in our system
-        # Create new user or link to existing email
+        # SECURITY FIX: Do NOT link to existing email accounts automatically
         existing_user = User.find_by(email: email) if email.present?
 
         if existing_user
-          # Link Facebook account to existing user
-          existing_user.update!(
-            provider: "facebook",
-            uid: facebook_user_id,
-            facebook_name: name,
-            facebook_profile_picture_url: picture_url
-          )
-          sign_in existing_user, event: :authentication
-          render json: { success: true, user_id: existing_user.id, linked: true }
+          # SECURITY: Prevent account takeover - do NOT update provider/uid on existing accounts
+          Rails.logger.warn "Sync status attempt to link Facebook #{facebook_user_id} to existing email #{email}"
+          render json: {
+            success: false,
+            error: "An account with this email already exists. Please sign in with your existing account first."
+          }, status: :unprocessable_entity
         else
           # Create new user - generate email if Facebook doesn't provide one
-          user_email = email.present? ? email : "facebook_#{facebook_user_id}@noemail.local"
+          user_email = email.presence || "facebook_#{facebook_user_id}@noemail.local"
 
           new_user = User.create!(
             email: user_email,

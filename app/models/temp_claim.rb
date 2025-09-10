@@ -49,11 +49,11 @@ class TempClaim < ApplicationRecord
   private
 
   def generate_token
-    self.token = SecureRandom.urlsafe_base64(32)
+    self.token ||= SecureRandom.urlsafe_base64(32)
   end
 
   def set_expiry
     # Claims expire after 24 hours
-    self.expires_at = 24.hours.from_now
+    self.expires_at ||= 24.hours.from_now
   end
 end

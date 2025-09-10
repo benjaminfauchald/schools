@@ -1,6 +1,8 @@
+require "digest"
+
 class FacebookWebhooksController < ApplicationController
   protect_from_forgery with: :null_session # Disable CSRF for webhook endpoints
-  before_action :validate_webhook_signature, except: [ :verify ]
+  before_action :validate_webhook_signature, except: [ :verify, :deletion_status ]
 
   # GET /facebook_webhooks/verify - Facebook webhook verification
   def verify

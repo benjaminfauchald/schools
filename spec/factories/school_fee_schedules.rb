@@ -8,29 +8,20 @@ FactoryBot.define do
     application_fee { 5000 }
     enrollment_fee { 10000 }
     is_published { true }
-    grade_level { 'Primary' }
-    tuition_fee_thb { 150000 }
-    registration_fee_thb { 10000 }
 
     trait :primary do
-      grade_level { 'Primary' }
       min_tuition { 80000 }
       max_tuition { 120000 }
-      tuition_fee_thb { 100000 }
     end
 
     trait :secondary do
-      grade_level { 'Secondary' }
       min_tuition { 120000 }
       max_tuition { 180000 }
-      tuition_fee_thb { 150000 }
     end
 
     trait :high_school do
-      grade_level { 'High School' }
       min_tuition { 150000 }
       max_tuition { 250000 }
-      tuition_fee_thb { 200000 }
     end
 
     trait :draft do
@@ -48,7 +39,6 @@ FactoryBot.define do
     trait :expensive do
       min_tuition { 300000 }
       max_tuition { 500000 }
-      tuition_fee_thb { 400000 }
     end
   end
 end

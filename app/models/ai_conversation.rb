@@ -154,7 +154,8 @@ class AiConversation < ApplicationRecord
       data_analyses: messages.where(message_type: "data_analysis").count,
       first_message_at: messages.order(:created_at).first&.created_at,
       last_message_at: messages.order(:created_at).last&.created_at,
-      unique_source_references: messages.where.not(source_references: [ nil, [], {} ])
+      unique_source_references: messages.where.not(source_references: nil)
+                                        .where("jsonb_array_length(source_references::jsonb) > 0")
                                         .pluck(:source_references)
                                         .flatten
                                         .uniq

@@ -12,14 +12,16 @@ RSpec.describe 'Schools Frontpage', type: :request do
 
   describe 'GET /' do
     context 'without location parameters' do
-      it 'returns successful response' do
+      it 'redirects to onboarding' do
         get root_path
-        expect(response).to have_http_status(:success)
+        expect(response).to redirect_to('/onboarding')
       end
 
-      it 'renders the frontpage' do
+      it 'renders onboarding page after redirect' do
         get root_path
-        expect(response.body).to include('Schools')
+        expect(response).to redirect_to('/onboarding')
+        follow_redirect!
+        expect(response).to have_http_status(:success)
       end
     end
 
@@ -173,16 +175,18 @@ RSpec.describe 'Schools Frontpage', type: :request do
     end
 
     it 'returns search results with distance' do
-      get search_schools_path, params: search_params
+      get search_schools_path, params: search_params, headers: { 'Accept' => 'application/json' }
 
+      # With location params but possibly no session, should return JSON
       expect(response).to have_http_status(:success)
       json = JSON.parse(response.body)
       expect(json).to have_key('schools')
     end
 
     it 'returns empty results for empty query' do
-      get search_schools_path, params: { q: '', home_lat: 13.691987, home_lng: 100.537079 }
+      get search_schools_path, params: { q: '', home_lat: 13.691987, home_lng: 100.537079 }, headers: { 'Accept' => 'application/json' }
 
+      # Empty query returns empty results
       expect(response).to have_http_status(:success)
       json = JSON.parse(response.body)
       expect(json['schools']).to be_empty
@@ -191,9 +195,8 @@ RSpec.describe 'Schools Frontpage', type: :request do
     it 'requires location for search' do
       get search_schools_path, params: { q: 'School' }
 
-      expect(response).to have_http_status(:bad_request)
-      json = JSON.parse(response.body)
-      expect(json['error']).to include('location')
+      # Without location, redirects to root_path for HTML
+      expect(response).to redirect_to(root_path)
     end
   end
 
@@ -216,7 +219,8 @@ RSpec.describe 'Schools Frontpage', type: :request do
         home_lng: 500     # Invalid longitude
       }
 
-      expect(response).to have_http_status(:success)
+      # Invalid coordinates should redirect to onboarding
+      expect(response).to redirect_to('/onboarding')
     end
   end
 

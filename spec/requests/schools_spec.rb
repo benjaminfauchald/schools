@@ -5,20 +5,20 @@ RSpec.describe 'Schools', type: :request do
     let!(:published_schools) { create_list(:school, 3) }
     let!(:draft_school) { create(:school, :draft) }
 
-    it 'returns successful response' do
+    it 'redirects to onboarding without location' do
       get root_path
-      expect(response).to have_http_status(:ok)
+      expect(response).to redirect_to('/onboarding')
     end
 
     it 'includes all published schools' do
-      get root_path, params: { home_lat: 13.7563, home_lng: 100.5018 }
+      get root_path, params: { home_lat: 13.7563, home_lng: 100.5018, show_all: true }
       published_schools.each do |school|
         expect(response.body).to include(school.name)
       end
     end
 
     it 'does not include draft schools' do
-      get root_path, params: { home_lat: 13.7563, home_lng: 100.5018 }
+      get root_path, params: { home_lat: 13.7563, home_lng: 100.5018, show_all: true }
       expect(response.body).not_to include(draft_school.name)
     end
 

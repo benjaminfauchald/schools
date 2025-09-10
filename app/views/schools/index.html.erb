@@ -1,3 +1,27 @@
+<% content_for :title, "Find International Schools in Bangkok | Schools Listing" %>
+
+<% content_for :head do %>
+  <meta name="description" content="Discover the best international schools in Bangkok. Find schools near you with detailed information about curricula, fees, facilities and more. Compare schools and make informed decisions for your child's education.">
+  <meta name="keywords" content="international schools bangkok, best schools bangkok, school finder, education bangkok, british curriculum, IB schools, american curriculum">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<%= request.original_url %>">
+  <meta property="og:title" content="Find International Schools in Bangkok | Schools Listing">
+  <meta property="og:description" content="Discover the best international schools in Bangkok. Find schools near you with detailed information about curricula, fees, facilities and more.">
+  <meta property="og:image" content="<%= asset_url('og-image.png') rescue request.base_url + '/icon.png' %>">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<%= request.original_url %>">
+  <meta name="twitter:title" content="Find International Schools in Bangkok | Schools Listing">
+  <meta name="twitter:description" content="Discover the best international schools in Bangkok. Find schools near you with detailed information about curricula, fees, facilities and more.">
+  <meta name="twitter:image" content="<%= asset_url('og-image.png') rescue request.base_url + '/icon.png' %>">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="<%= request.base_url + request.path %>">
+<% end %>
+
 <!-- Schools Distance-Filtered Listing -->
 <div class="w-full" data-controller="schools school-search" 
      data-schools-home-lat-value="<%= @home_location[:lat] %>" 
@@ -8,7 +32,11 @@
   
   <!-- Header Section with Search -->
   <div class="mb-8">
-      <!-- Logo and branded searchbox goes here -->
+    <!-- Main Heading -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Find International Schools in Bangkok</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">Discover the best international schools for your child. Compare curricula, facilities, fees, and locations to make the right choice.</p>
+    </div>
     
     <!-- Search Section -->
     <div class="relative max-w-2xl mx-auto">

@@ -7,10 +7,10 @@ class SchoolGradeOffering < ApplicationRecord
   validates :min_age, :max_age, numericality: { greater_than: 0, less_than: 25 }, allow_nil: true
   validate :max_age_greater_than_min
 
-  scope :early_years, -> { where("min_age < ?", 6) }
-  scope :elementary, -> { where("min_age >= ? AND max_age <= ?", 5, 12) }
+  scope :early_years, -> { where("min_age < ?", 5) }
+  scope :elementary, -> { where("min_age >= ? AND min_age <= ? AND max_age >= ? AND max_age <= ?", 5, 6, 5, 12) }
   scope :secondary, -> { where("min_age >= ? AND max_age >= ?", 10, 15) }
-  scope :full_range, -> { where("min_age <= ? AND max_age >= ?", 6, 16) }
+  scope :full_range, -> { where("min_age <= ? AND max_age >= ?", 4, 16) }
 
   # Get age range as display string
   def age_range_display
@@ -39,15 +39,15 @@ class SchoolGradeOffering < ApplicationRecord
     end
   end
 
-  # Check if school serves early years (under 6)
+  # Check if school serves early years (under 5)
   def serves_early_years?
-    min_age.present? && min_age < 6
+    min_age.present? && min_age < 5
   end
 
   # Check if school serves elementary ages (5-12)
   def serves_elementary?
     return false unless min_age && max_age
-    min_age <= 12 && max_age >= 5
+    min_age <= 11 && max_age >= 6
   end
 
   # Check if school serves secondary ages (13+)
@@ -62,6 +62,13 @@ class SchoolGradeOffering < ApplicationRecord
     age >= min_age && age <= max_age
   end
 
+  # Alias for better readability
+  def accepts_age?(age)
+    return true if min_age.nil? && max_age.nil?  # No restrictions
+    return false unless min_age && max_age
+    age >= min_age && age <= max_age
+  end
+
   # Get educational level based on age coverage
   def educational_level
     levels = []
@@ -71,12 +78,74 @@ class SchoolGradeOffering < ApplicationRecord
     levels.join(", ")
   end
 
+  # Get school type based on age range
+  def school_type
+    return "Special" if min_age.nil? || max_age.nil?
+
+    if min_age <= 4 && max_age >= 17
+      "K-12"
+    elsif min_age < 6 && max_age <= 6
+      "Early Years"
+    elsif min_age >= 5 && max_age <= 12
+      "Elementary"
+    elsif min_age >= 11 && max_age <= 14
+      "Middle School"
+    elsif min_age >= 13 && max_age >= 16
+      "High School"
+    elsif min_age >= 12 && max_age >= 17
+      "Secondary"
+    else
+      "Mixed"
+    end
+  end
+
+  # Get education levels as array
+  def education_levels
+    levels = []
+    levels << "Pre-K" if min_age && min_age < 5
+    levels << "Elementary" if serves_elementary?
+    levels << "Secondary" if serves_secondary?
+    levels
+  end
+
+  # Scope for finding schools accepting a specific age
+  def self.accepting_age(age)
+    where("(min_age IS NULL AND max_age IS NULL) OR (min_age <= ? AND max_age >= ?)", age, age)
+  end
+
+  # Detect Thai grade level
+  def thai_grade_level
+    return nil unless grades.present?
+
+    if grades.match?(/prathom/i)
+      "Prathom"
+    elsif grades.match?(/matthayom/i)
+      "Matthayom"
+    elsif grades.match?(/anuban/i)
+      "Anuban"
+    else
+      nil
+    end
+  end
+
+  # Detect curriculum type from grades
+  def curriculum_type
+    return [] unless grades.present?
+
+    types = []
+    types << "British" if grades.match?(/year \d+|reception/i)
+    types << "American" if grades.match?(/grades?\s+\d+|K-\d+/i)
+    types << "Thai" if grades.match?(/prathom|matthayom|anuban/i)
+    types << "International" if types.empty? && grades.match?(/nursery|kindergarten/i)
+    types
+  end
+
   private
 
   def max_age_greater_than_min
     return unless min_age && max_age
 
-    if max_age <= min_age
+    if max_age < min_age
       errors.add(:max_age, "must be greater than minimum age")
     end
   end

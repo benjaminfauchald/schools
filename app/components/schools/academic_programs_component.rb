@@ -18,18 +18,22 @@ class Schools::AcademicProgramsComponent < ViewComponent::Base
   end
 
   def curricula
+    return [] unless academic_programs
     academic_programs[:curricula] || []
   end
 
   def accreditations
+    return [] unless academic_programs
     academic_programs[:accreditations] || []
   end
 
   def languages
+    return [] unless academic_programs
     academic_programs[:languages] || []
   end
 
   def programs
+    return [] unless academic_programs
     academic_programs[:programs] || []
   end
 

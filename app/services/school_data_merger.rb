@@ -225,16 +225,17 @@ class SchoolDataMerger
 
   # Display email
   def display_email
-    prioritized_value(school.email, point&.email)
+    email = prioritized_value(school.email, point&.email)
+    email.present? ? email : nil
   end
 
   # Display website URL
   def display_website
     website = prioritized_value(school.website_url, place&.website, point&.website)
-    return nil if website.blank?
+    return nil if website.blank? || website.strip.blank?
 
     # Ensure URL has protocol
-    website.start_with?("http") ? website : "https://#{website}"
+    website.strip.start_with?("http") ? website.strip : "https://#{website.strip}"
   end
 
   # Display formatted address

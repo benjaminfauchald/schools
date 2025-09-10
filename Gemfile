@@ -98,10 +98,14 @@ end
 
 group :development do
   # File watching and auto-testing
+  gem "better_html"
+  gem "erb_lint"
   gem "guard"
   gem "guard-rspec"
   gem "listen"          # file watcher (uses macOS FSEvents)
   gem "terminal-notifier-guard"
+  gem "claude_swarm", "0.3.8"
+  gem "claude-on-rails"
 end
 
 group :test do
@@ -117,6 +121,8 @@ group :test do
   gem "cuprite", "~> 0.15"  # Headless Chrome driver
   # Database cleaning between tests
   gem "database_cleaner-active_record", "~> 2.1"
+  # Rails controller testing for assigns() support in request specs
+  gem "rails-controller-testing"
 end
 
 group :development do

@@ -66,10 +66,14 @@ RSpec.describe 'School Claim Flow', type: :request do
     let(:user) { create(:user, email: 'signed_in@example.com') }
 
     it 'school show page contains claim section for signed in users' do
-      # For request tests, we simulate being signed in with session/cookies
-      # Since testing signed-in functionality is complex in request tests,
-      # let's focus on the core claim flow functionality which is working
-      skip "Signed-in user functionality would be better tested in integration tests"
+      # Sign in the user for request specs
+      sign_in user
+      
+      get school_path(id: school.id)
+      
+      # Check for claim section in the response body
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Claim')
     end
 
     it 'pre-fills email field for signed in users' do

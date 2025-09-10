@@ -1,3 +1,84 @@
+<% content_for :title, "#{@school.name} - International School in Bangkok | Schools" %>
+
+<% content_for :head do %>
+  <meta name="description" content="<%= @school.name %> - <%= @school.about&.truncate(155) || "Leading international school in Bangkok offering quality education" %>">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<%= request.original_url %>">
+  <meta property="og:title" content="<%= @school.name %> - International School in Bangkok">
+  <meta property="og:description" content="<%= @school.about&.truncate(155) || "Leading international school in Bangkok offering quality education" %>">
+  <meta property="og:image" content="<%= asset_url('og-image.png') rescue request.base_url + '/icon.png' %>">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="<%= request.base_url + request.path %>">
+  
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "School",
+    "name": "<%= j @school.name %>",
+    "description": "<%= j (@school.about || "International school in Bangkok offering quality education") %>",
+    "url": "<%= request.original_url %>",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "<%= j (@merged_data.location_data[:formatted_address] || @school.place&.formatted_address || '') %>",
+      "addressLocality": "Bangkok",
+      "addressCountry": "Thailand"
+    },
+    <% if @merged_data.location_data[:lat] && @merged_data.location_data[:lng] %>
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": <%= @merged_data.location_data[:lat] %>,
+      "longitude": <%= @merged_data.location_data[:lng] %>
+    },
+    <% end %>
+    <% if @merged_data.contact_info[:phone] %>
+    "telephone": "<%= j @merged_data.contact_info[:phone] %>",
+    <% end %>
+    <% if @merged_data.contact_info[:email] %>
+    "email": "<%= j @merged_data.contact_info[:email] %>",
+    <% end %>
+    <% if @merged_data.contact_info[:website] %>
+    "sameAs": ["<%= j @merged_data.contact_info[:website] %>"],
+    <% end %>
+    <% if @school.place&.rating %>
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": <%= @school.place.rating %>,
+      "bestRating": 5,
+      "ratingCount": <%= @school.place.user_ratings_total || 1 %>
+    },
+    <% end %>
+    "educationalOrganizationType": "PrivateSchool",
+    "category": "International School"
+  }
+  </script>
+  
+  <!-- Breadcrumb Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Schools",
+        "item": "<%= root_url %>"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "<%= j @school.name %>",
+        "item": "<%= request.original_url %>"
+      }
+    ]
+  }
+  </script>
+<% end %>
+
 <!-- School Detail Page -->
 <div class="w-full" 
      data-controller="school-contact-modal" 

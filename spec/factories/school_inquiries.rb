@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :school_inquiry do
     association :school
-    association :user, provider: 'facebook'
+    user { nil }  # Make user optional by default
     name { Faker::Name.name }
     email { Faker::Internet.email }
     phone { Faker::PhoneNumber.phone_number }

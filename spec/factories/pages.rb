@@ -1,40 +1,36 @@
 FactoryBot.define do
   factory :page do
-    school
-    sequence(:title) { |n| "Page #{n}" }
+    association :school
+    title { Faker::Lorem.sentence(word_count: 3) }
     content { Faker::Lorem.paragraphs(number: 3).join("\n\n") }
-    status { 'published' }
-    page_type { 'general' }
-    slug { title.parameterize if title.present? }
-    meta_description { Faker::Lorem.sentence(word_count: 20) }
-    sort_order { 0 }
+    slug { title&.parameterize }
+    page_type { Page::PAGE_TYPES.keys.sample }
+    status { "draft" }
+    meta_description { nil }
+    sort_order { nil }
+    published_at { nil }
 
-    trait :draft do
-      status { 'draft' }
+    trait :published do
+      status { "published" }
+      published_at { 1.day.ago }
     end
 
-    trait :about_us do
-      title { 'About Us' }
-      page_type { 'about_us' }
-      content { "Learn more about our school's mission, vision, and values. #{Faker::Lorem.paragraphs(number: 2).join('\n\n')}" }
+    trait :archived do
+      status { "archived" }
     end
 
-    trait :academics do
-      title { 'Academic Programs' }
-      page_type { 'academics' }
-      content { "Discover our comprehensive academic programs. #{Faker::Lorem.paragraphs(number: 2).join('\n\n')}" }
+    trait :with_meta do
+      meta_description { Faker::Lorem.sentence(word_count: 10) }
     end
 
-    trait :admissions do
-      title { 'Admissions' }
-      page_type { 'admissions' }
-      content { "Information about our admissions process. #{Faker::Lorem.paragraphs(number: 2).join('\n\n')}" }
+    trait :about_page do
+      page_type { "about_us" }
+      title { "About Our School" }
     end
 
-    after(:build) do |page|
-      if page.title.present? && page.slug.blank?
-        page.slug = page.title.parameterize
-      end
+    trait :blog_post do
+      page_type { "blog" }
+      title { Faker::Lorem.sentence(word_count: 5) }
     end
   end
 end

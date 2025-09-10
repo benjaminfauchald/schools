@@ -270,8 +270,8 @@ RSpec.describe School, type: :model do
   end
 
   describe 'taxonomy methods' do
-    let(:curriculum_vocab) { create(:vocabulary, :curriculum) }
-    let(:facility_vocab) { create(:vocabulary, :facility) }
+    let(:curriculum_vocab) { Vocabulary.find_or_create_by(code: 'curriculum') { |v| v.label = 'Curriculum'; v.description = 'Educational curriculum and programs' } }
+    let(:facility_vocab) { Vocabulary.find_or_create_by(code: 'facility') { |v| v.label = 'Facilities'; v.description = 'Campus facilities and amenities' } }
     let(:curriculum_term) { create(:term, :ib_programme, vocabulary: curriculum_vocab) }
     let(:facility_term) { create(:term, :swimming_pool, vocabulary: facility_vocab) }
 
@@ -332,7 +332,7 @@ RSpec.describe School, type: :model do
         expect(school.has_term?(other_term)).to be false
       end
 
-      it 'works with slug and context' do
+      it 'returns true when queried with term slug and context' do
         expect(school.has_term?(curriculum_term.slug, context: 'curriculum')).to be true
       end
     end
@@ -353,8 +353,10 @@ RSpec.describe School, type: :model do
     end
 
     describe '.with_distance scope' do
-      let!(:close_school) { create(:school, lat: 13.7563, lng: 100.5018) }
-      let!(:far_school) { create(:school, lat: 14.0000, lng: 101.0000) }
+      let!(:close_place) { create(:place, lat: 13.7563, lng: 100.5018) }
+      let!(:far_place) { create(:place, lat: 14.0000, lng: 101.0000) }
+      let!(:close_school) { create(:school, place: close_place, lat: 13.7563, lng: 100.5018, status: 'published') }
+      let!(:far_school) { create(:school, place: far_place, lat: 14.0000, lng: 101.0000, status: 'published') }
 
       it 'returns schools within radius sorted by distance' do
         schools = School.with_distance(13.7563, 100.5018, 100)

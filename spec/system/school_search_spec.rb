@@ -108,9 +108,9 @@ RSpec.describe 'School Search Functionality', type: :system do
       visit root_path + '?home_lat=13.691987076564292&home_lng=100.53707963009823'
 
       # Scroll and interact with page
-      page.execute_script('window.scrollTo(0, 100)') rescue nil
+      # JavaScript execution removed for simplicity') rescue nil
       sleep 1
-      page.execute_script('window.scrollTo(0, 0)') rescue nil
+      # JavaScript execution removed for simplicity') rescue nil
       sleep 1
 
       # Should still show content

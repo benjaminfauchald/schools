@@ -73,54 +73,57 @@
 <!-- Photo Modal -->
 <div id="<%= modal_id %>" class="fixed inset-0 z-50 hidden bg-black/90" onclick="closePhotoModal_<%= object_id %>()">
   
-  <!-- Close Button -->
-  <button onclick="event.stopPropagation(); closePhotoModal_<%= object_id %>();" 
-          class="fixed top-6 right-6 z-[60] bg-gray-900/90 hover:bg-gray-900 backdrop-blur-sm rounded-full p-3 text-white hover:text-gray-200 shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
-          title="Close photo gallery"
-          aria-label="Close photo gallery">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  </button>
-  
-  <!-- Photo Counter -->
-  <div class="fixed top-6 left-6 z-[60] bg-gray-900/90 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-medium shadow-xl">
-    <span id="current-photo-number">1</span> of <%= photos.count %>
-  </div>
-  
-  <!-- Left Navigation Arrow -->
-  <% if photos.count > 1 %>
-    <button onclick="event.stopPropagation(); previousPhoto_<%= object_id %>();" 
-            class="fixed left-6 top-1/2 transform -translate-y-1/2 z-[60] bg-gray-900/90 hover:bg-gray-900 backdrop-blur-sm rounded-full p-4 text-white hover:text-gray-200 shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
-            title="Previous photo"
-            aria-label="Previous photo">
-      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-    </button>
-    
-    <!-- Right Navigation Arrow -->
-    <button onclick="event.stopPropagation(); nextPhoto_<%= object_id %>();" 
-            class="fixed right-6 top-1/2 transform -translate-y-1/2 z-[60] bg-gray-900/90 hover:bg-gray-900 backdrop-blur-sm rounded-full p-4 text-white hover:text-gray-200 shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
-            title="Next photo"
-            aria-label="Next photo">
-      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-      </svg>
-    </button>
-  <% end %>
-  
-  <!-- Main Photo Display -->
+  <!-- Main Photo Display Container -->
   <div class="w-full h-full flex items-center justify-center px-20 py-20" onclick="event.stopPropagation()">
-    <img id="modal-photo" 
-         src="" 
-         alt="" 
-         class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
-  </div>
-  
-  <!-- Photo Info -->
-  <div class="fixed bottom-6 left-6 right-6 z-[60] bg-gray-900/90 backdrop-blur-sm text-white p-4 rounded-lg shadow-xl">
-    <p id="modal-photo-alt" class="text-sm font-medium text-center"></p>
+    <div class="relative max-w-full max-h-full">
+      <!-- Close Button -->
+      <button onclick="event.stopPropagation(); closePhotoModal_<%= object_id %>();" 
+              class="absolute -top-12 -right-4 z-[60] bg-gray-900/90 hover:bg-gray-900 backdrop-blur-sm rounded-full p-3 text-white hover:text-gray-200 shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+              title="Close photo gallery"
+              aria-label="Close photo gallery">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
+      <!-- Photo Counter -->
+      <div class="absolute -top-12 -left-4 z-[60] bg-gray-900/90 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-medium shadow-xl">
+        <span id="current-photo-number">1</span> of <%= photos.count %>
+      </div>
+      
+      <!-- Left Navigation Arrow (Previous) -->
+      <% if photos.count > 1 %>
+        <button onclick="event.stopPropagation(); previousPhoto_<%= object_id %>();" 
+                class="absolute -left-16 top-1/2 transform -translate-y-1/2 z-[60] bg-gray-900/90 hover:bg-gray-900 backdrop-blur-sm rounded-full p-4 text-white hover:text-gray-200 shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+                title="Previous photo"
+                aria-label="Previous photo">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
+        </button>
+        
+        <!-- Right Navigation Arrow (Next) -->
+        <button onclick="event.stopPropagation(); nextPhoto_<%= object_id %>();" 
+                class="absolute -right-16 top-1/2 transform -translate-y-1/2 z-[60] bg-gray-900/90 hover:bg-gray-900 backdrop-blur-sm rounded-full p-4 text-white hover:text-gray-200 shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+                title="Next photo"
+                aria-label="Next photo">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </button>
+      <% end %>
+      
+      <!-- The Photo -->
+      <img id="modal-photo" 
+           src="" 
+           alt="" 
+           class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+      
+      <!-- Photo Info -->
+      <div class="absolute -bottom-16 left-0 right-0 z-[60] bg-gray-900/90 backdrop-blur-sm text-white p-4 rounded-lg shadow-xl">
+        <p id="modal-photo-alt" class="text-sm font-medium text-center"></p>
+      </div>
+    </div>
   </div>
 </div>
 

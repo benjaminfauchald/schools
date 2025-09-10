@@ -48,9 +48,38 @@ class SchoolFeeSchedule < ApplicationRecord
   # Get all annual fees
   def annual_fees
     {
-      boarding_fee_annual: boarding_fee_annual,
-      transport_fee_annual: transport_fee_annual
+      boarding_fee: boarding_fee_annual,
+      transport_fee: transport_fee_annual
     }.compact
+  end
+
+  # Calculate total first year cost including tuition and fees
+  def calculate_total_first_year_cost(level = :maximum)
+    tuition = level == :minimum ? (min_tuition || 0) : (max_tuition || 0)
+
+    # Add all one-time fees
+    one_time_total = [ application_fee, enrollment_fee, capital_levy ].compact.sum
+
+    # Add annual fees (optional - only for maximum calculation)
+    annual_total = if level == :maximum
+      [ boarding_fee_annual, transport_fee_annual ].compact.sum
+    else
+      0
+    end
+
+    tuition + one_time_total + annual_total
+  end
+
+  # Get formatted total cost range for display
+  def formatted_total_range
+    min_total = calculate_total_first_year_cost(:minimum)
+    max_total = calculate_total_first_year_cost(:maximum)
+
+    if min_total == max_total
+      "#{formatted_amount(min_total)} #{currency}"
+    else
+      "#{formatted_amount(min_total)} - #{formatted_amount(max_total)} #{currency}"
+    end
   end
 
   private

@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Block admin and owner areas
+Disallow: /admin/
+Disallow: /school_owner/
+Disallow: /users/
+Disallow: /auth/
+
+# Block API endpoints  
+Disallow: /api/
+
+# Block onboarding flow
+Disallow: /onboarding
+
+# Block settings and internal pages
+Disallow: /settings
+
+# Allow all other content
+Allow: /schools/
+Allow: /places/
+
+# Sitemap location
+Sitemap: <%= request.base_url %>/sitemap.xml

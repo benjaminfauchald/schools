@@ -35,28 +35,38 @@ RSpec.describe Schools::HeroComponent, type: :component do
 
   describe 'rendering' do
     subject(:rendered) do
-      render_inline(described_class.new(hero_data: hero_data, contact_info: contact_info, school: school))
+      component = described_class.new(hero_data: hero_data, contact_info: contact_info, school: school)
+      # Mock Devise helpers to avoid MissingWarden error
+      allow(component).to receive(:helpers).and_return(double('helpers',
+        user_signed_in?: false,
+        current_user: nil,
+        new_direct_claim_path: '/direct_claims/new',
+        heroicon: '<svg></svg>'
+      ))
+      # Mock school active_claims? method
+      allow(school).to receive(:active_claims?).and_return(false) if school
+      render_inline(component)
     end
 
     it 'displays school name' do
-      expect(rendered.css('h1').text).to include('Test International School')
+      expect(rendered).to have_css('h1', text: 'Test International School')
     end
 
     it 'displays hero image when available' do
-      expect(rendered.css('img[src*="hero.jpg"]')).to be_present
+      expect(rendered).to have_css('img[src*="hero.jpg"]')
     end
 
     it 'displays rating information' do
-      expect(rendered.text).to include('★★★★★')
-      expect(rendered.text).to include('4.5')
-      expect(rendered.text).to include('120')
+      expect(rendered).to have_content('★★★★★')
+      expect(rendered).to have_content('4.5')
+      expect(rendered).to have_content('120')
     end
 
     it 'displays key stats' do
-      expect(rendered.text).to include('Students')
-      expect(rendered.text).to include('500+')
-      expect(rendered.text).to include('Founded')
-      expect(rendered.text).to include('1995')
+      expect(rendered).to have_content('Students')
+      expect(rendered).to have_content('500+')
+      expect(rendered).to have_content('Founded')
+      expect(rendered).to have_content('1995')
     end
 
     context 'when hero image is not available' do
@@ -69,7 +79,7 @@ RSpec.describe Schools::HeroComponent, type: :component do
       end
 
       it 'falls back to logo' do
-        expect(rendered.css('img[src*="logo.jpg"]')).to be_present
+        expect(rendered).to have_css('img[src*="logo.jpg"]')
       end
     end
 
@@ -77,7 +87,8 @@ RSpec.describe Schools::HeroComponent, type: :component do
       let(:hero_data) { { name: 'Test School', rating: nil } }
 
       it 'does not display rating section' do
-        expect(rendered.css('.rating')).to be_empty
+        # Component doesn't use .rating class, check for rating content instead
+        expect(rendered).not_to have_content('reviews')
       end
     end
 
@@ -85,36 +96,38 @@ RSpec.describe Schools::HeroComponent, type: :component do
       let(:hero_data) { { name: 'Test School', key_stats: [] } }
 
       it 'does not display stats section' do
-        expect(rendered.css('.key-stats')).to be_empty
+        # Component doesn't use .key-stats class, check for stats container instead
+        expect(rendered).not_to have_css('div.grid')
       end
     end
   end
 
   describe 'claim button functionality' do
     let(:user) { create(:user, :school_owner) }
+    let(:component) { described_class.new(hero_data: hero_data, contact_info: contact_info, school: school) }
 
     before do
-      allow_any_instance_of(ActionView::Base).to receive(:user_signed_in?).and_return(true)
-      allow_any_instance_of(ActionView::Base).to receive(:current_user).and_return(user)
+      allow(component).to receive(:helpers).and_return(double('helpers',
+        user_signed_in?: true,
+        current_user: user,
+        new_direct_claim_path: '/direct_claims/new',
+        heroicon: '<svg></svg>'
+      ))
     end
 
     context 'when school is unclaimed' do
       it 'shows claim button for school owner' do
         allow(user).to receive(:can_edit_school?).with(school).and_return(false)
-        allow(user.school_claims).to receive(:where).and_return(double(exists?: false))
+        allow(user.school_claims).to receive(:where).and_return(double(where: double(exists?: false)))
+        allow(school).to receive(:active_claims?).and_return(false)
 
-        component = described_class.new(hero_data: hero_data, contact_info: contact_info, school: school)
         expect(component.send(:should_show_claim_button?)).to be true
       end
     end
 
     context 'when school is already claimed' do
-      before do
-        create(:school_claim, :approved, school: school)
-      end
-
       it 'does not show claim button' do
-        component = described_class.new(hero_data: hero_data, contact_info: contact_info, school: school)
+        allow(school).to receive(:active_claims?).and_return(true)
         expect(component.send(:should_show_claim_button?)).to be false
       end
     end
@@ -123,23 +136,31 @@ RSpec.describe Schools::HeroComponent, type: :component do
       let(:regular_user) { create(:user) }
 
       before do
-        allow_any_instance_of(ActionView::Base).to receive(:current_user).and_return(regular_user)
+        allow(component).to receive(:helpers).and_return(double('helpers',
+          user_signed_in?: true,
+          current_user: regular_user,
+          new_direct_claim_path: '/direct_claims/new'
+        ))
+        allow(regular_user).to receive(:school_owner?).and_return(false)
       end
 
       it 'does not show claim button' do
-        component = described_class.new(hero_data: hero_data, contact_info: contact_info, school: school)
+        allow(school).to receive(:active_claims?).and_return(false)
         expect(component.send(:should_show_claim_button?)).to be false
       end
     end
 
     context 'when user is not signed in' do
       before do
-        allow_any_instance_of(ActionView::Base).to receive(:user_signed_in?).and_return(false)
-        allow_any_instance_of(ActionView::Base).to receive(:current_user).and_return(nil)
+        allow(component).to receive(:helpers).and_return(double('helpers',
+          user_signed_in?: false,
+          current_user: nil,
+          new_direct_claim_path: '/direct_claims/new'
+        ))
       end
 
       it 'shows claim button for anonymous users if school unclaimed' do
-        component = described_class.new(hero_data: hero_data, contact_info: contact_info, school: school)
+        allow(school).to receive(:active_claims?).and_return(false)
         expect(component.send(:should_show_claim_button?)).to be true
       end
     end

@@ -93,11 +93,17 @@ class Place < ApplicationRecord
   end
 
   def is_school?
-    types&.include?("school") || types&.include?("university")
+    return false unless types
+    types.include?("school") || types.include?("university")
   end
 
   def needs_refresh?
     last_fetched_at.nil? || last_fetched_at < 30.days.ago
+  end
+
+  def expired?
+    return false if last_fetched_at.nil?
+    last_fetched_at < 30.days.ago
   end
 
   def google_maps_compliant?

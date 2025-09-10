@@ -59,13 +59,13 @@ RSpec.describe 'School Filtering Functionality', type: :system do
   describe 'responsive behavior', js: true do
     it 'adapts to mobile viewport' do
       # Set mobile viewport using Cuprite API
-      page.driver.resize(width: 375, height: 667)
+      page.driver.resize(375, 667)
 
       visit root_path + '?home_lat=13.691987076564292&home_lng=100.53707963009823'
       expect(page).to have_content('school') || page.has_content('School'), wait: 10
 
       # Reset to desktop
-      page.driver.resize(width: 1200, height: 800)
+      page.driver.resize(1200, 800)
     end
   end
 
@@ -74,8 +74,7 @@ RSpec.describe 'School Filtering Functionality', type: :system do
       visit root_path + '?home_lat=13.691987076564292&home_lng=100.53707963009823'
 
       # Scroll down the page
-      page.execute_script('window.scrollTo(0, 100)') rescue nil
-      sleep 1
+      page.execute_script('window.scrollTo(0, document.body.scrollHeight)') rescue nil
 
       # Should still show content
       expect(page).to have_content('school') || page.has_content('School')

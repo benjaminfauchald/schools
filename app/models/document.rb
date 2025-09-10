@@ -204,7 +204,6 @@ class Document < ApplicationRecord
 
     where(search_conditions.join(" OR "), *search_params)
       .processing_completed
-      .distinct
       .limit(limit)
       .order(:filename)
   end
@@ -223,7 +222,7 @@ class Document < ApplicationRecord
   def self.extract_keywords(query)
     # Common English stop words to exclude from search
     stop_words = %w[
-      a an and are as at be been by for from has he in is it its of on that the
+      a an and are as at be been by for from has he in is it its of on or that the
       to was what will with would who where when why how which this these those
       about above after against all along among any around before between both
       but can could did do does each either even every few first get given go

@@ -157,6 +157,10 @@ Rails.application.routes.draw do
     req.user_agent&.include?("scanner")
   }
 
+  # SEO routes (outside locale scope for universal access)
+  get "sitemap.xml", to: "seo#sitemap", format: :xml
+  get "robots.txt", to: "seo#robots", format: :text
+  
   # Root route - main school listing with distance filtering
   root "schools#index"
 

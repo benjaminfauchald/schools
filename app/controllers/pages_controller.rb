@@ -40,13 +40,15 @@ class PagesController < ApplicationController
       @school = School.published.find_by!(slug: params[:school_id])
     end
   rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: "School not found"
+    flash[:alert] = "School not found"
+    redirect_to root_path
   end
 
   def set_page
     @page = @school.pages.published.find_by!(slug: params[:id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to school_pages_path(@school), alert: "Page not found"
+    flash[:alert] = "Page not found"
+    redirect_to school_pages_path(school_id: @school.slug)
   end
 
   def group_pages_by_type(pages)
