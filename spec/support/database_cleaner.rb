@@ -25,14 +25,12 @@ RSpec.configure do |config|
   
   # System specs - use deletion strategy to avoid deadlocks
   config.before(:each, type: :system) do
-    DatabaseCleaner.strategy = :deletion, {
-      except: %w[ar_internal_metadata schema_migrations]
-    }
+    DatabaseCleaner.strategy = :deletion
     DatabaseCleaner.start
   end
   
   config.after(:each, type: :system) do
-    DatabaseCleaner.clean
+    DatabaseCleaner.clean if DatabaseCleaner.respond_to?(:clean)
   end
   
   # Request specs - use transaction when possible

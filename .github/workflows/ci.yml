@@ -30,7 +30,8 @@ jobs:
 
     services:
       postgres:
-        image: postgis/postgis:16-3.4
+        # Using postgres with extensions pre-installed
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
@@ -84,7 +85,14 @@ jobs:
 
       - name: Setup test database
         run: |
-          bundle exec rails db:create
+          # Install PostGIS in the container (pgvector is already included)
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16-postgis-3
+          # Create database and load extensions
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE schools_test;" || true
+          PGPASSWORD=postgres psql -h localhost -U postgres -d schools_test -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -d schools_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
+          # Load Rails schema
           bundle exec rails db:schema:load
           bundle exec rails db:migrate
 

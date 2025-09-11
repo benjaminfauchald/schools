@@ -208,9 +208,9 @@ class SchoolsController < ApplicationController
             .per(@filter_params[:per_page])
     else
       # Filter by distance and calculate distance
-      School.with_distance(@home_location[:lat], @home_location[:lng], @filter_params[:radius])
-            .page(@filter_params[:page])
-            .per(@filter_params[:per_page])
+      # with_distance returns a Kaminari paginated array, so we need to handle it differently
+      schools_array = School.with_distance(@home_location[:lat], @home_location[:lng], @filter_params[:radius])
+      schools_array.page(@filter_params[:page]).per(@filter_params[:per_page])
     end
   end
 

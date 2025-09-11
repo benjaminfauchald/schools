@@ -43,10 +43,15 @@ RSpec.describe YoutubeVideo, type: :model do
 
     describe '.recent' do
       it 'orders by created_at desc' do
+        # Clear any existing videos to ensure clean test
+        YoutubeVideo.destroy_all
+        
         old_video = create(:youtube_video, place: place, created_at: 2.days.ago)
         new_video = create(:youtube_video, place: place, created_at: 1.hour.ago)
-        expect(YoutubeVideo.recent.first).to eq(new_video)
-        expect(YoutubeVideo.recent.last).to eq(old_video)
+        
+        recent_videos = YoutubeVideo.recent
+        expect(recent_videos.first).to eq(new_video)
+        expect(recent_videos.last).to eq(old_video)
       end
     end
   end

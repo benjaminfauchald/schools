@@ -47,7 +47,7 @@ RSpec.describe Tagging, type: :model do
     let!(:facility_term) { create(:term, vocabulary: facility_vocab) }
     let!(:facility_tagging) { create(:tagging, taggable: school, term: facility_term, context: 'facility') }
     let!(:current_tagging) { create(:tagging, taggable: school, term: create(:term, vocabulary: vocabulary), context: 'curriculum', valid_from: Date.today - 1.year, valid_to: Date.today + 1.year) }
-    let!(:expired_tagging) { create(:tagging, taggable: school, term: create(:term, vocabulary: vocabulary), context: 'curriculum', valid_from: Date.today - 2.years, valid_to: Date.today - 1.day) }
+    let!(:expired_tagging) { create(:tagging, taggable: school, term: create(:term, vocabulary: vocabulary), context: 'curriculum', valid_from: Date.today - 2.years, valid_to: Date.yesterday) }
     let!(:future_tagging) { create(:tagging, taggable: school, term: create(:term, vocabulary: vocabulary), context: 'curriculum', valid_from: Date.today + 1.day, valid_to: Date.today + 1.year) }
 
     describe '.by_context' do
@@ -97,7 +97,7 @@ RSpec.describe Tagging, type: :model do
 
       it 'returns false for expired tagging' do
         tagging.valid_from = Date.today - 2.months
-        tagging.valid_to = Date.today - 1.day
+        tagging.valid_to = Date.yesterday
         expect(tagging.valid_at?).to be false
       end
 

@@ -184,7 +184,9 @@
 
   <body data-locale="<%= I18n.locale %>" class="min-h-screen flex flex-col">
     <!-- Location check (redirects to onboarding if needed) -->
-    <div data-controller="location" <%= raw session[:puppeteer_location] ? "data-puppeteer-location='#{session[:puppeteer_location].to_json}'" : '' %>></div>
+    <% location_attrs = { data: { controller: "location" } } %>
+    <% location_attrs[:data][:puppeteer_location] = session[:puppeteer_location].to_json if session[:puppeteer_location] %>
+    <%= tag.div(**location_attrs) %>
 
     <!-- Navigation Bar -->
     <%= render 'shared/navigation' unless controller.class.module_parent_name == 'Admin' %>

@@ -113,6 +113,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
     t.index ["user_id"], name: "index_audit_logs_on_user_id"
   end
 
+# Could not dump table "document_contents" because of following StandardError
+#   Unknown type 'vector(1536)' for column 'embedding'
+
+
+# Could not dump table "documents" because of following StandardError
+#   Unknown type 'vector(1536)' for column 'embedding'
+
+
   create_table "events", force: :cascade do |t|
     t.bigint "place_id", null: false
     t.string "title", null: false
@@ -528,6 +536,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
     t.index ["vocabulary_id"], name: "index_terms_on_vocabulary_id"
   end
 
+# Could not dump table "transcript_segments" because of following StandardError
+#   Unknown type 'vector(1536)' for column 'vector_embedding'
+
+
+# Could not dump table "transcripts" because of following StandardError
+#   Unknown type 'vector(1536)' for column 'vector_embedding'
+
+
   create_table "travel_times", force: :cascade do |t|
     t.bigint "place_id", null: false
     t.string "origin_hash", null: false
@@ -616,6 +632,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
   add_foreign_key "ai_conversations", "schools"
   add_foreign_key "ai_conversations", "users"
   add_foreign_key "ai_messages", "ai_conversations"
+  add_foreign_key "document_contents", "places"
+  add_foreign_key "documents", "places", name: "documents_place_id_fkey"
   add_foreign_key "events", "places"
   add_foreign_key "magic_link_tokens", "users"
   add_foreign_key "media_items", "places"
@@ -633,6 +651,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
   add_foreign_key "temp_claims", "schools"
   add_foreign_key "terms", "terms", column: "parent_id"
   add_foreign_key "terms", "vocabularies"
+  add_foreign_key "transcript_segments", "transcripts"
+  add_foreign_key "transcripts", "places"
   add_foreign_key "travel_times", "places"
   add_foreign_key "webhook_audit_logs", "users"
   add_foreign_key "youtube_videos", "places"

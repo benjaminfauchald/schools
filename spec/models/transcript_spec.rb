@@ -381,7 +381,7 @@ RSpec.describe Transcript, type: :model do
         create_list(:transcript, 2, place: place, status: "completed")
         create(:transcript, place: place, status: "failed")
         create(:transcript, place: place, status: "pending")
-        t = create(:transcript, place: place)
+        t = create(:transcript, place: place, status: "processing")
         vector = '[' + Array.new(1536, 0.1).join(',') + ']'
         ActiveRecord::Base.connection.execute("UPDATE transcripts SET vector_embedding = '#{vector}' WHERE id = #{t.id}")
         t.reload
@@ -393,6 +393,7 @@ RSpec.describe Transcript, type: :model do
         expect(stats[:completed]).to eq(2)
         expect(stats[:failed]).to eq(1)
         expect(stats[:pending]).to eq(1)
+        expect(stats[:processing]).to eq(1)
         expect(stats[:with_embeddings]).to eq(1)
       end
     end

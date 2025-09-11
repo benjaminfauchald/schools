@@ -50,7 +50,7 @@ RSpec.describe Event, type: :model do
     let!(:current_event) { create(:event, place: place, starts_at: 1.hour.ago, ends_at: 1.hour.from_now) }
     let!(:upcoming_event) { create(:event, place: place, starts_at: 1.day.from_now) }
     let!(:today_event) { create(:event, place: place, starts_at: Time.current.noon) }
-    let!(:this_week_event) { create(:event, place: place, starts_at: 3.days.from_now) }
+    let!(:this_week_event) { create(:event, place: place, starts_at: Date.current.beginning_of_week + 2.days) }
     let!(:next_month_event) { create(:event, place: place, starts_at: 1.month.from_now) }
 
     describe '.upcoming' do
