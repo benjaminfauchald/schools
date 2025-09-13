@@ -270,7 +270,8 @@ Devise.setup do |config|
   # config.navigational_formats = ['*/*', :html, :turbo_stream]
 
   # The default HTTP method used to sign out a resource. Default is :delete.
-  config.sign_out_via = :delete
+  # Also allowing :get for development/testing convenience
+  config.sign_out_via = Rails.env.development? ? [ :delete, :get ] : :delete
 
   # ==> OmniAuth
   # Add a new OmniAuth provider. Check the wiki for more information on setting
@@ -281,9 +282,10 @@ Devise.setup do |config|
   config.omniauth :facebook,
                   ENV["FACEBOOK_APP_ID"],
                   ENV["FACEBOOK_APP_SECRET"],
-                  scope: "public_profile,email",
+                  scope: "email,public_profile",
                   info_fields: "name,email,picture",
-                  image_size: "normal"
+                  image_size: "normal",
+                  display: "page"
 
   # ==> Warden configuration
   # If you want to use other strategies, that are not supported by Devise, or

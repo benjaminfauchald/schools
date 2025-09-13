@@ -36,7 +36,7 @@ RSpec.describe SchoolFeeBand, type: :model do
     describe 'overlapping bands validation' do
       it 'prevents overlapping grade ranges' do
         existing = create(:school_fee_band, school_fee_schedule: fee_schedule, grade_from: 1, grade_to: 5)
-        
+
         overlapping = build(:school_fee_band, school_fee_schedule: fee_schedule, grade_from: 3, grade_to: 7)
         expect(overlapping).not_to be_valid
         expect(overlapping.errors[:base]).to include('Grade range overlaps with existing fee band')
@@ -44,7 +44,7 @@ RSpec.describe SchoolFeeBand, type: :model do
 
       it 'allows non-overlapping ranges' do
         existing = create(:school_fee_band, school_fee_schedule: fee_schedule, grade_from: 1, grade_to: 5)
-        
+
         non_overlapping = build(:school_fee_band, school_fee_schedule: fee_schedule, grade_from: 6, grade_to: 8)
         expect(non_overlapping).to be_valid
       end
@@ -52,7 +52,7 @@ RSpec.describe SchoolFeeBand, type: :model do
       it 'allows overlapping in different fee schedules' do
         other_schedule = create(:school_fee_schedule, school: school, academic_year: "2024-2025")
         existing = create(:school_fee_band, school_fee_schedule: fee_schedule, grade_from: 1, grade_to: 5)
-        
+
         other_band = build(:school_fee_band, school_fee_schedule: other_schedule, grade_from: 1, grade_to: 5)
         expect(other_band).to be_valid
       end
@@ -62,7 +62,7 @@ RSpec.describe SchoolFeeBand, type: :model do
       it 'validates uniqueness of grade_from scoped to schedule and grade_to' do
         existing = create(:school_fee_band, school_fee_schedule: fee_schedule, grade_from: 1, grade_to: 5)
         duplicate = build(:school_fee_band, school_fee_schedule: fee_schedule, grade_from: 1, grade_to: 5)
-        
+
         expect(duplicate).not_to be_valid
         expect(duplicate.errors[:grade_from]).to include('overlaps with existing grade band')
       end
@@ -76,7 +76,7 @@ RSpec.describe SchoolFeeBand, type: :model do
 
     describe '.ordered' do
       it 'orders by grade_from ascending' do
-        expect(SchoolFeeBand.ordered).to eq([band2, band1, band3])
+        expect(SchoolFeeBand.ordered).to eq([ band2, band1, band3 ])
       end
     end
 
@@ -117,7 +117,7 @@ RSpec.describe SchoolFeeBand, type: :model do
       it 'returns true for grades within range' do
         fee_band.grade_from = 1
         fee_band.grade_to = 5
-        
+
         expect(fee_band.covers_grade?(1)).to be true
         expect(fee_band.covers_grade?(3)).to be true
         expect(fee_band.covers_grade?(5)).to be true
@@ -126,7 +126,7 @@ RSpec.describe SchoolFeeBand, type: :model do
       it 'returns false for grades outside range' do
         fee_band.grade_from = 1
         fee_band.grade_to = 5
-        
+
         expect(fee_band.covers_grade?(0)).to be false
         expect(fee_band.covers_grade?(6)).to be false
       end

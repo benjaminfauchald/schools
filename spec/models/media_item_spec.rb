@@ -13,7 +13,7 @@ RSpec.describe MediaItem, type: :model do
     subject { build(:media_item, place: place) }
 
     it { should validate_presence_of(:kind) }
-    
+
     it 'validates kind inclusion' do
       valid_kinds = %w[logo photo brochure fee_schedule_pdf video virtual_tour menu floor_plan]
       valid_kinds.each do |kind|
@@ -78,7 +78,7 @@ RSpec.describe MediaItem, type: :model do
         item1 = create(:media_item, place: place, sort_order: 10)
         item2 = create(:media_item, place: place, sort_order: 5)
         item3 = create(:media_item, place: place, sort_order: 15)
-        
+
         ordered = MediaItem.ordered
         # Verify they're ordered by sort_order
         expect(ordered.map(&:sort_order)).to eq(ordered.map(&:sort_order).sort)

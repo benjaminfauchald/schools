@@ -13,7 +13,8 @@ Rails.application.routes.draw do
   scope "(:locale)", locale: /en|th/ do
   devise_for :users, skip: :omniauth_callbacks, controllers: {
     registrations: "users/registrations",
-    confirmations: "users/confirmations"
+    confirmations: "users/confirmations",
+    sessions: "users/sessions"
   }
 
   # Additional Devise routes
@@ -160,7 +161,7 @@ Rails.application.routes.draw do
   # SEO routes (outside locale scope for universal access)
   get "sitemap.xml", to: "seo#sitemap", format: :xml
   get "robots.txt", to: "seo#robots", format: :text
-  
+
   # Root route - main school listing with distance filtering
   root "schools#index"
 

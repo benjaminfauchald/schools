@@ -212,7 +212,7 @@ RSpec.describe 'School Detail Page Rendering', type: :system do
       # Create school with grade offerings inline to avoid lazy loading issues
       test_school = create(:school, name: 'Test School with Grades', place: place)
       create(:school_grade_offering, school: test_school, min_age: 3, max_age: 18, grades: 'K-12')
-      
+
       visit school_path(test_school)
 
       # Grade offerings display format - check if section exists

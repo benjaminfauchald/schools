@@ -19,9 +19,9 @@ RSpec.shared_examples "requires admin authentication" do
 
   context "with non-admin user" do
     let(:user) { create(:user) }
-    
+
     before { sign_in user }
-    
+
     it "returns forbidden" do
       make_request
       expect(response).to have_http_status(:forbidden)
@@ -33,12 +33,12 @@ RSpec.shared_examples "requires school ownership" do
   context "with different school owner" do
     let(:other_user) { create(:user, :school_owner) }
     let(:other_school) { create(:school) }
-    
+
     before do
       create(:school_claim, user: other_user, school: other_school, status: 'approved')
       sign_in other_user
     end
-    
+
     it "returns forbidden" do
       make_request
       expect(response).to have_http_status(:forbidden)

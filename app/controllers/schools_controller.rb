@@ -36,13 +36,13 @@ class SchoolsController < ApplicationController
     # For HTML requests, check if we need to redirect to onboarding
     # For JSON/AJAX requests, we need location parameters
     @home_location = get_home_location_from_client
-    
+
     # Set location cookies if location parameters are provided
     set_location_cookies_if_provided
-    
+
     # Server-side redirect to onboarding if no location is available (fallback for when JS isn't loaded)
     if request.format.html? && !@home_location && !has_stored_location?
-      redirect_to '/onboarding' and return
+      redirect_to "/onboarding" and return
     end
 
     if request.format.json? && !@home_location
@@ -320,18 +320,18 @@ class SchoolsController < ApplicationController
     # But only if we don't already have location parameters or are testing onboarding flow
     if puppeteer_request? && !params[:home_lat].present? && !testing_onboarding_flow?
       session[:puppeteer_location] = { lat: 13.7563, lng: 100.5018, formatted_address: "Bangkok, Thailand" }
-      return
+      nil
     end
 
     # This will be handled by the location Stimulus controller
     # which redirects to onboarding if no home location exists
   end
-  
+
   # Detect if we're testing onboarding flow specifically
   def testing_onboarding_flow?
     # If the test explicitly cleared session but not headers, it's likely testing onboarding
     return false unless Rails.env.test?
-    
+
     # Check if we're in a test that expects onboarding behavior
     # Tests can set this header to disable puppeteer location injection
     request.headers["X-Test-Onboarding"] == "true"
@@ -523,10 +523,10 @@ class SchoolsController < ApplicationController
   def has_stored_location?
     # Check for home_location cookie
     return true if cookies[:home_location].present?
-    
+
     # Check for puppeteer session data
     return true if session[:puppeteer_location].present?
-    
+
     false
   end
 
@@ -536,12 +536,12 @@ class SchoolsController < ApplicationController
     if params[:home_lat].present? && params[:home_lng].present?
       lat_str = params[:home_lat].to_s.strip
       lng_str = params[:home_lng].to_s.strip
-      
+
       # Validate coordinates before setting cookies
       begin
         lat = Float(lat_str)
         lng = Float(lng_str)
-        
+
         # Basic validation
         if lat.between?(-90, 90) && lng.between?(-180, 180)
           # Set location cookie with 30 day expiry
@@ -550,13 +550,13 @@ class SchoolsController < ApplicationController
             lng: lng,
             timestamp: Time.current.iso8601
           }.to_json
-          
+
           cookies[:home_location] = {
             value: location_data,
             expires: 30.days.from_now,
             httponly: false # Allow JavaScript access for compatibility
           }
-          
+
           Rails.logger.info "Set home_location cookie: lat=#{lat}, lng=#{lng}"
         end
       rescue ArgumentError, TypeError

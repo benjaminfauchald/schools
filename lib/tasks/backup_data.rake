@@ -1,4 +1,5 @@
 # lib/tasks/data.rake
+require "aws-sdk-s3" if defined?(Aws)
 
 namespace :data do
   desc "Backup the database"
@@ -209,6 +210,63 @@ namespace :data do
     end
   end
 
+  desc "List S3 backups"
+  task list_s3_backups: :environment do
+    unless ENV["AWS_ACCESS_KEY_ID"] && ENV["AWS_SECRET_ACCESS_KEY"] && ENV["S3_BACKUP_BUCKET"]
+      puts "❌ S3 credentials not configured in .env"
+      puts "💡 Add AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and S3_BACKUP_BUCKET to .env"
+      next
+    end
+
+    if ENV["AWS_ACCESS_KEY_ID"].include?("your_aws") ||
+       ENV["S3_BACKUP_BUCKET"].include?("your-backup")
+      puts "❌ S3 credentials are placeholder values"
+      puts "💡 Update .env with your actual AWS credentials"
+      next
+    end
+
+    begin
+      s3_client = Aws::S3::Client.new(
+        access_key_id: ENV["AWS_ACCESS_KEY_ID"],
+        secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
+        region: ENV["AWS_REGION"] || "us-east-1"
+      )
+
+      response = s3_client.list_objects_v2(
+        bucket: ENV["S3_BACKUP_BUCKET"],
+        prefix: ""
+      )
+
+      if response.contents.empty?
+        puts "No backups found in S3 bucket: #{ENV['S3_BACKUP_BUCKET']}"
+      else
+        puts "\n☁️  S3 Backups in bucket: #{ENV['S3_BACKUP_BUCKET']}"
+        puts "=" * 70
+
+        # Group by date
+        backups_by_date = response.contents.group_by do |object|
+          object.key.split("/")[0..2].join("/")
+        end
+
+        backups_by_date.sort.reverse.each do |date, backups|
+          puts "\n📅 #{date}"
+          backups.each do |backup|
+            size_mb = (backup.size / 1024.0 / 1024.0).round(2)
+            filename = backup.key.split("/").last
+            puts "   • #{filename} (#{size_mb} MB) - #{backup.last_modified.strftime('%H:%M:%S')}"
+          end
+        end
+
+        total_size = response.contents.sum(&:size) / 1024.0 / 1024.0
+        puts "\n📊 Total: #{response.contents.size} backups, #{total_size.round(2)} MB"
+      end
+
+    rescue Aws::S3::Errors::ServiceError => e
+      puts "❌ S3 error: #{e.message}"
+      puts "💡 Check your AWS credentials and bucket permissions"
+    end
+  end
+
   desc "Clean old backups (keeps last 5)"
   task clean_backups: :environment do
     backup_dir = Rails.root.join("tmp", "backups")
@@ -290,6 +348,9 @@ namespace :data do
       puts "✅ PostgreSQL backup completed successfully!"
       puts "📁 Backup saved to: #{backup_file}"
       puts "📊 File size: #{(File.size(backup_file) / 1024.0 / 1024.0).round(2)} MB"
+
+      # Upload to S3 if configured
+      upload_to_s3(backup_file)
     else
       puts "❌ PostgreSQL backup failed!"
       exit 1
@@ -323,6 +384,9 @@ namespace :data do
       puts "✅ MySQL backup completed successfully!"
       puts "📁 Backup saved to: #{backup_file}"
       puts "📊 File size: #{(File.size(backup_file) / 1024.0 / 1024.0).round(2)} MB"
+
+      # Upload to S3 if configured
+      upload_to_s3(backup_file)
     else
       puts "❌ MySQL backup failed!"
       exit 1
@@ -482,9 +546,82 @@ namespace :data do
       puts "✅ SQLite backup completed successfully!"
       puts "📁 Backup saved to: #{backup_file}"
       puts "📊 File size: #{(File.size(backup_file) / 1024.0 / 1024.0).round(2)} MB"
+
+      # Upload to S3 if configured
+      upload_to_s3(backup_file)
     rescue => e
       puts "❌ SQLite backup failed: #{e.message}"
       exit 1
+    end
+  end
+
+  def upload_to_s3(backup_file)
+    # Check if S3 credentials are configured
+    return unless ENV["AWS_ACCESS_KEY_ID"] &&
+                  ENV["AWS_SECRET_ACCESS_KEY"] &&
+                  ENV["S3_BACKUP_BUCKET"]
+
+    # Skip if credentials are placeholder values
+    if ENV["AWS_ACCESS_KEY_ID"].include?("your_aws") ||
+       ENV["S3_BACKUP_BUCKET"].include?("your-backup")
+      puts "⚠️  S3 upload skipped - credentials not configured"
+      puts "💡 Configure AWS credentials in .env to enable S3 uploads"
+      return
+    end
+
+    begin
+      puts ""
+      puts "☁️  Starting S3 upload..."
+
+      # Initialize S3 client
+      s3_client = Aws::S3::Client.new(
+        access_key_id: ENV["AWS_ACCESS_KEY_ID"],
+        secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
+        region: ENV["AWS_REGION"] || "us-east-1"
+      )
+
+      # Generate S3 key with date prefix for organization
+      date_prefix = Time.current.strftime("%Y/%m/%d")
+      s3_key = "#{date_prefix}/#{File.basename(backup_file)}"
+
+      # Upload file to S3
+      File.open(backup_file, "rb") do |file|
+        s3_client.put_object(
+          bucket: ENV["S3_BACKUP_BUCKET"],
+          key: s3_key,
+          body: file,
+          storage_class: "STANDARD_IA", # Use Infrequent Access for cost savings
+          server_side_encryption: "AES256", # Enable encryption at rest
+          metadata: {
+            "backup-date" => Time.current.iso8601,
+            "rails-env" => Rails.env,
+            "database-type" => ActiveRecord::Base.connection_db_config.adapter
+          }
+        )
+      end
+
+      puts "✅ S3 upload completed successfully!"
+      puts "📍 S3 location: s3://#{ENV['S3_BACKUP_BUCKET']}/#{s3_key}"
+
+      # Generate pre-signed URL for download (valid for 7 days)
+      presigner = Aws::S3::Presigner.new(client: s3_client)
+      presigned_url = presigner.presigned_url(
+        :get_object,
+        bucket: ENV["S3_BACKUP_BUCKET"],
+        key: s3_key,
+        expires_in: 7 * 24 * 60 * 60
+      )
+
+      puts "🔗 Download URL (valid for 7 days):"
+      puts "   #{presigned_url}"
+
+    rescue Aws::S3::Errors::ServiceError => e
+      puts "❌ S3 upload failed: #{e.message}"
+      puts "💡 Check your AWS credentials and bucket permissions"
+      # Don't exit - local backup still succeeded
+    rescue => e
+      puts "❌ S3 upload error: #{e.message}"
+      # Don't exit - local backup still succeeded
     end
   end
 end

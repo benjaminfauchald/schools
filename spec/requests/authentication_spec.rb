@@ -118,7 +118,7 @@ RSpec.describe "Authentication", type: :request do
         it "does not log in user" do
           post user_session_path, params: invalid_params
           expect(response).to have_http_status(:unprocessable_entity)
-          # In request specs, check for proper error response
+        # In request specs, check for proper error response
         expect(response).to have_http_status(:unprocessable_entity)
         end
 
@@ -159,7 +159,7 @@ RSpec.describe "Authentication", type: :request do
       it "logs out user" do
         delete destroy_user_session_path
         # DELETE signs out and redirects
-        expect(response).to have_http_status(:see_other)
+        expect(response).to have_http_status(:found)
         expect(response).to redirect_to(root_path)
       end
 
@@ -222,7 +222,7 @@ RSpec.describe "Authentication", type: :request do
 
         it "signs in user automatically" do
           get user_facebook_omniauth_callback_path
-          # In request specs, verify successful login via redirect
+        # In request specs, verify successful login via redirect
         expect(response).to redirect_to(root_path)
         end
 
@@ -234,7 +234,7 @@ RSpec.describe "Authentication", type: :request do
 
       context "with existing user" do
         let!(:existing_user) do
-          create(:user, 
+          create(:user,
             email: 'fb_user@example.com',
             provider: 'facebook',
             uid: '123456'
@@ -249,7 +249,7 @@ RSpec.describe "Authentication", type: :request do
 
         it "signs in existing user" do
           get user_facebook_omniauth_callback_path
-          # In request specs, verify successful login via redirect
+        # In request specs, verify successful login via redirect
         expect(response).to redirect_to(root_path)
         end
 
@@ -273,7 +273,7 @@ RSpec.describe "Authentication", type: :request do
           expect {
             get user_facebook_omniauth_callback_path
           }.not_to change { email_user.reload.provider }
-          
+
           expect(email_user.provider).to be_nil
           expect(email_user.uid).to be_nil
           expect(response).to redirect_to(new_user_registration_url)

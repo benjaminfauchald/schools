@@ -30,9 +30,9 @@
 notification :terminal_notifier
 
 # Faster file watching on macOS
-guard :rspec, cmd: "bundle exec rspec" do
-  # run changed spec (including any .rb file in spec/)
-  watch(%r{^spec/.+\.rb$}) { 'spec' }
+guard :rspec, cmd: "bundle exec rspec", all_on_start: false, all_after_pass: false do
+  # run the specific spec that changed (not all specs!)
+  watch(%r{^spec/.+_spec\.rb$})
 
   # model -> model spec
   watch(%r{^app/models/(.+)\.rb$})     { |m| "spec/models/#{m[1]}_spec.rb" }
@@ -41,48 +41,48 @@ guard :rspec, cmd: "bundle exec rspec" do
   watch(%r{^app/controllers/(.+)_controller\.rb$}) { |m| "spec/requests/#{m[1]}_spec.rb" }
 
   # views/partials/helpers/components -> feature/system/request specs as you prefer
-  watch(%r{^app/views/(.+)\.(erb|haml|slim)$})     { "spec/system" }
-  watch(%r{^app/helpers/(.+)\.rb$})                { "spec/helpers" }
-  watch(%r{^app/(view_components|components)/(.+)\.rb$}) { "spec/components" }
-  watch(%r{^app/(view_components|components)/(.+)\.(erb|haml|slim)$}) { "spec" }
+  watch(%r{^app/views/(.+)\.(erb|haml|slim)$})     { |m| "spec/system" }
+  watch(%r{^app/helpers/(.+)\.rb$})                { |m| "spec/helpers/#{m[1]}_helper_spec.rb" }
+  watch(%r{^app/(view_components|components)/(.+)\.rb$}) { |m| "spec/components/#{m[2]}_spec.rb" }
+  watch(%r{^app/(view_components|components)/(.+)\.(erb|haml|slim)$}) { |m| "spec/components" }
 
   # Stimulus controllers (adjust path if you use js/ts)
   watch(%r{^app/javascript/controllers/(.+)\.(js|ts)$}) { "spec/system" }
 
-  # Configuration files that might affect tests
-  watch(%r{^config/routes\.rb$}) { 'spec' }
-  watch(%r{^config/application\.rb$}) { 'spec' }
-  watch(%r{^config/environments/test\.rb$}) { 'spec' }
-  watch(%r{^config/initializers/.+\.rb$}) { 'spec' }
+  # Configuration files that might affect tests - run only routing specs for routes
+  watch(%r{^config/routes\.rb$}) { 'spec/routing' }
+  watch(%r{^config/application\.rb$}) { 'spec/models' }  # Run fast unit tests
+  watch(%r{^config/environments/test\.rb$}) { 'spec/models' }  # Run fast unit tests
+  watch(%r{^config/initializers/.+\.rb$}) { 'spec/models' }  # Run fast unit tests
 
   # Rake tasks that might affect application logic
-  watch(%r{^lib/tasks/.+\.rake$}) { 'spec' }
+  watch(%r{^lib/tasks/.+\.rake$}) { 'spec/models' }
 
-  # Database changes
-  watch(%r{^db/migrate/.+\.rb$}) { 'spec' }
-  watch(%r{^db/schema\.rb$}) { 'spec' }
-  watch(%r{^db/seeds\.rb$}) { 'spec' }
+  # Database changes - run model specs as they're most affected
+  watch(%r{^db/migrate/.+\.rb$}) { 'spec/models' }
+  watch(%r{^db/schema\.rb$}) { 'spec/models' }
+  watch(%r{^db/seeds\.rb$}) { 'spec/models' }
 
-  # Gemfile changes
-  watch('Gemfile') { 'spec' }
-  watch('Gemfile.lock') { 'spec' }
+  # Gemfile changes - don't auto-run tests, just notify
+  watch('Gemfile') { nil }
+  watch('Gemfile.lock') { nil }
 
   # Mailers and email templates
-  watch(%r{^app/mailers/.+\.rb$}) { 'spec' }
-  watch(%r{^app/views/.+_mailer/.+\.(erb|html|text)$}) { 'spec' }
+  watch(%r{^app/mailers/.+\.rb$}) { |m| "spec/mailers" }
+  watch(%r{^app/views/.+_mailer/.+\.(erb|html|text)$}) { "spec/mailers" }
 
   # Jobs (if you add background jobs)
-  watch(%r{^app/jobs/.+\.rb$}) { 'spec' }
+  watch(%r{^app/jobs/.+\.rb$}) { |m| "spec/jobs" }
 
   # Services/POROs in app/services
-  watch(%r{^app/services/.+\.rb$}) { 'spec' }
+  watch(%r{^app/services/.+\.rb$}) { |m| "spec/services" }
 
   # Locale files (since you have i18n)
   watch(%r{^config/locales/.+\.yml$}) { 'spec/system' }
 
-  # run everything if core helpers change
-  watch('spec/spec_helper.rb') { 'spec' }
-  watch('spec/rails_helper.rb') { 'spec' }
+  # run model tests if core helpers change (faster feedback)
+  watch('spec/spec_helper.rb') { 'spec/models' }
+  watch('spec/rails_helper.rb') { 'spec/models' }
 end
 
 

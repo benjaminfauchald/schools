@@ -7,7 +7,7 @@ RSpec.describe Schools::ContactFormComponent, type: :component do
       example.run
     end
   end
-  
+
   let(:school) { create(:school) }
   let(:contact_info) do
     {

@@ -13,7 +13,7 @@ RSpec.describe Transcript, type: :model do
   describe 'validations' do
     it { should validate_presence_of(:video_id) }
     it { should validate_presence_of(:place) }
-    
+
     it 'validates uniqueness of video_id scoped to place_id' do
       existing_transcript = create(:transcript, place: place, video_id: "abc123")
       new_transcript = build(:transcript, place: place, video_id: "abc123")
@@ -24,7 +24,7 @@ RSpec.describe Transcript, type: :model do
   describe 'enums' do
     it { should define_enum_for(:status).backed_by_column_of_type(:string).with_values(
       pending: "pending",
-      processing: "processing", 
+      processing: "processing",
       completed: "completed",
       failed: "failed",
       no_transcript: "no_transcript"
@@ -37,7 +37,7 @@ RSpec.describe Transcript, type: :model do
         completed_transcript = create(:transcript, place: place, status: "completed")
         failed_transcript = create(:transcript, place: create(:place, school: school), status: "failed")
         pending_transcript = create(:transcript, place: create(:place, school: school), status: "pending")
-        
+
         expect(Transcript.processed).to include(completed_transcript)
         expect(Transcript.processed).not_to include(failed_transcript, pending_transcript)
       end
@@ -47,7 +47,7 @@ RSpec.describe Transcript, type: :model do
       it 'returns failed transcripts' do
         completed_transcript = create(:transcript, place: place, status: "completed")
         failed_transcript = create(:transcript, place: create(:place, school: school), status: "failed")
-        
+
         expect(Transcript.failed).to include(failed_transcript)
         expect(Transcript.failed).not_to include(completed_transcript)
       end
@@ -58,7 +58,7 @@ RSpec.describe Transcript, type: :model do
         pending_transcript = create(:transcript, place: place, status: "pending")
         processing_transcript = create(:transcript, place: create(:place, school: school), status: "processing")
         completed_transcript = create(:transcript, place: create(:place, school: school), status: "completed")
-        
+
         expect(Transcript.pending_processing).to include(pending_transcript, processing_transcript)
         expect(Transcript.pending_processing).not_to include(completed_transcript)
       end
@@ -68,7 +68,7 @@ RSpec.describe Transcript, type: :model do
       it 'returns AI enabled transcripts' do
         ai_enabled_transcript = create(:transcript, place: place, ai_enabled: true)
         ai_disabled_transcript = create(:transcript, place: create(:place, school: school), ai_enabled: false)
-        
+
         expect(Transcript.ai_enabled).to include(ai_enabled_transcript)
         expect(Transcript.ai_enabled).not_to include(ai_disabled_transcript)
       end
@@ -80,9 +80,9 @@ RSpec.describe Transcript, type: :model do
         vector = '[' + Array.new(1536, 0.1).join(',') + ']'
         ActiveRecord::Base.connection.execute("UPDATE transcripts SET vector_embedding = '#{vector}' WHERE id = #{transcript_with_embedding.id}")
         transcript_with_embedding.reload
-        
+
         transcript_without = create(:transcript, place: create(:place, school: school))
-        
+
         expect(Transcript.with_embeddings).to include(transcript_with_embedding)
         expect(Transcript.with_embeddings).not_to include(transcript_without)
       end
@@ -92,7 +92,7 @@ RSpec.describe Transcript, type: :model do
       it 'returns transcripts with cleaned text' do
         cleaned_transcript = create(:transcript, place: place, cleaned_transcript: "Clean text", transcript_cleaned_at: Time.current)
         uncleaned_transcript = create(:transcript, place: create(:place, school: school), cleaned_transcript: nil)
-        
+
         expect(Transcript.cleaned).to include(cleaned_transcript)
         expect(Transcript.cleaned).not_to include(uncleaned_transcript)
       end
@@ -102,7 +102,7 @@ RSpec.describe Transcript, type: :model do
       it 'returns transcripts needing cleaning' do
         needs_cleaning = create(:transcript, place: place, full_transcript: "Raw text", cleaned_transcript: nil)
         already_cleaned = create(:transcript, place: create(:place, school: school), full_transcript: "Raw", cleaned_transcript: "Clean")
-        
+
         expect(Transcript.needs_cleaning).to include(needs_cleaning)
         expect(Transcript.needs_cleaning).not_to include(already_cleaned)
       end
@@ -193,7 +193,7 @@ RSpec.describe Transcript, type: :model do
       it 'finds matching segments' do
         segment1 = create(:transcript_segment, transcript: transcript, text: "Ruby on Rails", segment_index: 0)
         segment2 = create(:transcript_segment, transcript: transcript, text: "Python Django", segment_index: 1)
-        
+
         result = transcript.search_content("Rails")
         expect(result[:segments]).to include(segment1)
         expect(result[:segments]).not_to include(segment2)
@@ -332,7 +332,7 @@ RSpec.describe Transcript, type: :model do
           { text: "First segment", start_time: 0, end_time: 10 },
           { text: "Second segment", start_time: 10, end_time: 20 }
         ]
-        
+
         expect {
           transcript.mark_completed!("Full text", segments_data)
         }.to change { transcript.transcript_segments.count }.by(2)
@@ -365,7 +365,7 @@ RSpec.describe Transcript, type: :model do
           duration_seconds: 120,
           language: "en"
         )
-        
+
         data = transcript.ai_context_data
         expect(data[:video_id]).to eq("abc123")
         expect(data[:title]).to eq("Test Video")

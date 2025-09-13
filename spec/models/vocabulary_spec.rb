@@ -13,7 +13,6 @@ RSpec.describe Vocabulary, type: :model do
     it { should validate_presence_of(:code) }
     it { should validate_presence_of(:label) }
     it { should validate_uniqueness_of(:code) }
-
   end
 
   describe 'scopes' do
@@ -35,7 +34,7 @@ RSpec.describe Vocabulary, type: :model do
       it 'returns active terms' do
         active = create(:term, vocabulary: vocabulary, is_active: true)
         inactive = create(:term, vocabulary: vocabulary, is_active: false)
-        
+
         expect(vocabulary.active_terms).to include(active)
         expect(vocabulary.active_terms).not_to include(inactive)
       end
@@ -57,10 +56,10 @@ RSpec.describe Vocabulary, type: :model do
         term1 = create(:term, vocabulary: vocabulary)
         term2 = create(:term, vocabulary: vocabulary)
         unused_term = create(:term, vocabulary: vocabulary)
-        
+
         create(:tagging, taggable: school, term: term1, context: 'curriculum')
         create(:tagging, taggable: school, term: term2, context: 'curriculum')
-        
+
         expect(vocabulary.usage_count).to eq(2)
       end
     end

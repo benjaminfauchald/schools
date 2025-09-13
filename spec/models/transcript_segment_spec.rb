@@ -14,7 +14,7 @@ RSpec.describe TranscriptSegment, type: :model do
     it { should validate_presence_of(:transcript) }
     it { should validate_presence_of(:segment_index) }
     it { should validate_presence_of(:text) }
-    
+
     it 'validates uniqueness of segment_index scoped to transcript_id' do
       existing_segment = create(:transcript_segment, transcript: transcript, segment_index: 0)
       new_segment = build(:transcript_segment, transcript: transcript, segment_index: 0)
@@ -28,8 +28,8 @@ RSpec.describe TranscriptSegment, type: :model do
         segment3 = create(:transcript_segment, transcript: transcript, segment_index: 2)
         segment1 = create(:transcript_segment, transcript: transcript, segment_index: 0)
         segment2 = create(:transcript_segment, transcript: transcript, segment_index: 1)
-        
-        expect(TranscriptSegment.ordered).to eq([segment1, segment2, segment3])
+
+        expect(TranscriptSegment.ordered).to eq([ segment1, segment2, segment3 ])
       end
     end
 
@@ -37,7 +37,7 @@ RSpec.describe TranscriptSegment, type: :model do
       it 'filters by speaker' do
         speaker_segment = create(:transcript_segment, transcript: transcript, speaker: "John", segment_index: 0)
         no_speaker_segment = create(:transcript_segment, transcript: transcript, speaker: nil, segment_index: 1)
-        
+
         expect(TranscriptSegment.by_speaker("John")).to include(speaker_segment)
         expect(TranscriptSegment.by_speaker("John")).not_to include(no_speaker_segment)
       end
@@ -45,7 +45,7 @@ RSpec.describe TranscriptSegment, type: :model do
       it 'returns all when speaker is blank' do
         segment1 = create(:transcript_segment, transcript: transcript, segment_index: 0)
         segment2 = create(:transcript_segment, transcript: transcript, segment_index: 1)
-        
+
         expect(TranscriptSegment.by_speaker(nil)).to include(segment1, segment2)
       end
     end
@@ -54,7 +54,7 @@ RSpec.describe TranscriptSegment, type: :model do
       it 'filters by time range' do
         early_segment = create(:transcript_segment, transcript: transcript, start_time: 0, end_time: 10, segment_index: 0)
         late_segment = create(:transcript_segment, transcript: transcript, start_time: 20, end_time: 30, segment_index: 1)
-        
+
         results = TranscriptSegment.by_time_range(0, 15)
         expect(results).to include(early_segment)
         expect(results).not_to include(late_segment)
@@ -65,7 +65,7 @@ RSpec.describe TranscriptSegment, type: :model do
       it 'filters by confidence threshold' do
         high_confidence = create(:transcript_segment, transcript: transcript, confidence: 0.9, segment_index: 0)
         low_confidence = create(:transcript_segment, transcript: transcript, confidence: 0.5, segment_index: 1)
-        
+
         results = TranscriptSegment.with_confidence_above(0.8)
         expect(results).to include(high_confidence)
         expect(results).not_to include(low_confidence)
@@ -78,9 +78,9 @@ RSpec.describe TranscriptSegment, type: :model do
         vector = '[' + Array.new(1536, 0.1).join(',') + ']'
         ActiveRecord::Base.connection.execute("UPDATE transcript_segments SET vector_embedding = '#{vector}' WHERE id = #{segment_with_embedding.id}")
         segment_with_embedding.reload
-        
+
         segment_without = create(:transcript_segment, transcript: transcript, vector_embedding: nil, segment_index: 1)
-        
+
         expect(TranscriptSegment.with_embeddings).to include(segment_with_embedding)
         expect(TranscriptSegment.with_embeddings).not_to include(segment_without)
       end
@@ -207,7 +207,7 @@ RSpec.describe TranscriptSegment, type: :model do
           speaker: "John",
           confidence: 0.95
         )
-        
+
         data = segment.ai_context_data
         expect(data[:segment_index]).to eq(5)
         expect(data[:text]).to eq("Test content")
@@ -225,17 +225,17 @@ RSpec.describe TranscriptSegment, type: :model do
 
       it 'returns surrounding segments' do
         context = seg2.surrounding_context(before: 1, after: 1)
-        expect(context).to eq([seg1, seg2, seg3])
+        expect(context).to eq([ seg1, seg2, seg3 ])
       end
 
       it 'handles edge cases at start' do
         context = seg1.surrounding_context(before: 2, after: 1)
-        expect(context).to eq([seg1, seg2])
+        expect(context).to eq([ seg1, seg2 ])
       end
 
       it 'handles edge cases at end' do
         context = seg4.surrounding_context(before: 1, after: 2)
-        expect(context).to eq([seg3, seg4])
+        expect(context).to eq([ seg3, seg4 ])
       end
     end
 
@@ -302,7 +302,7 @@ RSpec.describe TranscriptSegment, type: :model do
       it 'only includes segments from completed transcripts' do
         pending_transcript = create(:transcript, place: place, status: "pending")
         pending_segment = create(:transcript_segment, transcript: pending_transcript, text: "Rails")
-        
+
         results = TranscriptSegment.search_by_content("Rails")
         expect(results).not_to include(pending_segment)
       end
@@ -326,7 +326,7 @@ RSpec.describe TranscriptSegment, type: :model do
       let!(:segment2) { create(:transcript_segment, transcript: other_transcript) }
 
       it 'filters by transcript IDs' do
-        results = TranscriptSegment.by_transcript_ids([transcript.id])
+        results = TranscriptSegment.by_transcript_ids([ transcript.id ])
         expect(results).to include(segment1)
         expect(results).not_to include(segment2)
       end

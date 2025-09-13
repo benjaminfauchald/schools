@@ -13,7 +13,7 @@ RSpec.describe Document, type: :model do
   describe 'validations' do
     it { should validate_presence_of(:filename) }
     it { should validate_presence_of(:file_checksum) }
-    
+
     it 'validates uniqueness of file_checksum scoped to place_id' do
       existing_document = create(:document, place: place, file_checksum: "abc123")
       new_document = build(:document, place: place, file_checksum: "abc123")
@@ -35,7 +35,7 @@ RSpec.describe Document, type: :model do
         completed_doc = create(:document, place: place, processing_completed: true)
         failed_doc = create(:document, place: create(:place, school: school), processing_failed: true)
         pending_doc = create(:document, place: create(:place, school: school), processing_completed: false, processing_failed: false)
-        
+
         expect(Document.processing_completed).to include(completed_doc)
         expect(Document.processing_completed).not_to include(failed_doc, pending_doc)
       end
@@ -46,7 +46,7 @@ RSpec.describe Document, type: :model do
         completed_doc = create(:document, place: place, processing_completed: true)
         failed_doc = create(:document, place: create(:place, school: school), processing_failed: true)
         pending_doc = create(:document, place: create(:place, school: school), processing_completed: false, processing_failed: false)
-        
+
         expect(Document.processing_failed).to include(failed_doc)
         expect(Document.processing_failed).not_to include(completed_doc, pending_doc)
       end
@@ -57,7 +57,7 @@ RSpec.describe Document, type: :model do
         completed_doc = create(:document, place: place, processing_completed: true)
         failed_doc = create(:document, place: create(:place, school: school), processing_failed: true)
         pending_doc = create(:document, place: create(:place, school: school), processing_completed: false, processing_failed: false)
-        
+
         expect(Document.pending_processing).to include(pending_doc)
         expect(Document.pending_processing).not_to include(completed_doc, failed_doc)
       end
@@ -67,7 +67,7 @@ RSpec.describe Document, type: :model do
       it 'returns documents with AI enabled' do
         ai_enabled_doc = create(:document, place: place, ai_enabled: true)
         ai_disabled_doc = create(:document, place: create(:place, school: school), ai_enabled: false)
-        
+
         expect(Document.ai_enabled).to include(ai_enabled_doc)
         expect(Document.ai_enabled).not_to include(ai_disabled_doc)
       end
@@ -79,9 +79,9 @@ RSpec.describe Document, type: :model do
         vector = '[' + Array.new(1536, 0.1).join(',') + ']'
         ActiveRecord::Base.connection.execute("UPDATE documents SET embedding = '#{vector}' WHERE id = #{doc_with_embedding.id}")
         doc_with_embedding.reload
-        
+
         doc_without = create(:document, place: create(:place, school: school))
-        
+
         expect(Document.with_embeddings).to include(doc_with_embedding)
         expect(Document.with_embeddings).not_to include(doc_without)
       end
@@ -91,7 +91,7 @@ RSpec.describe Document, type: :model do
       it 'orders documents by created_at desc' do
         old_doc = create(:document, place: place, created_at: 2.days.ago)
         new_doc = create(:document, place: create(:place, school: school), created_at: 1.hour.ago)
-        
+
         recent_docs = Document.recent
         expect(recent_docs.first).to eq(new_doc)
         expect(recent_docs.to_a.last).to eq(old_doc)
@@ -126,7 +126,7 @@ RSpec.describe Document, type: :model do
       it 'returns appropriate display strings' do
         document.update(processing_completed: true)
         expect(document.processing_status_display).to eq("✅ Processed")
-        
+
         document.update(processing_completed: false, processing_failed: true)
         expect(document.processing_status_display).to eq("❌ Failed")
       end
@@ -136,7 +136,7 @@ RSpec.describe Document, type: :model do
       it 'returns true when processing failed or completed' do
         document.update(processing_failed: true)
         expect(document.can_reprocess?).to be true
-        
+
         document.update(processing_failed: false, processing_completed: true)
         expect(document.can_reprocess?).to be true
       end
@@ -151,7 +151,7 @@ RSpec.describe Document, type: :model do
       it 'returns the file extension' do
         document.update(original_filename: "test.pdf")
         expect(document.file_extension).to eq(".pdf")
-        
+
         document.update(original_filename: "report.DOCX")
         expect(document.file_extension).to eq(".docx")
       end
@@ -166,13 +166,13 @@ RSpec.describe Document, type: :model do
       it 'returns appropriate display names for file types' do
         document.update(original_filename: "test.pdf")
         expect(document.file_type_display).to eq("PDF Document")
-        
+
         document.update(original_filename: "test.docx")
         expect(document.file_type_display).to eq("Word Document")
-        
+
         document.update(original_filename: "test.xlsx")
         expect(document.file_type_display).to eq("Excel Spreadsheet")
-        
+
         document.update(original_filename: "test.pptx")
         expect(document.file_type_display).to eq("PowerPoint Presentation")
       end
@@ -182,10 +182,10 @@ RSpec.describe Document, type: :model do
       it 'formats file size appropriately' do
         document.update(file_size: 500)
         expect(document.file_size_display).to eq("500 bytes")
-        
+
         document.update(file_size: 5_000)
         expect(document.file_size_display).to eq("4.9 KB")
-        
+
         document.update(file_size: 5_000_000)
         expect(document.file_size_display).to eq("4.8 MB")
       end
@@ -252,7 +252,7 @@ RSpec.describe Document, type: :model do
         # Create a document first (it will get its own checksum from the file)
         doc = create(:document, place: place)
         expect(doc).to be_persisted
-        
+
         # Now check if duplicate_exists works with the actual checksum
         actual_checksum = doc.file_checksum
         expect(Document.duplicate_exists?(actual_checksum, place.id)).to be true
@@ -280,10 +280,10 @@ RSpec.describe Document, type: :model do
       end
 
       it 'limits results' do
-        10.times do |i| 
-          create(:document, 
-                 place: create(:place, school: school), 
-                 extracted_text: "Rails content #{i}", 
+        10.times do |i|
+          create(:document,
+                 place: create(:place, school: school),
+                 extracted_text: "Rails content #{i}",
                  processing_completed: true)
         end
         results = Document.search_by_text("Rails", limit: 5)

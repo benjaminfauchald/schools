@@ -85,7 +85,7 @@ RSpec.describe TempClaim, type: :model do
         # Ensure the test data is set up with explicit timestamps to avoid flakiness
         old_registered.update!(updated_at: 8.days.ago) # Explicitly older than 7 days
         registered_claim.update!(updated_at: 1.day.ago) # Explicitly newer than 7 days
-        
+
         expect(TempClaim.old_registered(7)).to include(old_registered)
         expect(TempClaim.old_registered(7)).not_to include(registered_claim)
       end

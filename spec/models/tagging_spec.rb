@@ -18,7 +18,7 @@ RSpec.describe Tagging, type: :model do
     it { should validate_presence_of(:taggable_id) }
     it { should validate_presence_of(:term_id) }
     it { should validate_presence_of(:context) }
-    
+
     it 'validates uniqueness of term_id scoped to taggable and context' do
       existing = create(:tagging, taggable: school, term: term, context: 'curriculum')
       duplicate = build(:tagging, taggable: school, term: term, context: 'curriculum')
@@ -38,7 +38,6 @@ RSpec.describe Tagging, type: :model do
         expect(tagging).to be_valid
       end
     end
-
   end
 
   describe 'scopes' do
@@ -73,7 +72,7 @@ RSpec.describe Tagging, type: :model do
       it 'filters taggings by school id' do
         other_school = create(:school)
         other_tagging = create(:tagging, taggable: other_school, term: term, context: 'curriculum')
-        
+
         taggings = Tagging.for_school(school.id)
         expect(taggings).to include(curriculum_tagging, facility_tagging)
         expect(taggings).not_to include(other_tagging)

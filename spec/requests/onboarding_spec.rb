@@ -26,6 +26,33 @@ RSpec.describe "Onboarding", type: :request do
         expect(response.body).to include("Enter your home address")
         expect(response.body).to include("location")
       end
+
+      it "renders using application layout without duplicate HTML structure" do
+        get onboarding_path
+        # Should contain exactly one DOCTYPE (from application layout)
+        expect(response.body.scan(/<!DOCTYPE html>/i).count).to eq(1)
+        # Should contain exactly one opening html tag
+        expect(response.body.scan(/<html[^>]*>/i).count).to eq(1)
+        # Should contain the content
+        expect(response.body).to include("Set Your Home Location")
+      end
+
+      it "works with Turbo navigation" do
+        get onboarding_path
+        expect(response).to have_http_status(:success)
+        # Should have only one DOCTYPE and one HTML tag (no duplicates)
+        expect(response.body.scan(/<!DOCTYPE html>/i).count).to eq(1)
+        expect(response.body.scan(/<html[^>]*>/i).count).to eq(1)
+        expect(response.body.scan(/<\/html>/i).count).to eq(1)
+      end
+
+      it "does not include location controller to prevent redirect loops" do
+        get onboarding_path
+        # Should NOT have the location controller that causes redirect loops
+        expect(response.body).not_to include('data-controller="location"')
+        # Should still have the onboarding content
+        expect(response.body).to include("Set Your Home Location")
+      end
     end
   end
 

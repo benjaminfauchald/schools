@@ -1,25 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Set Your Home Location - Schools</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<%# This view uses the application layout, no need for HTML/HEAD/BODY tags %>
+<% content_for :title, "Set Your Home Location" %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-
-    <!-- Flowbite CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
-  </head>
-
-  <body class="bg-gray-50 min-h-screen">
+<div class="bg-gray-50 min-h-screen">
     <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div class="sm:mx-auto sm:w-full sm:max-w-2xl">
         
@@ -124,12 +106,12 @@
               
               <!-- Map Controls -->
               <div class="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-2 space-y-2">
-                <button data-action="click->onboarding-location#getCurrentLocation"
+                <button id="get-current-location-button"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded text-xs font-medium transition-colors"
                         title="Use my current location">
                   📍 My Location
                 </button>
-                <button data-action="click->onboarding-location#searchOnMap"
+                <button id="search-on-map-button"
                         class="w-full bg-gray-600 hover:bg-gray-700 text-white p-2 rounded text-xs font-medium transition-colors"
                         title="Search for a place">
                   🔍 Search
@@ -147,13 +129,13 @@
               </div>
               
               <div class="flex flex-col sm:flex-row gap-3">
-                <button data-action="click->onboarding-location#confirmMapLocation" 
+                <button id="confirm-map-button"
                         data-onboarding-location-target="confirmMapButton"
                         disabled
                         class="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                   Confirm This Location
                 </button>
-                <button data-action="click->onboarding-location#backToAddress" 
+                <button id="back-to-address-button"
                         class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                   Back to Address Input
                 </button>
@@ -176,7 +158,7 @@
               <p class="font-medium text-blue-900" data-onboarding-location-target="finalAddress"></p>
             </div>
             
-            <button data-action="click->onboarding-location#completeOnboarding"
+            <button id="complete-onboarding-button"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
               Continue to Schools
             </button>
@@ -310,14 +292,35 @@
         document.getElementById('confirm-location-button').addEventListener('click', confirmLocation);
         document.getElementById('edit-address-button').addEventListener('click', editAddress);
         
-        // Map confirmation buttons (need to add these after map is shown)
-        document.addEventListener('click', function(e) {
-          if (e.target.matches('[data-onboarding-location-target="confirmMapButton"]')) {
-            confirmMapLocation();
-          } else if (e.target.matches('[data-action*="backToAddress"]')) {
-            backToAddress();
-          }
-        });
+        // Map confirmation buttons
+        const confirmMapBtn = document.getElementById('confirm-map-button');
+        if (confirmMapBtn) {
+          confirmMapBtn.addEventListener('click', confirmMapLocation);
+        }
+        
+        const backToAddressBtn = document.getElementById('back-to-address-button');
+        if (backToAddressBtn) {
+          backToAddressBtn.addEventListener('click', backToAddress);
+        }
+        
+        // Location buttons on map
+        const getCurrentLocationBtn = document.getElementById('get-current-location-button');
+        if (getCurrentLocationBtn) {
+          getCurrentLocationBtn.addEventListener('click', getCurrentLocation);
+        }
+        
+        const searchOnMapBtn = document.getElementById('search-on-map-button');
+        if (searchOnMapBtn) {
+          searchOnMapBtn.addEventListener('click', searchOnMap);
+        }
+        
+        // Complete onboarding button
+        const completeOnboardingBtn = document.getElementById('complete-onboarding-button');
+        if (completeOnboardingBtn) {
+          completeOnboardingBtn.addEventListener('click', function() {
+            window.location.href = '/';
+          });
+        }
       }
 
       async function geocodeAddress() {
@@ -359,8 +362,8 @@
             if (data.status === 'OK' && data.results.length > 0) {
               const location = data.results[0].geometry.location;
               return {
-                lat: location.lat,
-                lng: location.lng,
+                lat: parseFloat(location.lat),
+                lng: parseFloat(location.lng),
                 formatted_address: data.results[0].formatted_address,
                 source: 'google'
               };
@@ -445,12 +448,27 @@
       }
 
       function saveLocationAndComplete() {
-        if (!selectedLocation) return;
+        if (!selectedLocation) {
+          console.error('No location selected');
+          return;
+        }
+
+        debugLog('Saving location:', selectedLocation);
 
         try {
+          // Ensure lat/lng are numbers
+          const lat = parseFloat(selectedLocation.lat);
+          const lng = parseFloat(selectedLocation.lng);
+          
+          if (isNaN(lat) || isNaN(lng)) {
+            console.error('Invalid coordinates:', selectedLocation);
+            showError('Invalid location coordinates. Please try again.');
+            return;
+          }
+          
           const locationData = {
-            lat: selectedLocation.lat,
-            lng: selectedLocation.lng,
+            lat: lat,
+            lng: lng,
             formatted_address: selectedLocation.formatted_address,
             timestamp: new Date().toISOString(),
             source: selectedLocation.source || 'manual'
@@ -458,8 +476,10 @@
           
           localStorage.setItem('homeLocation', JSON.stringify(locationData));
           
-          // Redirect to home
-          window.location.href = '/';
+          // Redirect to home WITH location parameters so the server knows about them
+          const redirectUrl = `/?home_lat=${lat}&home_lng=${lng}`;
+          debugLog('Redirecting to:', redirectUrl);
+          window.location.href = redirectUrl;
           
         } catch (error) {
           console.error('Error saving location:', error);
@@ -668,7 +688,7 @@
             };
             
             const mapAddressEl = document.querySelector('[data-onboarding-location-target="mapAddress"]');
-            const confirmButton = document.querySelector('[data-onboarding-location-target="confirmMapButton"]');
+            const confirmButton = document.getElementById('confirm-map-button');
             
             if (mapAddressEl) {
               mapAddressEl.textContent = results[0].formatted_address;
@@ -682,6 +702,42 @@
           }
         });
       }
+      
+      function getCurrentLocation() {
+        if (navigator.geolocation && map) {
+          navigator.geolocation.getCurrentPosition(
+            function(position) {
+              const userLocation = new google.maps.LatLng(
+                position.coords.latitude,
+                position.coords.longitude
+              );
+              map.setCenter(userLocation);
+              map.setZoom(15);
+              placeMarkerAtLocation(userLocation);
+            },
+            function(error) {
+              alert('Could not get your current location. Please click on the map or search for a location.');
+            }
+          );
+        } else {
+          alert('Geolocation is not supported by your browser');
+        }
+      }
+      
+      function searchOnMap() {
+        const searchQuery = prompt('Enter a place to search for:');
+        if (searchQuery && geocoder && map) {
+          geocoder.geocode({ address: searchQuery }, function(results, status) {
+            if (status === 'OK' && results[0]) {
+              map.setCenter(results[0].geometry.location);
+              map.setZoom(15);
+              placeMarkerAtLocation(results[0].geometry.location);
+            } else {
+              alert('Could not find that location. Please try again.');
+            }
+          });
+        }
+      }
 
       window.initOnboardingMap = function() {
         debugLog('initOnboardingMap() called - Google Maps API ready');
@@ -690,5 +746,4 @@
         debugLog('Ready to initialize maps when user clicks "Use Map Instead"');
       };
     </script>
-  </body>
-</html>
+</div>

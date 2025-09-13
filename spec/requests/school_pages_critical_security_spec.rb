@@ -40,7 +40,7 @@ RSpec.describe 'School Pages Critical Security', type: :request do
 
       # Don't follow redirects to avoid infinite loops in test
       # We've already verified it redirects correctly
-      
+
       # The critical security requirement is that draft pages redirect away
       # which we've already verified above
       expect(response.body).not_to include('STRICTLY CONFIDENTIAL')

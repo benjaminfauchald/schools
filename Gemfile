@@ -61,6 +61,9 @@ gem "pgvector", "~> 0.3.2"
 # HTTP client for API requests
 gem "httparty", "~> 0.21"
 
+# AWS SDK for S3 backup uploads
+gem "aws-sdk-s3", "~> 1.143"
+
 
 
 gem "rgeo"

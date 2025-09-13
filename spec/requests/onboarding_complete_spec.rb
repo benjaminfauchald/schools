@@ -22,7 +22,7 @@ RSpec.describe 'Onboarding Complete', type: :request do
         # Should redirect to root path with success message
         expect(response).to redirect_to(root_path)
         expect(flash[:notice]).to eq("Welcome! Your home location has been set.")
-        
+
         # For this test, we just verify the redirect target is correct
         # We don't need to follow the redirect since that would trigger
         # the location check which might redirect again

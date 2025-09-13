@@ -6,15 +6,13 @@ RSpec.describe 'School Contact Modal', type: :system do
       example.run
     end
   end
-  
+
   let(:place) { create(:place, lat: 13.7563, lng: 100.5018) }
-  let(:school) { create(:school, name: 'Test International School', place: place) }
+  let!(:school) { create(:school, name: 'Test International School', place: place, status: 'published') }
   let(:facebook_user) { create(:user, :facebook_user) }
   let(:regular_user) { create(:user, provider: nil) }
 
   before do
-    # Ensure test isolation by cleaning up any existing data
-    School.where.not(id: school.id).destroy_all
     # Location cookies are set automatically by LocationHelpers
     # which overrides visit to set cookies after each page visit
   end

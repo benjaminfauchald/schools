@@ -13,7 +13,7 @@ RSpec.describe YoutubeVideo, type: :model do
     it { should validate_presence_of(:video_id) }
     it { should validate_presence_of(:title) }
     it { should validate_presence_of(:thumbnail_url) }
-    
+
     it 'validates uniqueness of video_id scoped to place_id' do
       existing_video = create(:youtube_video, place: place, video_id: "abc123")
       new_video = build(:youtube_video, place: place, video_id: "abc123")
@@ -45,10 +45,10 @@ RSpec.describe YoutubeVideo, type: :model do
       it 'orders by created_at desc' do
         # Clear any existing videos to ensure clean test
         YoutubeVideo.destroy_all
-        
+
         old_video = create(:youtube_video, place: place, created_at: 2.days.ago)
         new_video = create(:youtube_video, place: place, created_at: 1.hour.ago)
-        
+
         recent_videos = YoutubeVideo.recent
         expect(recent_videos.first).to eq(new_video)
         expect(recent_videos.last).to eq(old_video)

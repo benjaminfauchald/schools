@@ -48,6 +48,7 @@ en:
     sessions:
       signed_in: "Signed in successfully."
       signed_out: "Signed out successfully."
+      signed_out_facebook: "Signed out successfully. Note: You may still be logged into Facebook. To fully logout, please visit Facebook.com and sign out there as well."
       already_signed_out: "Signed out successfully."
     unlocks:
       send_instructions: "You will receive an email with instructions for how to unlock your account in a few minutes."

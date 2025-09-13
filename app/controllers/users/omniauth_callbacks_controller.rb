@@ -1,10 +1,32 @@
 class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  skip_before_action :verify_authenticity_token, only: [ :facebook, :mock_facebook, :sync_status ]
+  skip_before_action :verify_authenticity_token, only: [ :facebook, :failure, :mock_facebook, :sync_status ]
 
   def facebook
-    @user = User.from_omniauth(request.env["omniauth.auth"])
+    Rails.logger.info "🔵 Facebook OAuth: Callback received"
+    Rails.logger.info "🔵 Facebook OAuth: Request headers: #{request.headers.select { |k, _| k.match(/^HTTP.*/) }.to_h}"
+    Rails.logger.info "🔵 Facebook OAuth: Request origin: #{request.origin}"
+    Rails.logger.info "🔵 Facebook OAuth: Request referer: #{request.referer}"
+
+    auth_hash = request.env["omniauth.auth"]
+    Rails.logger.info "🔵 Facebook OAuth: Auth hash present: #{auth_hash.present?}"
+
+    if auth_hash
+      Rails.logger.info "🔵 Facebook OAuth: Provider: #{auth_hash.provider}"
+      Rails.logger.info "🔵 Facebook OAuth: UID: #{auth_hash.uid}"
+      Rails.logger.info "🔵 Facebook OAuth: Name: #{auth_hash.info&.name}"
+      Rails.logger.info "🔵 Facebook OAuth: Email: #{auth_hash.info&.email}"
+    else
+      Rails.logger.error "❌ Facebook OAuth: No auth hash found in request.env"
+      Rails.logger.error "❌ Facebook OAuth: Request env keys: #{request.env.keys.select { |k| k.include?('omniauth') }}"
+    end
+
+    @user = User.from_omniauth(auth_hash)
+    Rails.logger.info "🔵 Facebook OAuth: User from_omniauth result - persisted: #{@user.persisted?}, errors: #{@user.errors.full_messages}"
 
     if @user.persisted?
+      # Store Facebook access token in session for logout
+      session[:facebook_access_token] = auth_hash.credentials.token if auth_hash.credentials
+
       sign_in @user, event: :authentication
 
       # Check if user was trying to contact a school before OAuth
@@ -68,7 +90,25 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
 
   def failure
-    redirect_to root_path, alert: "Facebook authentication failed. Please try again."
+    Rails.logger.error "❌ Facebook OAuth: Authentication failed"
+    Rails.logger.error "❌ Facebook OAuth: Failure reason: #{params[:message]}"
+    Rails.logger.error "❌ Facebook OAuth: Failure strategy: #{params[:strategy]}"
+    Rails.logger.error "❌ Facebook OAuth: Request params: #{params.inspect}"
+    Rails.logger.error "❌ Facebook OAuth: Request env omniauth.error: #{request.env['omniauth.error']}"
+    Rails.logger.error "❌ Facebook OAuth: Request env omniauth.error.type: #{request.env['omniauth.error.type']}"
+
+    error_message = case params[:message]
+    when "invalid_credentials"
+      "Invalid Facebook credentials. Please try again."
+    when "timeout"
+      "Facebook authentication timed out. Please try again."
+    when "access_denied"
+      "You denied access to your Facebook account."
+    else
+      "Facebook authentication failed (#{params[:message]}). Please try again."
+    end
+
+    redirect_to root_path, alert: error_message
   end
 
   def store_school

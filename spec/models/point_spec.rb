@@ -51,7 +51,7 @@ RSpec.describe Point, type: :model do
     describe '#coordinates' do
       it 'returns lat and lon as array' do
         point = build(:point, lat: 13.7563, lon: 100.5018)
-        expect(point.coordinates).to eq([13.7563, 100.5018])
+        expect(point.coordinates).to eq([ 13.7563, 100.5018 ])
       end
     end
 

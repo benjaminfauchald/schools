@@ -25,7 +25,7 @@ RSpec.describe AiMessage, type: :model do
   describe 'scopes' do
     let!(:user_message) { create(:ai_message, ai_conversation: ai_conversation, role: "user") }
     let!(:assistant_message) { create(:ai_message, ai_conversation: ai_conversation, role: "assistant") }
-    let!(:message_with_sources) { create(:ai_message, ai_conversation: ai_conversation, source_references: [{ "type" => "document" }]) }
+    let!(:message_with_sources) { create(:ai_message, ai_conversation: ai_conversation, source_references: [ { "type" => "document" } ]) }
 
     describe '.recent' do
       it 'orders by created_at' do
@@ -55,7 +55,7 @@ RSpec.describe AiMessage, type: :model do
       it 'filters by conversation id' do
         other_conversation = create(:ai_conversation, school: school, user: user)
         other_message = create(:ai_message, ai_conversation: other_conversation)
-        
+
         expect(AiMessage.by_conversation(ai_conversation.id)).to include(user_message, assistant_message)
         expect(AiMessage.by_conversation(ai_conversation.id)).not_to include(other_message)
       end
@@ -77,7 +77,7 @@ RSpec.describe AiMessage, type: :model do
 
     describe '#has_sources?' do
       it 'returns true when source_references present' do
-        message = create(:ai_message, ai_conversation: ai_conversation, source_references: [{ "type" => "document" }])
+        message = create(:ai_message, ai_conversation: ai_conversation, source_references: [ { "type" => "document" } ])
         expect(message.has_sources?).to be true
       end
 
@@ -196,7 +196,7 @@ RSpec.describe AiMessage, type: :model do
       end
 
       it 'handles array of keywords' do
-        expect(message.mentions?(["university", "school"])).to be true
+        expect(message.mentions?([ "university", "school" ])).to be true
       end
 
       it 'is case insensitive' do
@@ -252,7 +252,7 @@ RSpec.describe AiMessage, type: :model do
           { "type" => "transcript" },
           { "type" => "school_data" }
         ])
-        
+
         stats = message.source_statistics
         expect(stats[:total_sources]).to eq(4)
         expect(stats[:by_type]["document"]).to eq(2)
@@ -266,14 +266,14 @@ RSpec.describe AiMessage, type: :model do
 
     describe '#ai_context_data' do
       it 'exports message data for AI context' do
-        message = create(:ai_message, 
-          ai_conversation: ai_conversation, 
-          role: "user", 
+        message = create(:ai_message,
+          ai_conversation: ai_conversation,
+          role: "user",
           content: "Test content",
           message_type: "text",
           metadata: { "key" => "value" }
         )
-        
+
         data = message.ai_context_data
         expect(data[:id]).to eq(message.id)
         expect(data[:role]).to eq("user")
@@ -290,7 +290,7 @@ RSpec.describe AiMessage, type: :model do
       it 'returns conversation messages in order' do
         create(:ai_message, ai_conversation: ai_conversation, role: "user", content: "Question", created_at: 2.hours.ago)
         create(:ai_message, ai_conversation: ai_conversation, role: "assistant", content: "Answer", created_at: 1.hour.ago)
-        
+
         flow = AiMessage.conversation_flow(ai_conversation.id)
         expect(flow.first[0]).to eq("user")
         expect(flow.first[1]).to eq("Question")

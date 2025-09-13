@@ -68,9 +68,9 @@ RSpec.describe 'School Claim Flow', type: :request do
     it 'school show page contains claim section for signed in users' do
       # Sign in the user for request specs
       sign_in user
-      
+
       get school_path(id: school.id)
-      
+
       # Check for claim section in the response body
       expect(response).to have_http_status(:success)
       expect(response.body).to include('Claim')

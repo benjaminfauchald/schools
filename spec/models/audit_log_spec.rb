@@ -55,7 +55,7 @@ RSpec.describe AuditLog, type: :model do
       it 'returns recent logs ordered by created_at desc' do
         old_log = create(:audit_log, auditable: school, created_at: 1.week.ago)
         new_log = create(:audit_log, auditable: school, created_at: 1.hour.ago)
-        
+
         recent = AuditLog.recent(10)
         expect(recent).to include(new_log)
         expect(recent).to include(old_log)
@@ -119,16 +119,16 @@ RSpec.describe AuditLog, type: :model do
 
     describe '#changed_fields_display' do
       it 'returns readable list of changed fields' do
-        audit_log.changed_fields = { 'name' => ['Old', 'New'] }
+        audit_log.changed_fields = { 'name' => [ 'Old', 'New' ] }
         expect(audit_log.changed_fields_display).to eq('Name')
 
-        audit_log.changed_fields = { 'name' => ['Old', 'New'], 'email' => ['old@test.com', 'new@test.com'] }
+        audit_log.changed_fields = { 'name' => [ 'Old', 'New' ], 'email' => [ 'old@test.com', 'new@test.com' ] }
         expect(audit_log.changed_fields_display).to eq('Name and Email')
 
-        audit_log.changed_fields = { 
-          'name' => ['Old', 'New'],
-          'email' => ['old@test.com', 'new@test.com'],
-          'phone' => ['123', '456']
+        audit_log.changed_fields = {
+          'name' => [ 'Old', 'New' ],
+          'email' => [ 'old@test.com', 'new@test.com' ],
+          'phone' => [ '123', '456' ]
         }
         expect(audit_log.changed_fields_display).to eq('Name, Email, and Phone')
       end
@@ -142,7 +142,7 @@ RSpec.describe AuditLog, type: :model do
     describe '#change_summary' do
       it 'returns summary of changes' do
         audit_log.action = 'update'
-        audit_log.changed_fields = { 'name' => ['Old', 'New'] }
+        audit_log.changed_fields = { 'name' => [ 'Old', 'New' ] }
         expect(audit_log.change_summary).to eq('Updated name')
 
         audit_log.action = 'create'
@@ -161,20 +161,20 @@ RSpec.describe AuditLog, type: :model do
 
       it 'returns false for timestamp-only updates' do
         audit_log.action = 'update'
-        audit_log.changed_fields = { 'updated_at' => [1.hour.ago, Time.current] }
+        audit_log.changed_fields = { 'updated_at' => [ 1.hour.ago, Time.current ] }
         expect(audit_log.significant_change?).to be false
       end
 
       it 'returns true for non-timestamp updates' do
         audit_log.action = 'update'
-        audit_log.changed_fields = { 'name' => ['Old', 'New'], 'updated_at' => [1.hour.ago, Time.current] }
+        audit_log.changed_fields = { 'name' => [ 'Old', 'New' ], 'updated_at' => [ 1.hour.ago, Time.current ] }
         expect(audit_log.significant_change?).to be true
       end
     end
 
     describe '#previous_value' do
       it 'returns previous value for field' do
-        audit_log.changed_fields = { 'name' => ['Old Name', 'New Name'] }
+        audit_log.changed_fields = { 'name' => [ 'Old Name', 'New Name' ] }
         expect(audit_log.previous_value('name')).to eq('Old Name')
       end
 
@@ -186,7 +186,7 @@ RSpec.describe AuditLog, type: :model do
 
     describe '#new_value' do
       it 'returns new value for field' do
-        audit_log.changed_fields = { 'name' => ['Old Name', 'New Name'] }
+        audit_log.changed_fields = { 'name' => [ 'Old Name', 'New Name' ] }
         expect(audit_log.new_value('name')).to eq('New Name')
       end
 
@@ -217,22 +217,22 @@ RSpec.describe AuditLog, type: :model do
     describe '.create_for_record' do
       it 'creates audit log for record' do
         expect {
-          AuditLog.create_for_record(school, 'update', user.id, { 'name' => ['Old', 'New'] })
+          AuditLog.create_for_record(school, 'update', user.id, { 'name' => [ 'Old', 'New' ] })
         }.to change(AuditLog, :count).by(1)
 
         log = AuditLog.last
         expect(log.auditable).to eq(school)
         expect(log.user_id).to eq(user.id)
         expect(log.action).to eq('update')
-        expect(log.changed_fields).to eq({ 'name' => ['Old', 'New'] })
+        expect(log.changed_fields).to eq({ 'name' => [ 'Old', 'New' ] })
       end
 
       it 'handles array of field names' do
         school.name = 'New Name'
         school.save!
-        
-        AuditLog.create_for_record(school, 'update', user.id, ['name'])
-        
+
+        AuditLog.create_for_record(school, 'update', user.id, [ 'name' ])
+
         log = AuditLog.last
         expect(log.changed_fields.keys).to include('name')
       end
@@ -250,9 +250,9 @@ RSpec.describe AuditLog, type: :model do
       end
 
       it 'excludes timestamps by default' do
-        changes = { 'name' => ['Old', 'New'], 'updated_at' => [1.hour.ago, Time.current] }
-        AuditLog.create_for_record(school, 'update', user.id, ['name', 'updated_at'])
-        
+        changes = { 'name' => [ 'Old', 'New' ], 'updated_at' => [ 1.hour.ago, Time.current ] }
+        AuditLog.create_for_record(school, 'update', user.id, [ 'name', 'updated_at' ])
+
         log = AuditLog.last
         expect(log.changed_fields.keys).not_to include('updated_at')
       end

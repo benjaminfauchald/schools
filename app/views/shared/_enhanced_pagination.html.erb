@@ -27,12 +27,21 @@
   show_pagination = total_pages > 1
 %>
 
-<div class="<%= container_classes %> bg-white border-t border-gray-200 px-4 py-3 sm:px-6" 
-     <%= "data-#{ajax_target}-target=\"pagination\"" if ajax_target %>
-     data-controller="enhanced-pagination"
-     data-enhanced-pagination-current-page-value="<%= current_page %>"
-     data-enhanced-pagination-total-pages-value="<%= total_pages %>"
-     data-enhanced-pagination-base-url-value="<%= request.base_url + request.path %>">
+<%
+  data_attrs = {
+    controller: "enhanced-pagination",
+    enhanced_pagination_current_page_value: current_page,
+    enhanced_pagination_total_pages_value: total_pages,
+    enhanced_pagination_base_url_value: "#{request.base_url}#{request.path}"
+  }
+  
+  # Add the ajax target data attribute if provided
+  if ajax_target
+    data_attrs["#{ajax_target}_target".to_sym] = "pagination"
+  end
+%>
+
+<%= tag.div(class: "#{container_classes} bg-white border-t border-gray-200 px-4 py-3 sm:px-6", data: data_attrs) do %>
   <!-- Mobile View -->
   <div class="flex flex-1 justify-between items-center sm:hidden">
     <!-- Mobile Results Info -->
@@ -80,9 +89,9 @@
             data-enhanced-pagination-target="perPageSelect"
           >
             <% per_page_options.each do |option| %>
-              <option value="<%= option %>" <%= 'selected' if current_per_page == option %>>
-                <%= option %>
-              </option>
+              <%= content_tag :option, option,
+                  value: option,
+                  selected: (current_per_page == option) %>
             <% end %>
           </select>
           <span class="text-sm text-gray-600">per page</span>
@@ -125,7 +134,7 @@
       </p>
     </div>
   <% end %>
-</div>
+<% end %>
 
 <!-- Enhanced Pagination Styles -->
 <style>

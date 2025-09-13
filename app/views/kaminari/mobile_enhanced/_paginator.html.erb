@@ -46,12 +46,10 @@
         aria-label="Select page"
       >
         <% (1..total_pages).each do |page_num| %>
-          <option 
-            value="<%= url_for(request.query_parameters.merge(page: page_num)) %>" 
-            <%= 'selected' if page_num == current_page %>
-          >
-            Page <%= page_num %><%= " (current)" if page_num == current_page %>
-          </option>
+          <%= content_tag :option,
+              "Page #{page_num}#{' (current)' if page_num == current_page}",
+              value: url_for(request.query_parameters.merge(page: page_num)),
+              selected: (page_num == current_page) %>
         <% end %>
       </select>
     </div>

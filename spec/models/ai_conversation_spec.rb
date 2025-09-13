@@ -110,7 +110,7 @@ RSpec.describe AiConversation, type: :model do
         expect {
           ai_conversation.add_user_message("Test message", { key: "value" })
         }.to change { ai_conversation.ai_messages.count }.by(1)
-        
+
         message = ai_conversation.ai_messages.last
         expect(message.role).to eq("user")
         expect(message.content).to eq("Test message")
@@ -126,11 +126,11 @@ RSpec.describe AiConversation, type: :model do
 
     describe '#add_assistant_message' do
       it 'creates an assistant message' do
-        source_refs = ["ref1", "ref2"]
+        source_refs = [ "ref1", "ref2" ]
         expect {
           ai_conversation.add_assistant_message("Response", source_refs, { key: "value" })
         }.to change { ai_conversation.ai_messages.count }.by(1)
-        
+
         message = ai_conversation.ai_messages.last
         expect(message.role).to eq("assistant")
         expect(message.content).to eq("Response")
@@ -207,7 +207,7 @@ RSpec.describe AiConversation, type: :model do
       it 'exports conversation data' do
         create(:ai_message, ai_conversation: ai_conversation)
         export = ai_conversation.export_data
-        
+
         expect(export[:id]).to eq(ai_conversation.id)
         expect(export[:school_id]).to eq(school.id)
         expect(export[:user_id]).to eq(user.id)
@@ -221,7 +221,7 @@ RSpec.describe AiConversation, type: :model do
       it 'returns conversations for specific school and user' do
         conversation = create(:ai_conversation, school: school, user: user)
         other = create(:ai_conversation, school: create(:school), user: user)
-        
+
         result = AiConversation.for_school_and_user(school.id, user.id)
         expect(result).to include(conversation)
         expect(result).not_to include(other)

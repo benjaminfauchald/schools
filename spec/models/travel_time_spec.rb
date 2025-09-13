@@ -15,7 +15,7 @@ RSpec.describe TravelTime, type: :model do
     it { should validate_presence_of(:mode) }
     it { should validate_presence_of(:computed_at) }
     it { should validate_uniqueness_of(:origin_hash).scoped_to(:place_id, :mode) }
-    
+
     it 'validates mode inclusion' do
       valid_modes = %w[driving transit walking cycling]
       valid_modes.each do |mode|
@@ -228,7 +228,7 @@ RSpec.describe TravelTime, type: :model do
 
     describe '.find_or_compute' do
       it 'finds existing travel time' do
-        existing = create(:travel_time, 
+        existing = create(:travel_time,
           place: place,
           origin_hash: '13.756,100.502',
           mode: 'driving',

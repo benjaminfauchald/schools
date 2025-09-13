@@ -15,7 +15,7 @@ RSpec.describe Term, type: :model do
 
     it { should validate_presence_of(:vocabulary_id) }
     it { should validate_presence_of(:label) }
-    
+
     it 'validates presence of slug' do
       term = build(:term, vocabulary: vocabulary, slug: nil, label: 'Test')
       term.valid?
@@ -23,7 +23,7 @@ RSpec.describe Term, type: :model do
       expect(term).to be_valid
       expect(term.slug).to eq('test')
     end
-    
+
     it { should validate_uniqueness_of(:slug).scoped_to(:vocabulary_id) }
   end
 
@@ -101,7 +101,7 @@ RSpec.describe Term, type: :model do
         school1 = create(:school, status: 'published')
         school2 = create(:school, status: 'published')
         draft_school = create(:school, status: 'draft')
-        
+
         create(:tagging, taggable: school1, term: term, context: 'curriculum')
         create(:tagging, taggable: school2, term: term, context: 'curriculum')
         create(:tagging, taggable: draft_school, term: term, context: 'curriculum')
@@ -119,14 +119,14 @@ RSpec.describe Term, type: :model do
     describe '#valid_at?' do
       it 'checks if term has valid taggings at date' do
         school = create(:school)
-        create(:tagging, 
+        create(:tagging,
           taggable: school,
           term: term,
           context: 'curriculum',
           valid_from: Date.today - 1.month,
           valid_to: Date.today + 1.month
         )
-        
+
         expect(term.valid_at?(Date.today)).to be true
         expect(term.valid_at?(Date.today + 2.months)).to be false
       end
@@ -165,7 +165,7 @@ RSpec.describe Term, type: :model do
       it 'returns all descendants' do
         # Ensure all terms are created first
         grandchild_term
-        
+
         descendants = parent_term.descendants
         descendant_ids = descendants.map(&:id)
         expect(descendant_ids).to include(child_term.id)
@@ -176,7 +176,6 @@ RSpec.describe Term, type: :model do
         expect(grandchild_term.descendants).to be_empty
       end
     end
-
   end
 
   describe 'metadata' do

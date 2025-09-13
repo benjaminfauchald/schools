@@ -19,60 +19,118 @@
     <!-- Facebook JavaScript SDK -->
     <script>
       window.fbAsyncInit = function() {
+        console.log('🔵 Facebook SDK: fbAsyncInit called');
+        console.log('🔵 Facebook SDK: Current URL:', window.location.href);
+        console.log('🔵 Facebook SDK: Protocol:', window.location.protocol);
+        console.log('🔵 Facebook SDK: Hostname:', window.location.hostname);
+        
         // Only initialize Facebook SDK if we have HTTPS or in development with mock
         const isHTTPS = window.location.protocol === 'https:';
         const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const isAllowedDomain = window.location.hostname === 'listing.connectica.no' || window.location.hostname === 'connectica.no';
+        
+        console.log('🔵 Facebook SDK: isHTTPS:', isHTTPS);
+        console.log('🔵 Facebook SDK: isDevelopment:', isDevelopment);
+        console.log('🔵 Facebook SDK: isAllowedDomain:', isAllowedDomain);
+        console.log('🔵 Facebook SDK: App ID:', '<%= ENV['FACEBOOK_APP_ID'] %>');
         
         if (!isHTTPS && !isDevelopment) {
-          console.log('Facebook SDK requires HTTPS in production');
+          console.error('❌ Facebook SDK requires HTTPS in production');
           return;
         }
         
-        FB.init({
-          appId      : '<%= ENV['FACEBOOK_APP_ID'] %>',
-          cookie     : true,
-          xfbml      : true,
-          version    : 'v18.0'
-        });
+        try {
+          FB.init({
+            appId      : '<%= ENV['FACEBOOK_APP_ID'] %>',
+            cookie     : true,
+            xfbml      : true,
+            version    : 'v18.0',
+            status     : true,
+            oauth      : true
+          });
           
-        FB.AppEvents.logPageView();
+          console.log('✅ Facebook SDK: FB.init() completed successfully');
+          
+          FB.AppEvents.logPageView();
+          console.log('✅ Facebook SDK: Page view logged');
+        } catch (error) {
+          console.error('❌ Facebook SDK: FB.init() failed:', error);
+        }
         
-        // Only check login status if we have HTTPS or in development
-        if (isHTTPS || isDevelopment) {
+        // Check if user just logged out (cookie set by server)
+        const justLoggedOut = document.cookie.includes('facebook_logout=true');
+        
+        if (justLoggedOut) {
+          console.log('🔵 Facebook SDK: User just logged out, skipping auto-login');
+          // Don't check login status or auto-sync if user just logged out
+          // Clear the logout cookie
+          document.cookie = 'facebook_logout=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        } else if (isHTTPS || isDevelopment || isAllowedDomain) {
+          // Only check login status if we have HTTPS or in development AND user didn't just logout
+          console.log('🔵 Facebook SDK: Checking login status...');
           try {
             FB.getLoginStatus(function(response) {
+              console.log('✅ Facebook SDK: Login status received:', response);
               statusChangeCallback(response);
-            });
+            }, true); // Force fresh status check
           } catch (error) {
-            console.log('Facebook getLoginStatus failed (likely HTTP issue):', error);
+            console.error('❌ Facebook SDK: getLoginStatus failed:', error);
           }
         } else {
-          console.log('Skipping Facebook login status check - HTTPS required');
+          console.warn('⚠️ Facebook SDK: Skipping login status check - HTTPS required');
         }
       };
 
       // Handle Facebook login status changes
       function statusChangeCallback(response) {
-        console.log('Facebook login status:', response);
+        console.log('🔵 Facebook SDK: Status callback triggered');
+        console.log('🔵 Facebook SDK: Response status:', response.status);
+        console.log('🔵 Facebook SDK: Full response:', JSON.stringify(response, null, 2));
+        
+        // Check if user just logged out
+        const justLoggedOut = document.cookie.includes('facebook_logout=true');
+        if (justLoggedOut) {
+          console.log('🔵 Facebook SDK: Ignoring status callback - user just logged out');
+          return; // Don't process status if user just logged out
+        }
         
         if (response.status === 'connected') {
           // User is logged into Facebook and your app
-          console.log('User is connected to Facebook and your app');
+          console.log('✅ Facebook SDK: User is connected to Facebook and your app');
+          console.log('🔵 Facebook SDK: Auth response:', response.authResponse);
           handleFacebookConnected(response.authResponse);
         } else if (response.status === 'not_authorized') {
           // User is logged into Facebook but not your app
-          console.log('User is logged into Facebook but not authorized for your app');
+          console.warn('⚠️ Facebook SDK: User is logged into Facebook but not authorized for your app');
+        } else if (response.status === 'unknown') {
+          // Cannot determine if user is logged into Facebook
+          console.warn('⚠️ Facebook SDK: Cannot determine Facebook login status');
         } else {
           // User is not logged into Facebook
-          console.log('User is not logged into Facebook');
+          console.log('🔵 Facebook SDK: User is not logged into Facebook');
         }
       }
       
       // Handle when user is connected to Facebook
       function handleFacebookConnected(authResponse) {
+        console.log('🔵 Facebook SDK: handleFacebookConnected called');
+        
+        // Check again if user just logged out
+        const justLoggedOut = document.cookie.includes('facebook_logout=true');
+        if (justLoggedOut) {
+          console.log('🔵 Facebook SDK: Not auto-syncing - user just logged out');
+          return; // Don't auto-sync if user just logged out
+        }
+        console.log('🔵 Facebook SDK: Auth response:', authResponse);
+        
         // Get user's profile information
         FB.api('/me', {fields: 'name,email,picture'}, function(response) {
-          console.log('Facebook user info:', response);
+          console.log('🔵 Facebook SDK: FB.api /me response:', response);
+          
+          if (response.error) {
+            console.error('❌ Facebook SDK: FB.api error:', response.error);
+            return;
+          }
           
           // Send this info to Rails backend to sync with session
           fetch('/users/auth/facebook/sync_status', {
@@ -144,11 +202,35 @@
       // Make loginWithFacebook available globally
       window.loginWithFacebook = loginWithFacebook;
 
+      // Load Facebook SDK
+      console.log('🔵 Facebook SDK: Starting SDK load...');
       (function(d, s, id){
          var js, fjs = d.getElementsByTagName(s)[0];
-         if (d.getElementById(id)) {return;}
-         js = d.createElement(s); js.id = id;
+         if (d.getElementById(id)) {
+           console.warn('⚠️ Facebook SDK: Script already exists with id:', id);
+           return;
+         }
+         js = d.createElement(s); 
+         js.id = id;
          js.src = "https://connect.facebook.net/en_US/sdk.js";
+         
+         // Add load event listeners
+         js.onload = function() {
+           console.log('✅ Facebook SDK: Script loaded successfully from:', js.src);
+           console.log('🔵 Facebook SDK: typeof FB =', typeof FB);
+           if (typeof FB !== 'undefined') {
+             console.log('✅ Facebook SDK: FB object is available');
+           } else {
+             console.error('❌ Facebook SDK: FB object is NOT available after script load');
+           }
+         };
+         
+         js.onerror = function(error) {
+           console.error('❌ Facebook SDK: Failed to load script:', error);
+           console.error('❌ Facebook SDK: Script URL was:', js.src);
+         };
+         
+         console.log('🔵 Facebook SDK: Inserting script tag with src:', js.src);
          fjs.parentNode.insertBefore(js, fjs);
        }(document, 'script', 'facebook-jssdk'));
     </script>
@@ -184,9 +266,11 @@
 
   <body data-locale="<%= I18n.locale %>" class="min-h-screen flex flex-col">
     <!-- Location check (redirects to onboarding if needed) -->
-    <% location_attrs = { data: { controller: "location" } } %>
-    <% location_attrs[:data][:puppeteer_location] = session[:puppeteer_location].to_json if session[:puppeteer_location] %>
-    <%= tag.div(**location_attrs) %>
+    <% unless controller_name == 'onboarding' %>
+      <% location_attrs = { data: { controller: "location" } } %>
+      <% location_attrs[:data][:puppeteer_location] = session[:puppeteer_location].to_json if session[:puppeteer_location] %>
+      <%= tag.div(**location_attrs) %>
+    <% end %>
 
     <!-- Navigation Bar -->
     <%= render 'shared/navigation' unless controller.class.module_parent_name == 'Admin' %>
@@ -215,5 +299,23 @@
 
     <!-- Footer - Always at bottom -->
     <%= render 'shared/footer' unless controller.class.module_parent_name == 'Admin' %>
+    
+    <!-- Handle Facebook logout if flag is set -->
+    <% if flash[:facebook_logout] %>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          if (typeof FB !== 'undefined') {
+            FB.getLoginStatus(function(response) {
+              if (response.status === 'connected') {
+                // User is still logged into Facebook, log them out
+                FB.logout(function(response) {
+                  console.log('User has been logged out from Facebook');
+                });
+              }
+            });
+          }
+        });
+      </script>
+    <% end %>
   </body>
 </html>

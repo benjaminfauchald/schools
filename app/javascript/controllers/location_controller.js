@@ -20,6 +20,17 @@ export default class extends Controller {
       return
     }
 
+    // Check if we have location parameters in the URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const hasLocationParams = urlParams.has('home_lat') && urlParams.has('home_lng')
+    
+    if (hasLocationParams) {
+      // Server will handle setting cookies, don't redirect
+      this.hasLocationValue = true
+      this.enableAppFeatures()
+      return
+    }
+
     const homeLocation = this.getStoredLocation()
     
     if (!homeLocation) {

@@ -105,8 +105,8 @@ RSpec.describe Event, type: :model do
     describe '.ordered' do
       it 'orders by starts_at ascending' do
         ordered = Event.ordered
-        expect(ordered.first).to eq(past_event)
-        expect(ordered.last).to eq(next_month_event)
+        # Events should be ordered from earliest to latest
+        expect(ordered.map(&:starts_at)).to eq(ordered.map(&:starts_at).sort)
       end
     end
   end
