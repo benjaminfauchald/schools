@@ -33,9 +33,11 @@ class User < ApplicationRecord
   def self.from_omniauth(auth)
     # Sanitize input data to prevent XSS attacks - strip ALL HTML tags
     sanitized_name = ActionController::Base.helpers.strip_tags(auth.info.name.to_s)
-    sanitized_email = ActionController::Base.helpers.strip_tags(auth.info.email.to_s).downcase.strip if auth.info.email.present?
     sanitized_uid = auth.uid.to_s.gsub(/[^a-zA-Z0-9_-]/, "") # Remove any non-alphanumeric chars from UID
-
+    
+    # We don't get email from Facebook anymore - only name and picture
+    # Email will be collected through the contact form instead
+    
     # Try to find existing user by provider and uid first
     user = User.find_by(provider: auth.provider, uid: sanitized_uid)
 
@@ -48,30 +50,13 @@ class User < ApplicationRecord
       return user
     end
 
-    # SECURITY FIX: Do NOT link OAuth to existing email accounts automatically
-    # This prevents account takeover where attacker with same email but different UID
-    # could take over an existing account
-    if sanitized_email.present?
-      existing_user = User.find_by(email: sanitized_email)
-
-      if existing_user
-        # If user exists with this email but different provider/uid, this is a security risk
-        # Do NOT update their provider/uid - this would allow account takeover
-        Rails.logger.warn "OAuth login attempt for existing email #{sanitized_email} with different provider/uid"
-
-        # Return unpersisted user with error to trigger registration flow
-        user = User.new(email: sanitized_email)
-        user.errors.add(:email, "already exists. Please sign in with your existing account first, then link Facebook in settings.")
-        return user
-      end
-    end
-
-    # Handle missing email by generating a placeholder
-    final_email = sanitized_email.presence || "fb_#{sanitized_uid}@facebook.local"
+    # For new users, create with a placeholder email
+    # The real email will be collected when they submit their first contact form
+    placeholder_email = "fb_#{sanitized_uid}@facebook.local"
 
     # Create new user with sanitized data
     User.create!(
-      email: final_email,
+      email: placeholder_email,
       provider: auth.provider,
       uid: sanitized_uid,
       facebook_name: sanitized_name,

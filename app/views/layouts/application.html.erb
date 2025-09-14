@@ -192,7 +192,7 @@
             } else {
               console.log('Facebook login cancelled or failed');
             }
-          }, {scope: 'email,public_profile'});
+          }, {scope: 'public_profile'});
         } catch (error) {
           console.error('Facebook login failed:', error);
           alert('Facebook login is not available. Please try again later or contact support.');

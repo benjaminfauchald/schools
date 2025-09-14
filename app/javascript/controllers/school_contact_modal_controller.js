@@ -5,15 +5,24 @@ export default class extends Controller {
   static values = { 
     schoolId: Number,
     userSignedIn: Boolean,
-    facebookAuthenticated: Boolean
+    facebookAuthenticated: Boolean,
+    facebookAuthComplete: Boolean
   }
 
   connect() {
     this.boundHandleEscape = this.handleEscape.bind(this)
     
-    // Check if we need to restore form data after Facebook authentication
-    if (this.facebookAuthenticatedValue) {
-      setTimeout(() => this.restoreFormData(), 100)
+    console.log('🎯 School Contact Modal Controller connected')
+    console.log('🎯 Facebook authenticated:', this.facebookAuthenticatedValue)
+    console.log('🎯 Facebook auth complete:', this.facebookAuthCompleteValue)
+    console.log('🎯 School ID:', this.schoolIdValue)
+    console.log('🎯 Pending form data exists:', !!sessionStorage.getItem('pendingModalContactForm'))
+    
+    // Check if we need to restore form data and auto-submit after Facebook authentication
+    // Check both the facebookAuthComplete flag (from server) and sessionStorage (client-side persistence)
+    if ((this.facebookAuthCompleteValue || this.facebookAuthenticatedValue) && sessionStorage.getItem('pendingModalContactForm')) {
+      console.log('✅ Facebook authenticated and pending form data found - will auto-submit')
+      setTimeout(() => this.restoreAndAutoSubmitForm(), 100)
     }
   }
 
@@ -177,22 +186,32 @@ export default class extends Controller {
   }
 
   showToast(type, message) {
+    console.log(`🔔 showToast called - type: ${type}, message: ${message}`)
+    
     // Remove any existing toasts
     const existingToasts = document.querySelectorAll('.contact-toast')
     existingToasts.forEach(toast => toast.remove())
 
     // Create toast element
     const toast = document.createElement('div')
-    toast.className = `contact-toast fixed top-4 right-4 max-w-sm w-full z-50 transform transition-transform duration-300 translate-x-full`
+    toast.className = `contact-toast fixed top-4 right-4 max-w-sm w-full z-[9999] transform transition-transform duration-300 translate-x-full`
     
-    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    const icon = type === 'success' ? 
-      `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    let bgColor = 'bg-blue-500'
+    let icon = `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+       </svg>`
+    
+    if (type === 'success') {
+      bgColor = 'bg-green-500'
+      icon = `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-       </svg>` :
-      `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+       </svg>`
+    } else if (type === 'error') {
+      bgColor = 'bg-red-500'
+      icon = `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
        </svg>`
+    }
 
     toast.innerHTML = `
       <div class="${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3">
@@ -212,11 +231,13 @@ export default class extends Controller {
 
     // Add to page
     document.body.appendChild(toast)
+    console.log('🔔 Toast added to page')
 
     // Animate in
     setTimeout(() => {
       toast.classList.remove('translate-x-full')
       toast.classList.add('translate-x-0')
+      console.log('🔔 Toast animated in')
     }, 100)
 
     // Auto remove after 5 seconds
@@ -224,7 +245,11 @@ export default class extends Controller {
       if (toast.parentNode) {
         toast.classList.remove('translate-x-0')
         toast.classList.add('translate-x-full')
-        setTimeout(() => toast.remove(), 300)
+        console.log('🔔 Toast animating out')
+        setTimeout(() => {
+          toast.remove()
+          console.log('🔔 Toast removed')
+        }, 300)
       }
     }, 5000)
   }
@@ -235,6 +260,19 @@ export default class extends Controller {
   }
 
   handleFacebookAuthRequired() {
+    console.log('handleFacebookAuthRequired called')
+    
+    // Get school ID from the controller element if not available as value
+    let schoolId = this.schoolIdValue
+    if (!schoolId) {
+      const controllerElement = document.querySelector('[data-controller="school-contact-modal"]')
+      if (controllerElement) {
+        schoolId = controllerElement.dataset.schoolContactModalSchoolIdValue
+      }
+    }
+    
+    console.log('School ID:', schoolId)
+    
     // Store form data in session storage for restoration after Facebook login
     const form = document.querySelector('[data-school-contact-modal-target="form"]')
     if (form) {
@@ -244,31 +282,44 @@ export default class extends Controller {
         formObject[key] = value
       }
       sessionStorage.setItem('pendingModalContactForm', JSON.stringify(formObject))
+      console.log('Form data saved to sessionStorage')
     }
     
-    // Store school context for Facebook OAuth callback
-    fetch(`/users/auth/facebook/store_school`, {
-      method: 'POST',
-      headers: {
-        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ school_id: this.schoolIdValue })
-    }).then(() => {
-      // Close the modal before Facebook login
-      this.closeModal()
-      
-      // Use Facebook JavaScript SDK for authentication
-      if (typeof window.loginWithFacebook === 'function') {
-        window.loginWithFacebook()
-      } else {
-        // Fallback to OAuth redirect if SDK not available
+    // If we have a school ID, store it for the callback
+    if (schoolId) {
+      // Store school context for Facebook OAuth callback
+      fetch(`/users/auth/facebook/store_school`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ school_id: schoolId })
+      }).then(response => {
+        console.log('Store school response:', response)
+        if (!response.ok) {
+          throw new Error('Failed to store school context')
+        }
+        return response.json()
+      }).then(data => {
+        console.log('School context stored, redirecting to Facebook OAuth')
+        // Close the modal before Facebook login
+        this.closeModal()
+        
+        // Always use direct OAuth redirect for reliability
         window.location.href = '/users/auth/facebook'
-      }
-    }).catch(error => {
-      console.error('Error storing school context:', error)
-      this.showErrorMessage('Please sign in with Facebook to contact schools.')
-    })
+      }).catch(error => {
+        console.error('Error storing school context:', error)
+        // Try to proceed anyway with Facebook OAuth
+        this.closeModal()
+        window.location.href = '/users/auth/facebook'
+      })
+    } else {
+      console.log('No school ID found, proceeding with Facebook OAuth anyway')
+      // Close the modal and proceed with Facebook OAuth
+      this.closeModal()
+      window.location.href = '/users/auth/facebook'
+    }
   }
 
   // Method to restore form data after Facebook authentication
@@ -285,17 +336,90 @@ export default class extends Controller {
               input.value = formObject[key]
             }
           })
-          // Auto-open modal and submit if data was restored
-          this.openModal()
-          setTimeout(() => {
-            form.dispatchEvent(new Event('submit'))
-          }, 500)
         }
-        sessionStorage.removeItem('pendingModalContactForm')
       } catch (error) {
         console.error('Error restoring form data:', error)
+      }
+    }
+  }
+
+  // Method to restore and auto-submit form after Facebook authentication
+  restoreAndAutoSubmitForm() {
+    console.log('🚀 restoreAndAutoSubmitForm called')
+    const savedData = sessionStorage.getItem('pendingModalContactForm')
+    console.log('🚀 Saved data from sessionStorage:', savedData)
+    
+    if (savedData) {
+      try {
+        const formObject = JSON.parse(savedData)
+        console.log('📝 Parsed form data:', formObject)
+        
+        // Create FormData and submit directly without opening modal
+        const formData = new FormData()
+        Object.keys(formObject).forEach(key => {
+          formData.append(`school_inquiry[${key}]`, formObject[key])
+          console.log(`📝 Added to FormData: school_inquiry[${key}] = ${formObject[key]}`)
+        })
+        
+        // Show loading notification
+        console.log('🔔 Showing loading toast')
+        this.showToast('info', 'Sending your message to the school...')
+        
+        const submitUrl = `/schools/${this.schoolIdValue}/school_inquiries`
+        console.log('📮 Submitting to URL:', submitUrl)
+        
+        // Submit the form
+        fetch(submitUrl, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
+          body: formData
+        })
+        .then(response => {
+          console.log('📬 Response status:', response.status)
+          console.log('📬 Response headers:', response.headers)
+          return response.json()
+        })
+        .then(data => {
+          console.log('📬 Response data:', data)
+          if (data.success) {
+            // Clear saved data
+            sessionStorage.removeItem('pendingModalContactForm')
+            console.log('✅ Form data cleared from sessionStorage')
+            
+            // Show success message
+            const successMsg = data.message || 'Your message has been sent successfully! The school will contact you soon.'
+            console.log('✅ Showing success message:', successMsg)
+            this.showSuccessMessage(successMsg)
+            
+            // Optionally reload page after a delay to show updated state
+            console.log('🔄 Will reload page in 3 seconds')
+            setTimeout(() => {
+              window.location.reload()
+            }, 3000)
+          } else {
+            console.log('❌ Server returned error:', data)
+            // If there's an error, open the modal with restored data
+            this.restoreFormData()
+            this.openModal()
+            this.showErrorMessage(data.errors ? data.errors.join(', ') : 'There was an error sending your message. Please try again.')
+          }
+        })
+        .catch(error => {
+          console.error('❌ Fetch error:', error)
+          // On error, open modal with restored data so user can manually submit
+          this.restoreFormData()
+          this.openModal()
+          this.showErrorMessage('There was an error sending your message. Please try again.')
+        })
+      } catch (error) {
+        console.error('❌ Error parsing saved form data:', error)
         sessionStorage.removeItem('pendingModalContactForm')
       }
+    } else {
+      console.log('⚠️ No saved form data found in sessionStorage')
     }
   }
 }

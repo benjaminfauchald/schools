@@ -84,7 +84,8 @@
      data-controller="school-contact-modal" 
      data-school-contact-modal-school-id-value="<%= @school.id %>"
      data-school-contact-modal-user-signed-in-value="<%= user_signed_in? %>"
-     data-school-contact-modal-facebook-authenticated-value="<%= user_signed_in? && current_user&.provider == 'facebook' %>">
+     data-school-contact-modal-facebook-authenticated-value="<%= user_signed_in? && current_user&.provider == 'facebook' %>"
+     data-school-contact-modal-facebook-auth-complete-value="<%= flash[:facebook_auth_complete].present? %>">
   
 
   <!-- School Information Sections -->
@@ -107,7 +108,8 @@
                 contact_info: @merged_data.contact_info,
                 user_signed_in: user_signed_in?,
                 facebook_authenticated: user_signed_in? && current_user&.provider == 'facebook',
-                debug_mode: debug_mode_enabled?
+                debug_mode: debug_mode_enabled?,
+                current_user: current_user
               ) %>
         </div>
       </div>
