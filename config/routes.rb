@@ -106,10 +106,14 @@ Rails.application.routes.draw do
     end
   end
 
-  devise_for :admin_users, path: "admin", controllers: {
-    sessions: "admin/sessions"
-  }
+  # Admin routes with authentication through User model
   namespace :admin do
+    devise_scope :user do
+      get "/sign_in", to: "sessions#new", as: :new_session
+      post "/sign_in", to: "sessions#create", as: :session
+      delete "/sign_out", to: "sessions#destroy", as: :destroy_session
+      get "/sign_out", to: "sessions#destroy", as: :destroy_session_get
+    end
       root to: "dashboard#index"
       resources :inquiries, only: [ :index, :show, :update ]
       resources :places

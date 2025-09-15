@@ -100,7 +100,7 @@ class MediaItem < ApplicationRecord
   # Get the display URL for images (either attached file or URL)
   def image_url
     if file.attached?
-      Rails.application.routes.url_helpers.rails_blob_url(file, only_path: false)
+      Rails.application.routes.url_helpers.rails_blob_path(file)
     else
       url
     end
@@ -109,9 +109,8 @@ class MediaItem < ApplicationRecord
   # Get display URL for thumbnails
   def thumbnail_url(size: 300)
     if file.attached? && image?
-      Rails.application.routes.url_helpers.rails_representation_url(
-        file.variant(resize_to_limit: [ size, size ]),
-        only_path: false
+      Rails.application.routes.url_helpers.rails_representation_path(
+        file.variant(resize_to_limit: [ size, size ])
       )
     else
       url

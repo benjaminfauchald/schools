@@ -239,19 +239,19 @@
             <% end %>
 
             <!-- All Pages -->
-            <div class="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-6">
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
               <div class="flex items-center mb-3">
-                <%= heroicon('squares-2x2', css_class: 'w-6 h-6 text-purple-600 mr-2') %>
+                <%= heroicon('squares-2x2', css_class: 'w-6 h-6 text-blue-600 mr-2') %>
                 <h3 class="text-lg font-semibold text-black">All Pages</h3>
               </div>
               <p class="text-sm text-gray-600 mb-4">
                 Browse all our pages including academics, sports, activities, and more.
               </p>
-              <div class="text-sm text-purple-600 mb-4">
+              <div class="text-sm text-gray-600 mb-4">
                 <%= pluralize(@school.pages.published.count, 'page') %> available
               </div>
               <%= link_to "View All Pages", school_pages_path(school_id: @school.id),
-                          class: "inline-flex items-center text-purple-600 hover:text-purple-800 font-medium transition-colors" %>
+                          class: "inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors" %>
             </div>
 
           </div>

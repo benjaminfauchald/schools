@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = [
     "statusModal", "modalTitle", "modalMessage",
     "loadingIcon", "successIcon", "errorIcon",
-    "closeButton"
+    "closeButton", "crawledPagesContent", "toggleText", "toggleIcon"
   ]
   
   static values = {
@@ -82,14 +82,28 @@ export default class extends Controller {
   }
   
   checkImportStatus() {
+    if (!this.schoolIdValue) {
+      console.error('School ID is not set!')
+      this.stopPolling()
+      this.showError('School ID is missing. Please refresh the page and try again.')
+      return
+    }
+    
     const statusUrl = `/school_owner/schools/${this.schoolIdValue}/import_status`
+    console.log('Checking import status at:', statusUrl)
     
     fetch(statusUrl, {
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       }
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      return response.json()
+    })
     .then(data => {
       switch(data.status) {
         case 'crawling':
@@ -124,7 +138,7 @@ export default class extends Controller {
     .catch(error => {
       console.error('Status check failed:', error)
       this.stopPolling()
-      this.showError('Failed to check import status')
+      this.showError(`Failed to check import status: ${error.message}`)
     })
   }
   
@@ -191,5 +205,31 @@ export default class extends Controller {
   resetImportButton(button, originalHTML) {
     button.disabled = false
     button.innerHTML = originalHTML
+  }
+  
+  toggleCrawledPages(event) {
+    event.preventDefault()
+    
+    if (this.hasCrawledPagesContentTarget) {
+      const isHidden = this.crawledPagesContentTarget.classList.contains('hidden')
+      
+      if (isHidden) {
+        this.crawledPagesContentTarget.classList.remove('hidden')
+        if (this.hasToggleTextTarget) {
+          this.toggleTextTarget.textContent = 'Hide Details'
+        }
+        if (this.hasToggleIconTarget) {
+          this.toggleIconTarget.style.transform = 'rotate(180deg)'
+        }
+      } else {
+        this.crawledPagesContentTarget.classList.add('hidden')
+        if (this.hasToggleTextTarget) {
+          this.toggleTextTarget.textContent = 'Show Details'
+        }
+        if (this.hasToggleIconTarget) {
+          this.toggleIconTarget.style.transform = 'rotate(0deg)'
+        }
+      }
+    }
   }
 }

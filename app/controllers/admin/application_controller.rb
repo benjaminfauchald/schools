@@ -7,25 +7,24 @@
 module Admin
   class ApplicationController < Administrate::ApplicationController
     layout "admin"
-    before_action :authenticate_admin
+    before_action :authenticate_user!
     before_action :ensure_admin_access
 
     private
 
-    def authenticate_admin
-      redirect_to new_admin_user_session_path unless admin_user_signed_in?
-    end
-
     def ensure_admin_access
-      unless admin_user_signed_in?
+      unless current_user&.admin?
         flash[:alert] = "You don't have permission to access the admin area."
-        redirect_to new_admin_user_session_path
+        redirect_to new_user_session_path
       end
     end
 
     # Helper method for accessing current admin user in views and controllers
-    # This is provided by Devise automatically as current_admin_user
-    # No need to override it
+    # Alias current_admin_user to current_user for compatibility
+    def current_admin_user
+      current_user if current_user&.admin?
+    end
+    helper_method :current_admin_user
 
     # Override this value to specify the number of elements to display at a time
     # on index pages. Defaults to 20.

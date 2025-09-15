@@ -105,7 +105,7 @@
           <!-- Actions -->
           <div class="px-6 pb-6 pt-2">
             <div class="flex space-x-3">
-              <%= link_to school_owner_school_path(school.id), 
+              <%= link_to school_owner_school_path(id: school.id), 
                   class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -114,7 +114,7 @@
                 View
               <% end %>
               
-              <%= link_to edit_school_owner_school_path(school.id), 
+              <%= link_to edit_school_owner_school_path(id: school.id), 
                   class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" do %>
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>

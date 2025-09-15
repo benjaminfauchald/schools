@@ -7,7 +7,7 @@
     <div class="flex">
       <!-- Left area with Back link -->
       <div class="hidden lg:block w-64 px-6 py-4">
-        <%= link_to school_owner_school_path(@school), class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
+        <%= link_to school_owner_school_path(id: @school.id), class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
           </svg>
@@ -26,7 +26,7 @@
           
           <!-- Mobile menu button and mobile back link -->
           <div class="lg:hidden flex items-center space-x-4">
-            <%= link_to school_owner_school_path(@school), class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
+            <%= link_to school_owner_school_path(id: @school.id), class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
               </svg>
@@ -217,7 +217,7 @@
             </a>
 
             <!-- Ask AI -->
-            <%= link_to ai_chat_school_owner_school_path(@school), 
+            <%= link_to ai_chat_school_owner_school_path(id: @school.id), 
                 class: "border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium" do %>
               <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z"></path>
@@ -258,7 +258,7 @@
     <div class="flex flex-col flex-1 min-w-0">
       <div class="form-content flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <!-- Form -->
-          <%= form_with model: [@school], url: school_owner_school_path(@school), method: :patch, local: false, class: "h-full", data: { controller: "school-form", action: "submit->school-form#handleSubmit" } do |form| %>
+          <%= form_with model: [@school], url: school_owner_school_path(id: @school.id), method: :patch, local: false, class: "h-full", data: { controller: "school-form", action: "submit->school-form#handleSubmit" } do |form| %>
             <div class="p-6 space-y-8">
               
               <!-- Global Error Messages -->
@@ -765,6 +765,19 @@
                     <div data-photo-upload-target="preview" class="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 hidden">
                       <!-- Previews will be inserted here by JavaScript -->
                     </div>
+                    
+                    <!-- Upload Button -->
+                    <div data-photo-upload-target="uploadSection" class="mt-4 hidden">
+                      <button type="button"
+                              data-action="click->photo-upload#uploadPhotos"
+                              class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        Upload Selected Photos
+                      </button>
+                      <span data-photo-upload-target="uploadStatus" class="ml-3 text-sm text-gray-600"></span>
+                    </div>
                   </div>
                   
                   <!-- Uploaded Photos Display -->
@@ -793,7 +806,7 @@
                             
                             <!-- Delete button -->
                             <%= button_to "×", 
-                                delete_media_item_school_owner_school_path(@school, media_item_id: photo.id), 
+                                delete_media_item_school_owner_school_path(id: @school.id, media_item_id: photo.id), 
                                 method: :delete,
                                 class: "absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-sm font-bold hover:bg-red-600",
                                 title: "Delete photo",
@@ -815,8 +828,8 @@
                      class="hidden bg-white border border-gray-200 rounded-lg p-6"
                      data-controller="youtube-videos"
                      data-youtube-videos-school-id-value="<%= @school.id %>"
-                     data-youtube-videos-fetch-url-value="<%= fetch_videos_school_owner_school_path(@school) %>"
-                     data-youtube-videos-toggle-url-value="<%= toggle_video_visibility_school_owner_school_path(@school) %>">
+                     data-youtube-videos-fetch-url-value="<%= fetch_videos_school_owner_school_path(id: @school.id) %>"
+                     data-youtube-videos-toggle-url-value="<%= toggle_video_visibility_school_owner_school_path(id: @school.id) %>">
                   
                   <div class="flex items-center mb-6">
                     <svg class="w-6 h-6 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1100,45 +1113,97 @@
                 <div class="space-y-4">
                   <!-- Website Import -->
                   <% if @school.website_url.present? %>
-                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
-                      <div class="flex items-center space-x-3">
+                    <div class="border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
+                      <div class="flex items-center justify-between p-4">
+                        <div class="flex items-center space-x-3">
+                          <div class="flex-shrink-0">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                            </svg>
+                          </div>
+                          <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium text-gray-900">Website</p>
+                            <p class="text-sm text-gray-500 truncate"><%= @school.website_url %></p>
+                            <% if @school.website_crawled_at.present? %>
+                              <p class="text-xs text-gray-400">
+                                Last imported: <%= time_ago_in_words(@school.website_crawled_at) %> ago
+                                <% if @school.website_crawling_status == 'completed' %>
+                                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 ml-2">
+                                    Success
+                                  </span>
+                                <% elsif @school.website_crawling_status == 'failed' %>
+                                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 ml-2">
+                                    Failed
+                                  </span>
+                                <% end %>
+                                <% if @school.website_pages_found.present? && @school.website_pages_found > 0 %>
+                                  <span class="text-gray-500 ml-2">• <%= @school.website_pages_found %> pages found</span>
+                                <% end %>
+                              </p>
+                            <% else %>
+                              <p class="text-xs text-gray-400">Never imported</p>
+                            <% end %>
+                          </div>
+                        </div>
                         <div class="flex-shrink-0">
-                          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
-                          </svg>
+                          <button type="button" 
+                                  data-action="click->data-import#importWebsite"
+                                  data-data-import-url-value="<%= @school.website_url %>"
+                                  class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Import
+                          </button>
                         </div>
-                        <div class="min-w-0 flex-1">
-                          <p class="text-sm font-medium text-gray-900">Website</p>
-                          <p class="text-sm text-gray-500 truncate"><%= @school.website_url %></p>
-                          <% if @school.website_crawled_at.present? %>
-                            <p class="text-xs text-gray-400">
-                              Last imported: <%= time_ago_in_words(@school.website_crawled_at) %> ago
-                              <% if @school.website_crawling_status == 'completed' %>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 ml-2">
-                                  Success
-                                </span>
-                              <% elsif @school.website_crawling_status == 'failed' %>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 ml-2">
-                                  Failed
-                                </span>
+                      </div>
+                      
+                      <!-- Crawled Pages Details -->
+                      <% if @school.website_crawl_data.present? && @school.website_crawl_data.is_a?(Array) && @school.website_crawl_data.any? %>
+                        <div class="border-t border-gray-200 p-4 bg-gray-50">
+                          <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-sm font-medium text-gray-900">Crawled Pages (<%= @school.website_crawl_data.size %>)</h4>
+                            <button type="button" 
+                                    data-action="click->data-import#toggleCrawledPages"
+                                    class="text-sm text-purple-600 hover:text-purple-700 flex items-center">
+                              <span data-data-import-target="toggleText">Show Details</span>
+                              <svg class="w-4 h-4 ml-1 transition-transform" data-data-import-target="toggleIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                              </svg>
+                            </button>
+                          </div>
+                          
+                          <div class="hidden" data-data-import-target="crawledPagesContent">
+                            <div class="space-y-2 max-h-96 overflow-y-auto">
+                              <% @school.website_crawl_data.each_with_index do |page, index| %>
+                                <div class="bg-white p-3 rounded border border-gray-200">
+                                  <div class="flex items-start justify-between">
+                                    <div class="flex-1 min-w-0">
+                                      <p class="text-sm font-medium text-gray-900">
+                                        <%= page['title'].presence || "Page #{index + 1}" %>
+                                      </p>
+                                      <p class="text-xs text-gray-500 truncate mt-1">
+                                        <%= page['url'] %>
+                                      </p>
+                                      <% if page['markdown_length'].present? %>
+                                        <p class="text-xs text-gray-400 mt-1">
+                                          <%= number_with_delimiter(page['markdown_length']) %> characters
+                                        </p>
+                                      <% end %>
+                                    </div>
+                                  </div>
+                                </div>
                               <% end %>
-                            </p>
-                          <% else %>
-                            <p class="text-xs text-gray-400">Never imported</p>
-                          <% end %>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div class="flex-shrink-0">
-                        <button type="button" 
-                                data-action="click->data-import#importWebsite"
-                                data-data-import-url-value="<%= @school.website_url %>"
-                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                          <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                          </svg>
-                          Import
-                        </button>
-                      </div>
+                      <% elsif @school.website_crawling_error.present? %>
+                        <div class="border-t border-gray-200 p-4 bg-red-50">
+                          <p class="text-xs text-red-600">
+                            <strong>Error:</strong> <%= @school.website_crawling_error %>
+                          </p>
+                        </div>
+                      <% end %>
                     </div>
                   <% end %>
 
@@ -1494,7 +1559,7 @@
                       </div>
                       
                       <!-- Page Form -->
-                      <%= form_tag school_owner_school_pages_path(@school), 
+                      <%= form_tag school_owner_school_pages_path(school_id: @school.id), 
                           id: "page-form",
                           method: :post,
                           class: "space-y-6" do %>
@@ -1596,7 +1661,7 @@
         </div>
         
         <div class="flex space-x-3">
-          <%= link_to school_owner_school_path(@school), 
+          <%= link_to school_owner_school_path(id: @school.id), 
               class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
             Cancel
           <% end %>

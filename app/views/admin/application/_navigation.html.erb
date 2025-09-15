@@ -3,6 +3,13 @@
     <div class="flex-shrink-0">
       <h1 class="text-xl font-semibold text-gray-900">Admin Panel</h1>
     </div>
+    <% if current_user && current_user.school_claims.approved.any? %>
+      <div class="ml-6">
+        <%= link_to school_owner_schools_path, class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+          My Schools
+        <% end %>
+      </div>
+    <% end %>
   </div>
   
   <div class="hidden md:block">
@@ -108,7 +115,7 @@
   <div class="hidden md:block">
     <div class="ml-4 flex items-center md:ml-6">
       <!-- Sign out link -->
-      <%= link_to destroy_admin_user_session_path, method: :delete, class: "px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50" do %>
+      <%= link_to admin_destroy_session_path, data: { turbo_method: :delete }, class: "px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50" do %>
         Sign Out
       <% end %>
     </div>
@@ -128,6 +135,12 @@
 <!-- Mobile menu -->
 <div class="md:hidden" id="mobile-menu" data-mobile-menu-target="menu" style="display: none;">
   <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+    <% if current_user && current_user.school_claims.approved.any? %>
+      <%= link_to school_owner_schools_path, class: "block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700" do %>
+        My Schools
+      <% end %>
+    <% end %>
+    
     <%= link_to admin_root_path, class: "block px-3 py-2 rounded-md text-base font-medium #{current_page?(admin_root_path) ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}" do %>
       Dashboard
     <% end %>
@@ -147,5 +160,11 @@
     <%= link_to admin_users_path, class: "block px-3 py-2 rounded-md text-base font-medium #{controller_name == 'users' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}" do %>
       Users
     <% end %>
+    
+    <div class="border-t border-gray-200 mt-2 pt-2">
+      <%= link_to admin_destroy_session_path, data: { turbo_method: :delete }, class: "block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50" do %>
+        Sign Out
+      <% end %>
+    </div>
   </div>
 </div>

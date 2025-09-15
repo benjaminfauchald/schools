@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_15_153033) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -54,17 +54,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
-  end
-
-  create_table "admin_users", force: :cascade do |t|
-    t.string "email"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
   end
 
   create_table "ai_conversations", force: :cascade do |t|
@@ -153,7 +142,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
   create_table "media_items", force: :cascade do |t|
     t.bigint "place_id", null: false
     t.string "kind", null: false
-    t.string "url", null: false
+    t.string "url"
     t.string "alt_text"
     t.integer "sort_order", default: 0
     t.datetime "created_at", null: false
@@ -632,8 +621,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
   add_foreign_key "ai_conversations", "schools"
   add_foreign_key "ai_conversations", "users"
   add_foreign_key "ai_messages", "ai_conversations"
-  # add_foreign_key "document_contents", "places"  # Commented out - table uses vector type
-  # add_foreign_key "documents", "places", name: "documents_place_id_fkey"  # Commented out - table uses vector type
+  add_foreign_key "document_contents", "places"
+  add_foreign_key "documents", "places", name: "documents_place_id_fkey"
   add_foreign_key "events", "places"
   add_foreign_key "magic_link_tokens", "users"
   add_foreign_key "media_items", "places"
@@ -651,8 +640,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_103504) do
   add_foreign_key "temp_claims", "schools"
   add_foreign_key "terms", "terms", column: "parent_id"
   add_foreign_key "terms", "vocabularies"
-  # add_foreign_key "transcript_segments", "transcripts"  # Commented out - table uses vector type
-  # add_foreign_key "transcripts", "places"  # Commented out - table uses vector type
+  add_foreign_key "transcript_segments", "transcripts"
+  add_foreign_key "transcripts", "places"
   add_foreign_key "travel_times", "places"
   add_foreign_key "webhook_audit_logs", "users"
   add_foreign_key "youtube_videos", "places"

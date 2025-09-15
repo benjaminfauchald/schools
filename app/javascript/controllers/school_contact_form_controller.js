@@ -10,8 +10,30 @@ export default class extends Controller {
     // Check if user just returned from OAuth and restore form if needed
     this.restoreFormFromSession()
     
+    // Check for Facebook auth complete flag (set by server after OAuth)
+    // This is an additional check to ensure auto-submission happens
+    if (this.checkFacebookAuthComplete()) {
+      if (this.debugModeValue) {
+        console.log('Facebook auth complete flag detected')
+      }
+      // Ensure form is restored and submitted
+      this.restoreFormFromSession()
+    }
+    
     // Load previously saved form data from cookies
     this.loadFormDataFromCookies()
+  }
+  
+  checkFacebookAuthComplete() {
+    // Check for flash message or meta tag that indicates Facebook auth just completed
+    const flashNotice = document.querySelector('.flash-notice, .alert-notice')
+    if (flashNotice && flashNotice.textContent.includes('Successfully signed in with Facebook')) {
+      return true
+    }
+    
+    // Also check sessionStorage for pending form data
+    const pendingForm = sessionStorage.getItem('pendingContactForm')
+    return pendingForm && this.facebookAuthenticatedValue
   }
 
   async submitForm(event) {
@@ -124,7 +146,8 @@ export default class extends Controller {
     sessionStorage.setItem('pendingContactForm', JSON.stringify({
       schoolId: this.schoolIdValue,
       formData: formValues,
-      returnUrl: window.location.href
+      returnUrl: window.location.href,
+      autoSubmit: true  // Flag to auto-submit after auth
     }))
     
     // Store school ID in session for server-side context
@@ -138,6 +161,14 @@ export default class extends Controller {
     }).then(() => {
       // Use Facebook JavaScript SDK for authentication
       if (typeof window.loginWithFacebook === 'function') {
+        // Set up a callback for when SDK auth completes
+        window.facebookAuthCallback = () => {
+          if (this.debugModeValue) {
+            console.log('Facebook SDK auth completed, reloading page')
+          }
+          // Reload the page to get updated auth status
+          window.location.reload()
+        }
         window.loginWithFacebook()
       } else {
         // Fallback to OAuth redirect if SDK not available
@@ -149,6 +180,9 @@ export default class extends Controller {
       }
       // Still try Facebook auth even if storing context fails
       if (typeof window.loginWithFacebook === 'function') {
+        window.facebookAuthCallback = () => {
+          window.location.reload()
+        }
         window.loginWithFacebook()
       } else {
         window.location.href = '/users/auth/facebook'
@@ -199,7 +233,7 @@ export default class extends Controller {
     if (!pendingForm) return
 
     try {
-      const { schoolId, formData, returnUrl } = JSON.parse(pendingForm)
+      const { schoolId, formData, returnUrl, autoSubmit } = JSON.parse(pendingForm)
       
       // Only restore if we're on the right school page
       if (schoolId === this.schoolIdValue) {
@@ -211,20 +245,110 @@ export default class extends Controller {
           }
         })
 
-        // Show success message about authentication
-        this.showMessage('Successfully signed in! You can now send your message.', 'success')
-        
         // Clear the stored form data
         sessionStorage.removeItem('pendingContactForm')
         
-        // Scroll to form
-        this.element.scrollIntoView({ behavior: 'smooth' })
+        // Check if user is now authenticated with Facebook and autoSubmit flag is set
+        if (this.facebookAuthenticatedValue && autoSubmit) {
+          // Show brief status message
+          this.showMessage('Authentication successful! Sending your message...', 'success')
+          
+          // Wait a brief moment for the user to see the status, then submit
+          setTimeout(() => {
+            if (this.debugModeValue) {
+              console.log('Auto-submitting form after successful Facebook authentication')
+            }
+            // Programmatically submit the form
+            this.submitFormAfterAuth()
+          }, 500) // Short delay to let the page fully load
+        } else if (this.facebookAuthenticatedValue) {
+          // User is authenticated but didn't come from the form
+          this.showMessage('Successfully signed in! You can now send your message.', 'success')
+        } else {
+          // If not authenticated, show error
+          this.showMessage('Please sign in with Facebook to send your message.', 'error')
+        }
       }
     } catch (error) {
       if (this.debugModeValue) {
         console.error('Error restoring form from session:', error)
       }
       sessionStorage.removeItem('pendingContactForm')
+    }
+  }
+  
+  // New method to handle auto-submission after Facebook auth
+  async submitFormAfterAuth() {
+    // Validate that we have all required fields
+    const nameField = this.formTarget.querySelector('[name="school_inquiry[name]"]')
+    const emailField = this.formTarget.querySelector('[name="school_inquiry[email]"]')
+    const messageField = this.formTarget.querySelector('[name="school_inquiry[message]"]')
+    
+    if (!nameField?.value.trim() || !emailField?.value.trim() || !messageField?.value.trim()) {
+      if (this.debugModeValue) {
+        console.log('Missing required fields, not auto-submitting')
+      }
+      this.showMessage('Please complete all required fields.', 'error')
+      return
+    }
+    
+    // Show sending status
+    if (this.hasSubmitButtonTarget) {
+      this.submitButtonTarget.disabled = true
+      this.submitButtonTarget.textContent = 'Sending...'
+    }
+
+    // Use the form's natural FormData
+    const formData = new FormData(this.formTarget)
+    
+    if (this.debugModeValue) {
+      console.log('Auto-submitting form data after Facebook auth:')
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`)
+      }
+    }
+
+    try {
+      const response = await fetch(this.formTarget.action, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Save form data to cookies for next time
+        this.saveFormDataToCookies()
+        
+        // Show success modal
+        this.showSuccessModal(result.message || 'Your message has been sent successfully! The school will contact you soon.')
+        this.formTarget.reset()
+      } else {
+        const errorMessage = result.errors ? result.errors.join(', ') : 'Failed to send message'
+        if (this.debugModeValue) {
+          console.error('Validation errors:', result.errors)
+        }
+        this.showMessage(errorMessage, 'error')
+      }
+    } catch (error) {
+      if (this.debugModeValue) {
+        console.error('Contact form error:', error)
+      }
+      this.showMessage('Network error. Please check your connection and try again.', 'error')
+    } finally {
+      // Re-enable submit button
+      if (this.hasSubmitButtonTarget) {
+        this.submitButtonTarget.disabled = false
+        this.submitButtonTarget.textContent = 'Send Message to School'
+      }
     }
   }
 

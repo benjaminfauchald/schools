@@ -2,10 +2,11 @@ import { Controller } from "@hotwired/stimulus"
 
 // Photo upload controller with drag & drop, preview, and validation
 export default class extends Controller {
-  static targets = ["input", "preview"]
+  static targets = ["input", "preview", "uploadSection", "uploadStatus"]
   static values = { 
     maxFiles: Number,
-    maxSize: Number
+    maxSize: Number,
+    schoolId: Number
   }
 
   connect() {
@@ -98,6 +99,11 @@ export default class extends Controller {
     this.previewTarget.classList.remove('hidden')
     this.previewTarget.innerHTML = ''
     
+    // Show upload button when files are selected
+    if (this.hasUploadSectionTarget) {
+      this.uploadSectionTarget.classList.remove('hidden')
+    }
+    
     files.forEach((file, index) => {
       const reader = new FileReader()
       reader.onload = (e) => {
@@ -144,9 +150,12 @@ export default class extends Controller {
     // Update file input by removing the file at this index
     this.removeFileAtIndex(index)
     
-    // Hide preview container if no more previews
+    // Hide preview container and upload button if no more previews
     if (this.previewTarget.children.length === 0) {
       this.previewTarget.classList.add('hidden')
+      if (this.hasUploadSectionTarget) {
+        this.uploadSectionTarget.classList.add('hidden')
+      }
     }
   }
 
@@ -211,5 +220,78 @@ export default class extends Controller {
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+  
+  uploadPhotos(event) {
+    event.preventDefault()
+    
+    const files = this.inputTarget.files
+    if (files.length === 0) {
+      this.showError('No files selected')
+      return
+    }
+    
+    // Get school ID from the page URL or data attribute
+    const schoolId = window.location.pathname.match(/schools\/(\d+)/)?.[1]
+    if (!schoolId) {
+      this.showError('Unable to determine school ID')
+      return
+    }
+    
+    // Update status
+    if (this.hasUploadStatusTarget) {
+      this.uploadStatusTarget.textContent = 'Uploading...'
+    }
+    
+    // Create FormData
+    const formData = new FormData()
+    Array.from(files).forEach(file => {
+      formData.append('school[photos][]', file)
+    })
+    
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name="csrf-token"]')?.content
+    
+    // Upload photos
+    fetch(`/school_owner/schools/${schoolId}`, {
+      method: 'PATCH',
+      headers: {
+        'X-CSRF-Token': csrfToken,
+        'Accept': 'application/json'
+      },
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then(data => {
+      if (data.success) {
+        // Show success message
+        if (this.hasUploadStatusTarget) {
+          this.uploadStatusTarget.textContent = 'Photos uploaded successfully!'
+          this.uploadStatusTarget.classList.add('text-green-600')
+        }
+        
+        // Reload page to show new photos
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
+      } else {
+        this.showError(data.error || 'Upload failed')
+        if (this.hasUploadStatusTarget) {
+          this.uploadStatusTarget.textContent = ''
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Upload error:', error)
+      this.showError('Upload failed: ' + error.message)
+      if (this.hasUploadStatusTarget) {
+        this.uploadStatusTarget.textContent = ''
+      }
+    })
   }
 }

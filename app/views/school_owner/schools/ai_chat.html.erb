@@ -3,9 +3,9 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" data-controller="ai-chat" 
      data-ai-chat-school-id-value="<%= @school.id %>"
      data-ai-chat-conversation-id-value="<%= @conversation&.id %>"
-     data-ai-chat-messages-url-value="<%= ai_chat_message_school_owner_school_path(@school) %>"
-     data-ai-chat-suggestions-url-value="<%= ai_suggestions_school_owner_school_path(@school) %>"
-     data-ai-chat-analysis-url-value="<%= ai_analysis_school_owner_school_path(@school) %>"
+     data-ai-chat-messages-url-value="<%= ai_chat_message_school_owner_school_path(id: @school.id) %>"
+     data-ai-chat-suggestions-url-value="<%= ai_suggestions_school_owner_school_path(id: @school.id) %>"
+     data-ai-chat-analysis-url-value="<%= ai_analysis_school_owner_school_path(id: @school.id) %>"
      data-ai-chat-existing-sources-value="[]">
 
   <!-- Header -->

@@ -4,15 +4,25 @@ namespace :admin do
     email = ENV["ADMIN_EMAIL"] || "admin@example.com"
     password = ENV["ADMIN_PASSWORD"] || SecureRandom.urlsafe_base64(12)
 
-    if AdminUser.exists?(email: email)
-      puts "❌ Admin user with email #{email} already exists!"
-      exit 1
+    if User.exists?(email: email)
+      puts "❌ User with email #{email} already exists!"
+      user = User.find_by(email: email)
+      if user.admin?
+        puts "ℹ️  User is already an admin"
+      else
+        puts "ℹ️  Updating user role to admin..."
+        user.update!(role: 'admin')
+        puts "✅ User role updated to admin"
+      end
+      exit 0
     end
 
-    admin = AdminUser.create!(
+    admin = User.create!(
       email: email,
       password: password,
-      password_confirmation: password
+      password_confirmation: password,
+      role: 'admin',
+      confirmed_at: Time.current
     )
 
     puts "✅ Admin user created successfully!"
@@ -22,12 +32,12 @@ namespace :admin do
     puts "You can now access the admin panel at: http://localhost:3000/admin"
     puts ""
     puts "⚠️  Please save this password securely. To reset it, run:"
-    puts "   AdminUser.find_by(email: '#{email}').update!(password: 'new_password', password_confirmation: 'new_password')"
+    puts "   User.find_by(email: '#{email}').update!(password: 'new_password', password_confirmation: 'new_password')"
   end
 
   desc "List all admin users"
   task list_admins: :environment do
-    admins = AdminUser.all
+    admins = User.where(role: 'admin')
 
     if admins.empty?
       puts "No admin users found. Run 'rake admin:create_admin' to create one."
@@ -50,10 +60,15 @@ namespace :admin do
       exit 1
     end
 
-    admin = AdminUser.find_by(email: email)
+    admin = User.find_by(email: email)
 
     if admin.nil?
-      puts "❌ No admin user found with email: #{email}"
+      puts "❌ No user found with email: #{email}"
+      exit 1
+    end
+
+    unless admin.admin?
+      puts "❌ User #{email} is not an admin"
       exit 1
     end
 

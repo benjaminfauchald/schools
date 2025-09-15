@@ -117,7 +117,7 @@
 
     <!-- Actions -->
     <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-      <%= link_to school_path(@school), 
+      <%= link_to school_path(id: @school.id), 
           class: "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
         Cancel
       <% end %>

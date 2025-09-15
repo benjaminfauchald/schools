@@ -903,17 +903,27 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
   end
 
   def import_status
-    @school = current_school
+    begin
+      @school = current_school
+      
+      unless @school
+        render json: { error: "School not found" }, status: :not_found
+        return
+      end
 
-    status = {
-      status: @school.website_crawling_status || "none",
-      last_crawled: @school.website_crawled_at,
-      pages_found: @school.website_pages_found,
-      error: @school.website_crawling_error
-    }
+      status = {
+        status: @school.website_crawling_status || "none",
+        last_crawled: @school.website_crawled_at,
+        pages_found: @school.website_pages_found,
+        error: @school.website_crawling_error
+      }
 
-    respond_to do |format|
-      format.json { render json: status }
+      respond_to do |format|
+        format.json { render json: status }
+      end
+    rescue => e
+      Rails.logger.error "Import status error: #{e.message}"
+      render json: { error: "Failed to check import status: #{e.message}" }, status: :internal_server_error
     end
   end
 
@@ -1195,19 +1205,25 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       next if photo_file.blank?
 
       begin
-        media_item = @school.place.media_items.create!(
+        # Build the media item first (don't save yet)
+        media_item = @school.place.media_items.build(
           kind: "photo",
           source: "school_upload",
           alt_text: "#{@school.name} uploaded photo",
           sort_order: @school.place.media_items.photos.maximum(:sort_order).to_i + index + 1
         )
 
+        # Attach the file before saving (this will satisfy the validation)
         media_item.file.attach(photo_file)
-        uploaded_count += 1
-
-        Rails.logger.info "Successfully uploaded photo for school #{@school.id}: #{photo_file.original_filename}"
+        
+        # Now save the media item with the attached file
+        if media_item.save!
+          uploaded_count += 1
+          Rails.logger.info "Successfully uploaded photo for school #{@school.id}: #{photo_file.original_filename}"
+        end
       rescue => e
         Rails.logger.error "Failed to upload photo for school #{@school.id}: #{e.message}"
+        Rails.logger.error "Backtrace: #{e.backtrace.first(5).join("\n")}"
       end
     end
 
