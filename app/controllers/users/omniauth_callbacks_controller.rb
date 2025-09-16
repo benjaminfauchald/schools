@@ -27,6 +27,13 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       # Store Facebook access token in session for logout
       session[:facebook_access_token] = auth_hash.credentials.token if auth_hash.credentials
 
+      # Track user signup or login
+      if @user.created_at > 1.minute.ago
+        AnalyticsService.track_signup(@user, method: "facebook", source: "oauth")
+      else
+        AnalyticsService.track_login(@user, method: "facebook")
+      end
+
       sign_in @user, event: :authentication
 
       # Check if user was trying to contact a school before OAuth

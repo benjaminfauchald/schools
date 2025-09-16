@@ -405,6 +405,7 @@ GEM
       logger
     mini_mime (1.1.5)
     minitest (5.25.5)
+    mixpanel-ruby (2.3.0)
     msgpack (1.8.0)
     multi_xml (0.7.2)
       bigdecimal (~> 3.1)
@@ -787,6 +788,7 @@ DEPENDENCIES
   koala (~> 3.5)
   letter_opener (~> 1.10)
   listen
+  mixpanel-ruby
   omniauth
   omniauth-facebook
   omniauth-rails_csrf_protection

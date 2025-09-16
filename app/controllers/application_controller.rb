@@ -8,6 +8,9 @@ class ApplicationController < ActionController::Base
   # Internationalization
   before_action :set_locale
 
+  # Analytics tracking
+  after_action :track_page_view
+
   # Add helper methods for location calculations and authentication
   helper_method :calculate_distance, :format_distance, :facebook_authenticated, :debug_mode_enabled
 
@@ -86,6 +89,22 @@ class ApplicationController < ActionController::Base
   def set_locale
     I18n.locale = params[:locale] || session[:locale] || extract_locale_from_accept_language_header || I18n.default_locale
     session[:locale] = I18n.locale
+  end
+
+  # Track page views with analytics
+  def track_page_view
+    # Skip tracking for assets, admin pages, and non-HTML requests
+    return if request.path.start_with?("/rails/", "/assets/", "/admin/")
+    return unless request.format.html?
+
+    AnalyticsService.track_page_view(
+      request.path,
+      response.body[/<title>(.*?)<\/title>/m, 1] || "Untitled Page",
+      user: current_user,
+      request: request
+    )
+  rescue => e
+    Rails.logger.error "Analytics tracking error: #{e.message}"
   end
 
   private

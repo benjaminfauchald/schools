@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_15_153033) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_15_174338) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -101,10 +101,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_15_153033) do
     t.index ["created_at"], name: "index_audit_logs_on_created_at"
     t.index ["user_id"], name: "index_audit_logs_on_user_id"
   end
-
-# Could not dump table "document_contents" because of following StandardError
-#   Unknown type 'vector(1536)' for column 'embedding'
-
 
 # Could not dump table "documents" because of following StandardError
 #   Unknown type 'vector(1536)' for column 'embedding'
@@ -456,6 +452,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_15_153033) do
     t.string "twitter_url"
     t.string "instagram_url"
     t.jsonb "video_visibility_settings", default: {}
+    t.decimal "min_annual_fee", precision: 10, scale: 2
+    t.decimal "max_annual_fee", precision: 10, scale: 2
+    t.string "fee_currency", default: "THB", null: false
     t.index ["district"], name: "index_schools_on_district"
     t.index ["facebook_content"], name: "index_schools_on_facebook_content", using: :gin
     t.index ["geog"], name: "index_schools_on_geog", using: :gist
@@ -524,14 +523,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_15_153033) do
     t.index ["vocabulary_id", "slug"], name: "index_terms_on_vocabulary_id_and_slug", unique: true
     t.index ["vocabulary_id"], name: "index_terms_on_vocabulary_id"
   end
-
-# Could not dump table "transcript_segments" because of following StandardError
-#   Unknown type 'vector(1536)' for column 'vector_embedding'
-
-
-# Could not dump table "transcripts" because of following StandardError
-#   Unknown type 'vector(1536)' for column 'vector_embedding'
-
 
   create_table "travel_times", force: :cascade do |t|
     t.bigint "place_id", null: false
@@ -621,8 +612,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_15_153033) do
   add_foreign_key "ai_conversations", "schools"
   add_foreign_key "ai_conversations", "users"
   add_foreign_key "ai_messages", "ai_conversations"
-  add_foreign_key "document_contents", "places"
-  add_foreign_key "documents", "places", name: "documents_place_id_fkey"
+  add_foreign_key "documents", "places"
   add_foreign_key "events", "places"
   add_foreign_key "magic_link_tokens", "users"
   add_foreign_key "media_items", "places"
@@ -640,8 +630,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_15_153033) do
   add_foreign_key "temp_claims", "schools"
   add_foreign_key "terms", "terms", column: "parent_id"
   add_foreign_key "terms", "vocabularies"
-  add_foreign_key "transcript_segments", "transcripts"
-  add_foreign_key "transcripts", "places"
   add_foreign_key "travel_times", "places"
   add_foreign_key "webhook_audit_logs", "users"
   add_foreign_key "youtube_videos", "places"

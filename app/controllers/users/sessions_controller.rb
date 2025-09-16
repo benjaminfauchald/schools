@@ -1,4 +1,17 @@
 class Users::SessionsController < Devise::SessionsController
+  # Override Devise's create action to track logins
+  def create
+    super do |resource|
+      # Clear any Facebook logout flags when signing in again
+      cookies.delete(:facebook_logout)
+
+      # Track user login
+      if resource
+        AnalyticsService.track_login(resource, method: "email")
+      end
+    end
+  end
+
   # Override Devise's destroy action to handle Facebook logout
   def destroy
     # Check if the user logged in with Facebook

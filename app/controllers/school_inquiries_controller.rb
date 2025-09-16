@@ -8,19 +8,19 @@ class SchoolInquiriesController < ApplicationController
     @inquiry = @school.school_inquiries.build(inquiry_params)
     @inquiry.ip_address = request.remote_ip
     @inquiry.user = current_user
-    
+
     # Auto-fill missing fields from current user if authenticated
     if current_user
-      @inquiry.name ||= current_user.facebook_name || current_user.email.split('@').first.humanize
+      @inquiry.name ||= current_user.facebook_name || current_user.email.split("@").first.humanize
       @inquiry.email ||= current_user.email
       @inquiry.phone ||= current_user.phone if current_user.respond_to?(:phone)
-      
+
       # Update user's email if it was changed in the form
       if @inquiry.email.present? && @inquiry.email != current_user.email
         Rails.logger.info "Updating user email from #{current_user.email} to #{@inquiry.email}"
         current_user.update(email: @inquiry.email)
       end
-      
+
       # Update user's phone if provided and user has phone field
       if @inquiry.phone.present? && current_user.respond_to?(:phone=)
         current_user.update(phone: @inquiry.phone)
@@ -28,6 +28,9 @@ class SchoolInquiriesController < ApplicationController
     end
 
     if @inquiry.save
+      # Track inquiry submission
+      AnalyticsService.track_inquiry(@inquiry, user: current_user, request: request)
+
       # Send email notifications
       begin
         SchoolInquiryMailer.new_inquiry_notification(@inquiry).deliver_now

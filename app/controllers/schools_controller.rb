@@ -30,6 +30,14 @@ class SchoolsController < ApplicationController
     @page_description = @merged_data.additional_details[:about] ||
                        "Learn about #{@school.name} - curriculum, facilities, fees, and more."
     @page_keywords = generate_page_keywords(@school)
+
+    # Track school view
+    AnalyticsService.track_school_view(
+      @school,
+      user: current_user,
+      request: request,
+      source: params[:from] || "direct"
+    )
   end
 
   def index
@@ -135,6 +143,15 @@ class SchoolsController < ApplicationController
     end.sort_by { |school| school[:distance_km] }
 
     @search_results = schools_with_distance
+
+    # Track search
+    AnalyticsService.track_search(
+      query: query,
+      filters: {},
+      results_count: schools_with_distance.count,
+      user: current_user,
+      request: request
+    )
 
     respond_to do |format|
       format.json { render json: { schools: schools_with_distance } }

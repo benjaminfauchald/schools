@@ -115,6 +115,7 @@ Rails.application.routes.draw do
       get "/sign_out", to: "sessions#destroy", as: :destroy_session_get
     end
       root to: "dashboard#index"
+      resources :analytics, only: [ :index ]
       resources :inquiries, only: [ :index, :show, :update ]
       resources :places
       resources :points

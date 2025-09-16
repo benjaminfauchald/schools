@@ -44,7 +44,8 @@ RSpec.describe User, type: :model do
         uid: '123456789',
         info: OpenStruct.new(
           name: 'John Doe',
-          email: 'john@example.com'
+          email: 'john@example.com',
+          image: 'https://graph.facebook.com/123456789/picture'
         )
       )
     end
@@ -67,7 +68,8 @@ RSpec.describe User, type: :model do
         user = User.from_omniauth(auth_hash)
         expect(user.provider).to eq('facebook')
         expect(user.uid).to eq('123456789')
-        expect(user.email).to eq('john@example.com')
+        expect(user.email).to eq('fb_123456789@facebook.local')
+        expect(user.facebook_name).to eq('John Doe')
       end
     end
   end

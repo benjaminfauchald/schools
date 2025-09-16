@@ -90,7 +90,7 @@ RSpec.describe Transcript, type: :model do
 
     describe '.cleaned' do
       it 'returns transcripts with cleaned text' do
-        cleaned_transcript = create(:transcript, place: place, cleaned_transcript: "Clean text", transcript_cleaned_at: Time.current)
+        cleaned_transcript = create(:transcript, place: place, cleaned_transcript: "Clean text", cleaned_at: Time.current)
         uncleaned_transcript = create(:transcript, place: create(:place, school: school), cleaned_transcript: nil)
 
         expect(Transcript.cleaned).to include(cleaned_transcript)
@@ -208,12 +208,12 @@ RSpec.describe Transcript, type: :model do
 
     describe '#cleaned?' do
       it 'returns true when cleaned_transcript and timestamp present' do
-        transcript.update(cleaned_transcript: "Clean text", transcript_cleaned_at: Time.current)
+        transcript.update(cleaned_transcript: "Clean text", cleaned_at: Time.current)
         expect(transcript.cleaned?).to be true
       end
 
       it 'returns false when cleaned_transcript missing' do
-        transcript.update(cleaned_transcript: nil, transcript_cleaned_at: Time.current)
+        transcript.update(cleaned_transcript: nil, cleaned_at: Time.current)
         expect(transcript.cleaned?).to be false
       end
     end
@@ -287,7 +287,7 @@ RSpec.describe Transcript, type: :model do
       it 'returns true when cleaned but no embedding' do
         transcript.update(
           cleaned_transcript: "Clean",
-          transcript_cleaned_at: Time.current,
+          cleaned_at: Time.current,
           vector_embedding: nil
         )
         expect(transcript.ready_for_embedding?).to be true
@@ -301,7 +301,7 @@ RSpec.describe Transcript, type: :model do
       it 'returns false when already has embedding' do
         transcript.update(
           cleaned_transcript: "Clean",
-          transcript_cleaned_at: Time.current
+          cleaned_at: Time.current
         )
         vector = '[' + Array.new(1536, 0.1).join(',') + ']'
         ActiveRecord::Base.connection.execute("UPDATE transcripts SET vector_embedding = '#{vector}' WHERE id = #{transcript.id}")

@@ -123,6 +123,19 @@
               <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
             </a>
 
+            <!-- Fees & Pricing -->
+            <a href="#fees-pricing" 
+               data-section="fees-pricing"
+               data-action="click->school-form-navigation#navigateToSection"
+               data-school-form-navigation-target="navItem"
+               class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group border-l-4 px-3 py-2 flex items-center text-sm font-medium">
+              <svg class="text-gray-400 mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+              </svg>
+              Fees & Pricing
+              <div class="completion-indicator ml-auto h-4 w-4 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center"></div>
+            </a>
+
             <!-- School Details -->
             <a href="#school-details" 
                data-section="school-details"
@@ -469,6 +482,168 @@
           <p class="mt-1 text-xs text-gray-500">Describe language programs, bilingual education, ESL support, or special needs programs available</p>
                 </div>
                 </div>
+              </div>
+
+              <!-- Fees & Pricing Section -->
+              <div data-school-form-navigation-target="section" 
+                   data-section="fees-pricing" 
+                   class="hidden bg-white border border-gray-200 rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Fees & Pricing</h2>
+                <p class="text-sm text-gray-600 mb-6">Set your school's annual fee range to help parents understand pricing</p>
+                
+                <!-- Max Fee Controller Wrapper -->
+                <div data-controller="max-fee-slider"
+                     data-max-fee-slider-max-value-value="<%= @school.max_annual_fee || 500000 %>"
+                     data-max-fee-slider-currency-value="<%= @school.fee_currency || 'THB' %>">
+                
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Currency Selection -->
+                    <div>
+                      <%= form.label :fee_currency, "Currency", class: "block text-sm font-medium text-gray-700" %>
+                      <%= form.select :fee_currency, 
+                          options_for_select([
+                            ['Thai Baht (฿)', 'THB'],
+                            ['US Dollar ($)', 'USD'],
+                            ['Euro (€)', 'EUR'],
+                            ['British Pound (£)', 'GBP']
+                          ], @school.fee_currency || 'THB'), 
+                          {}, 
+                          {class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+                           data: { 
+                             action: "change->max-fee-slider#currencyChanged change->min-fee-slider#currencyChanged" 
+                           }} %>
+                      <p class="mt-1 text-xs text-gray-500">Currency for fee display</p>
+                    </div>
+
+                    <!-- Minimum Fee -->
+                    <div>
+                      <%= form.label :min_annual_fee, "Minimum Annual Fee", class: "block text-sm font-medium text-gray-700" %>
+                      <%= form.number_field :min_annual_fee, 
+                          class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+                          step: 1000,
+                          min: 50000,
+                          max: 2000000,
+                          data: { 
+                            action: "input->min-fee-slider#updateFromInput",
+                            "min-fee-slider-target": "minInput"
+                          } %>
+                      <p class="mt-1 text-xs text-gray-500">Lowest annual fee</p>
+                    </div>
+
+                    <!-- Maximum Fee -->
+                    <div>
+                      <%= form.label :max_annual_fee, "Maximum Annual Fee", class: "block text-sm font-medium text-gray-700" %>
+                      <%= form.number_field :max_annual_fee, 
+                          class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+                          step: 1000,
+                          min: 50000,
+                          max: 2000000,
+                          data: { 
+                            action: "input->max-fee-slider#updateFromInput",
+                            "max-fee-slider-target": "maxInput"
+                          } %>
+                      <p class="mt-1 text-xs text-gray-500">Highest annual fee</p>
+                    </div>
+                  </div>
+
+                  <!-- Simple Dual Range Slider -->
+                  <div class="mt-8" data-controller="dual-slider"
+                       data-dual-slider-min-value="<%= @school.min_annual_fee || 50000 %>"
+                       data-dual-slider-max-value="<%= @school.max_annual_fee || 500000 %>"
+                       data-dual-slider-currency-value="<%= @school.fee_currency || 'THB' %>">
+                  
+                    <div class="flex items-center justify-between mb-4">
+                      <h3 class="text-base font-medium text-gray-900">Annual Fee Range</h3>
+                      <div class="text-sm text-gray-600" data-dual-slider-target="display">
+                        <%= number_with_delimiter(@school.min_annual_fee || 50000) %> - <%= number_with_delimiter(@school.max_annual_fee || 500000) %> <%= @school.fee_currency == 'THB' ? '฿' : (@school.fee_currency || 'THB') %>
+                      </div>
+                    </div>
+
+                    <!-- Single Slider Track with Two Thumbs -->
+                    <div class="relative h-8 mb-4" data-dual-slider-target="container">
+                      <!-- Background track -->
+                      <div class="absolute top-3 w-full h-2 bg-gray-300 rounded"></div>
+                      
+                      <!-- Active range bar -->
+                      <div class="absolute top-3 h-2 bg-blue-500 rounded" data-dual-slider-target="range"></div>
+                      
+                      <!-- Min thumb (Green) -->
+                      <div class="absolute w-6 h-6 bg-green-500 border-2 border-white rounded-full shadow cursor-pointer" 
+                           data-dual-slider-target="minThumb" 
+                           style="top: 1px; left: 0%;"></div>
+                      
+                      <!-- Max thumb (Blue) -->
+                      <div class="absolute w-6 h-6 bg-blue-500 border-2 border-white rounded-full shadow cursor-pointer" 
+                           data-dual-slider-target="maxThumb" 
+                           style="top: 1px; left: 25%;"></div>
+                    </div>
+
+                    <!-- Range Labels -->
+                    <div class="flex justify-between text-xs text-gray-500">
+                      <span>50K</span>
+                      <span>500K</span>
+                      <span>1M</span>
+                      <span>1.5M</span>
+                      <span>2M</span>
+                    </div>
+                  </div>
+
+                  <!-- Range Labels -->
+                  <div class="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>50,000</span>
+                    <span>500,000</span>
+                    <span>1,000,000</span>
+                    <span>1,500,000</span>
+                    <span>2,000,000</span>
+                  </div>
+                  </div>
+
+                  <!-- Remove old maximum slider section -->
+                  <div class="mt-8" style="display: none;">
+                  
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-medium text-gray-900">Maximum Fee Slider</h3>
+                    <div class="text-sm text-gray-600">
+                      <span data-max-fee-slider-target="displayRange">
+                        <%= number_with_delimiter(@school.max_annual_fee || 500000) %> <%= @school.fee_currency == 'THB' ? '฿' : (@school.fee_currency || 'THB') %>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="relative">
+                    <!-- Slider Track -->
+                    <div class="h-2 bg-gray-200 rounded-full relative overflow-hidden">
+                      <div class="absolute h-full bg-blue-500 rounded-full" 
+                           data-max-fee-slider-target="track"
+                           style="left: 0%; right: 50%;"></div>
+                    </div>
+                    
+                    <!-- Max Slider -->
+                    <input type="range" 
+                           class="absolute top-0 w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb-blue"
+                           min="50000" 
+                           max="2000000" 
+                           step="10000"
+                           value="<%= @school.max_annual_fee || 500000 %>"
+                           data-max-fee-slider-target="maxSlider"
+                           data-action="input->max-fee-slider#updateRange">
+                  </div>
+
+                  <!-- Range Labels -->
+                  <div class="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>50,000</span>
+                    <span>500,000</span>
+                    <span>1,000,000</span>
+                    <span>1,500,000</span>
+                    <span>2,000,000</span>
+                  </div>
+
+                  <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                      <strong>💡 Tip:</strong> This fee range will be displayed prominently on your school page to help parents quickly understand your pricing structure.
+                    </p>
+                  </div>
+                </div> <!-- End Fee Range Controller Wrapper -->
               </div>
 
               <!-- School Details Section -->

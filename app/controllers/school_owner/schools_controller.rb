@@ -905,7 +905,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
   def import_status
     begin
       @school = current_school
-      
+
       unless @school
         render json: { error: "School not found" }, status: :not_found
         return
@@ -1215,7 +1215,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
 
         # Attach the file before saving (this will satisfy the validation)
         media_item.file.attach(photo_file)
-        
+
         # Now save the media item with the attached file
         if media_item.save!
           uploaded_count += 1
@@ -1248,7 +1248,8 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       :address_line_1, :address_line_2, :district, :province, :postcode, :country_code,
       :facebook_url, :line_id, :whatsapp_number, :youtube_url, :linkedin_url, :twitter_url, :instagram_url,
       :founded_year, :ownership, :avg_class_size, :student_teacher_ratio,
-      :boarding, :school_bus, :language_support_notes, :tone_of_voice
+      :boarding, :school_bus, :language_support_notes, :tone_of_voice,
+      :min_annual_fee, :max_annual_fee, :fee_currency
     )
   end
 
@@ -1259,6 +1260,7 @@ class SchoolOwner::SchoolsController < SchoolOwner::ApplicationController
       :facebook_url, :line_id, :whatsapp_number, :youtube_url, :linkedin_url, :twitter_url, :instagram_url,
       :founded_year, :ownership, :avg_class_size, :student_teacher_ratio,
       :boarding, :school_bus, :language_support_notes, :tone_of_voice,
+      :min_annual_fee, :max_annual_fee, :fee_currency,
       curriculum: [], accreditation: [], language: [], program: [], facility: []
     )
   end

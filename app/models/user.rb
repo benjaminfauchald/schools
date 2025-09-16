@@ -34,10 +34,10 @@ class User < ApplicationRecord
     # Sanitize input data to prevent XSS attacks - strip ALL HTML tags
     sanitized_name = ActionController::Base.helpers.strip_tags(auth.info.name.to_s)
     sanitized_uid = auth.uid.to_s.gsub(/[^a-zA-Z0-9_-]/, "") # Remove any non-alphanumeric chars from UID
-    
+
     # We don't get email from Facebook anymore - only name and picture
     # Email will be collected through the contact form instead
-    
+
     # Try to find existing user by provider and uid first
     user = User.find_by(provider: auth.provider, uid: sanitized_uid)
 

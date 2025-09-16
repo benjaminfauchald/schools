@@ -329,13 +329,15 @@ RSpec.describe 'User Registration', type: :request do
 
       it 'prevents account takeover via OAuth' do
         # Existing user with email but no OAuth
-        create(:user, email: 'fb_user@example.com')
+        existing_user = create(:user, email: 'fb_user@example.com')
 
         get user_facebook_omniauth_callback_path
 
-        # Should not link to existing account automatically
+        # Should create new user with placeholder email, not link to existing
         oauth_user = User.find_by(provider: 'facebook', uid: '123456789')
-        expect(oauth_user).to be_nil # Should fail to create due to email conflict
+        expect(oauth_user).to be_present
+        expect(oauth_user.id).not_to eq(existing_user.id)
+        expect(oauth_user.email).to eq('fb_123456789@facebook.local')
       end
     end
   end

@@ -26,7 +26,6 @@ RSpec.describe "Facebook OAuth Authentication", type: :request do
           provider: 'facebook',
           uid: '123456789',
           info: {
-            email: 'fb_user@example.com',
             name: 'John Doe',
             first_name: 'John',
             last_name: 'Doe',
@@ -59,7 +58,7 @@ RSpec.describe "Facebook OAuth Authentication", type: :request do
         }.to change(User, :count).by(1)
 
         user = User.last
-        expect(user.email).to eq('fb_user@example.com')
+        expect(user.email).to eq('fb_123456789@facebook.local')  # Now uses placeholder email
         expect(user.provider).to eq('facebook')
         expect(user.uid).to eq('123456789')
         expect(user.facebook_name).to eq('John Doe')
@@ -67,7 +66,7 @@ RSpec.describe "Facebook OAuth Authentication", type: :request do
 
       it "signs in existing user without creating duplicate" do
         # Create existing user with same Facebook UID
-        existing_user = create(:user,
+        create(:user,
           email: 'fb_user@example.com',
           provider: 'facebook',
           uid: '123456789'
@@ -189,13 +188,13 @@ RSpec.describe "Facebook OAuth Authentication", type: :request do
           uid: '111111'
         )
 
-        # Attacker tries to use same email but different UID
+        # Attacker tries with different UID (no email from Facebook anymore)
         attacker_auth = OmniAuth::AuthHash.new({
           provider: 'facebook',
           uid: '999999',  # Different UID
           info: {
-            email: 'victim@example.com',  # Same email as victim
-            name: 'Attacker'
+            name: 'Attacker',
+            image: 'https://graph.facebook.com/999999/picture'
           },
           credentials: {
             token: 'attacker_token',
@@ -211,13 +210,14 @@ RSpec.describe "Facebook OAuth Authentication", type: :request do
         victim_user.reload
         expect(victim_user.uid).to eq('111111')  # UID remains unchanged - account is safe!
 
-        # The attacker should be redirected to registration with an error
-        expect(response).to redirect_to(new_user_registration_url)
-        expect(flash[:alert]).to include("already exists")
-
-        # No new user should be created for the attacker
+        # New user should be created with placeholder email
         attacker = User.find_by(uid: '999999')
-        expect(attacker).to be_nil
+        expect(attacker).to be_present
+        expect(attacker.email).to eq('fb_999999@facebook.local')
+        expect(attacker.id).not_to eq(victim_user.id)
+
+        # Should redirect to root after successful creation
+        expect(response).to redirect_to(root_path)
       end
 
       it "sanitizes malicious data in OAuth response" do
@@ -265,8 +265,8 @@ RSpec.describe "Facebook OAuth Authentication", type: :request do
           provider: 'facebook',
           uid: '789789',
           info: {
-            email: 'expired@example.com',
-            name: 'Expired User'
+            name: 'Expired User',
+            image: 'https://graph.facebook.com/789789/picture'
           },
           credentials: {
             token: 'expired_token',
@@ -279,9 +279,10 @@ RSpec.describe "Facebook OAuth Authentication", type: :request do
 
         get user_facebook_omniauth_callback_path
 
-        user = User.find_by(email: 'expired@example.com')
+        user = User.find_by(uid: '789789')
         # Should still create/login user even with expired token
         expect(user).to be_present
+        expect(user.email).to eq('fb_789789@facebook.local')
       end
     end
 

@@ -15,6 +15,10 @@ class SchoolOwner::ApplicationController < ApplicationController
   def current_school
     @current_school ||= current_user.owned_schools.find(params[:school_id] || params[:id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to school_owner_dashboard_index_path, alert: "School not found or access denied."
+    respond_to do |format|
+      format.html { redirect_to school_owner_dashboard_index_path, alert: "School not found or access denied." }
+      format.json { render json: { error: "School not found or access denied" }, status: :not_found }
+    end
+    nil
   end
 end

@@ -7,11 +7,11 @@ FactoryBot.define do
     end_time { (segment_index * 10.0) + 9.5 }
     speaker { nil }
     confidence { 0.95 }
-    
+
     trait :with_speaker do
       speaker { "Narrator" }
     end
-    
+
     trait :with_embedding do
       # vector_embedding must be set via raw SQL after creation
       embedding_generated_at { Time.current }
@@ -20,7 +20,7 @@ FactoryBot.define do
         ActiveRecord::Base.connection.execute("UPDATE transcript_segments SET vector_embedding = '#{vector}' WHERE id = #{segment.id}")
       end
     end
-    
+
     trait :low_confidence do
       confidence { 0.65 }
     end

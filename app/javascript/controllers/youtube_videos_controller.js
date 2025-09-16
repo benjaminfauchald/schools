@@ -8,14 +8,27 @@ export default class extends Controller {
     toggleUrl: String
   }
 
+  get debugMode() {
+    if (this._debugMode === undefined) {
+      this._debugMode = document.querySelector('meta[name="debug-mode"]')?.content === 'true'
+    }
+    return this._debugMode
+  }
+
+  debugLog(...args) {
+    if (this.debugMode) {
+      console.log(...args)
+    }
+  }
+
   async connect() {
-    console.log('🔌 CONNECT: Starting YouTube videos controller')
+    this.debugLog('🔌 CONNECT: Starting YouTube videos controller')
     this.lastReloadTime = 0 // Prevent rapid successive reloads
     
     // Load videos first, then start polling
     await this.loadVideos()
     this.startPolling()
-    console.log('🔌 CONNECT: Initial load complete, polling started')
+    this.debugLog('🔌 CONNECT: Initial load complete, polling started')
     
     // Set up the "Generate All Transcripts" button
     this.setupBulkTranscriptButton()
@@ -59,7 +72,7 @@ export default class extends Controller {
   }
 
   renderVideos(videos) {
-    console.log(`🎬 RENDER: renderVideos called with ${videos.length} videos`)
+    this.debugLog(`🎬 RENDER: renderVideos called with ${videos.length} videos`)
     if (videos.length === 0) {
       this.showEmptyState()
       return
@@ -68,7 +81,7 @@ export default class extends Controller {
     // Log transcript statuses from server
     videos.forEach((video, index) => {
       if (index < 5) { // Log first 5 videos
-        console.log(`🎬 RENDER: Video ${video.video_key || video.video_id} transcript_status:`, video.transcript_status)
+        this.debugLog(`🎬 RENDER: Video ${video.video_key || video.video_id} transcript_status:`, video.transcript_status)
       }
     })
 
@@ -78,7 +91,7 @@ export default class extends Controller {
     } else {
       this.videosContainerTarget.innerHTML = videosHtml
     }
-    console.log(`🎬 RENDER: Finished rendering ${videos.length} video cards`)
+    this.debugLog(`🎬 RENDER: Finished rendering ${videos.length} video cards`)
   }
 
   renderVideoCard(video) {
@@ -404,12 +417,12 @@ export default class extends Controller {
 
   renderTranscriptBadge(video) {
     if (!video.transcript_status) {
-      console.log(`🔴 BADGE: No transcript_status for video ${video.video_key || video.video_id}`)
+      this.debugLog(`🔴 BADGE: No transcript_status for video ${video.video_key || video.video_id}`)
       return ''
     }
     
     const status = video.transcript_status
-    console.log(`🎯 BADGE: Rendering badge for video ${video.video_key || video.video_id} with status:`, status)
+    this.debugLog(`🎯 BADGE: Rendering badge for video ${video.video_key || video.video_id} with status:`, status)
     
     let badgeClass, icon, text
     
@@ -445,7 +458,7 @@ export default class extends Controller {
         text = 'No Transcript'
         break
       default:
-        console.log(`🔴 BADGE: Unknown status "${status.status}" for video ${video.video_key || video.video_id}`)
+        this.debugLog(`🔴 BADGE: Unknown status "${status.status}" for video ${video.video_key || video.video_id}`)
         return '' // Don't show badge for not_started
     }
     
@@ -461,9 +474,9 @@ export default class extends Controller {
         ${icon} ${text}
       </div>
     `
-    console.log(`✅ BADGE: Generated badge for ${video.video_key || video.video_id}: ${icon} ${text}`)
-    console.log(`🔧 BADGE: Is clickable: ${isClickable}, Click action: ${clickAction}`)
-    console.log(`🔧 BADGE: Full HTML:`, badgeHtml)
+    this.debugLog(`✅ BADGE: Generated badge for ${video.video_key || video.video_id}: ${icon} ${text}`)
+    this.debugLog(`🔧 BADGE: Is clickable: ${isClickable}, Click action: ${clickAction}`)
+    this.debugLog(`🔧 BADGE: Full HTML:`, badgeHtml)
     return badgeHtml
   }
   
@@ -774,7 +787,7 @@ export default class extends Controller {
   // Polling methods for transcript status updates
   
   startPolling() {
-    console.log('🔄 POLLING: Starting transcript status polling')
+    this.debugLog('🔄 POLLING: Starting transcript status polling')
     
     // Stop any existing polling first
     this.stopPolling()
@@ -784,10 +797,10 @@ export default class extends Controller {
     
     // Check if we actually need to poll
     const processingVideos = this.getProcessingVideos()
-    console.log(`🔄 POLLING: Found ${processingVideos.length} videos that need polling`)
+    this.debugLog(`🔄 POLLING: Found ${processingVideos.length} videos that need polling`)
     
     if (processingVideos.length === 0) {
-      console.log('🔄 POLLING: No processing videos found, not starting polling')
+      this.debugLog('🔄 POLLING: No processing videos found, not starting polling')
       return
     }
     
@@ -811,7 +824,7 @@ export default class extends Controller {
     if (processingVideos.length === 0 || 
         this.pollingAttempts >= this.maxPollingAttempts || 
         processingVideos.length > 10) {
-      console.log(`Stopping polling: processingVideos=${processingVideos.length}, attempts=${this.pollingAttempts}`)
+      this.debugLog(`Stopping polling: processingVideos=${processingVideos.length}, attempts=${this.pollingAttempts}`)
       this.stopPolling()
       return
     }
@@ -898,21 +911,21 @@ export default class extends Controller {
             element: card,
             currentStatus: badgeText
           })
-          console.log(`Found processing video: ${card.dataset.videoKey} - ${badgeText}`)
+          this.debugLog(`Found processing video: ${card.dataset.videoKey} - ${badgeText}`)
         }
       }
     })
     
-    console.log(`Total processing videos found: ${processingVideos.length}`)
+    this.debugLog(`Total processing videos found: ${processingVideos.length}`)
     return processingVideos
   }
   
   updateVideoStatuses(videos) {
-    console.log('🔵 UPDATE: updateVideoStatuses called with', videos.length, 'videos')
+    this.debugLog('🔵 UPDATE: updateVideoStatuses called with', videos.length, 'videos')
     // Just update individual elements without full page reloads
     const container = this.hasVideoGridTarget ? this.videoGridTarget : this.videosContainerTarget
     if (!container) {
-      console.log('🔴 UPDATE: No container found!')
+      this.debugLog('🔴 UPDATE: No container found!')
       return
     }
     
@@ -922,7 +935,7 @@ export default class extends Controller {
     videos.forEach(video => {
       const videoCard = container.querySelector(`[data-video-key="${video.video_key}"]`)
       if (videoCard) {
-        console.log(`🔵 UPDATE: Processing video ${video.video_key} with server status:`, video.transcript_status)
+        this.debugLog(`🔵 UPDATE: Processing video ${video.video_key} with server status:`, video.transcript_status)
         
         // Check current status before updating
         const currentBadge = videoCard.querySelector('.absolute.top-1.left-1')

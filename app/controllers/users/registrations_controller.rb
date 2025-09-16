@@ -10,12 +10,21 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # Override Devise's create method to handle temp claims
   def create
     super do |resource|
-      if resource.persisted? && session[:temp_claim_token].present?
-        # Process the temp claim after successful registration
-        if resource.process_temp_claim!(session[:temp_claim_token])
-          session.delete(:temp_claim_token)
-          # Set a flash message that will be shown after email confirmation
-          session[:post_confirmation_message] = "Your school claim has been submitted for approval!"
+      if resource.persisted?
+        # Track user signup
+        AnalyticsService.track_signup(
+          resource,
+          method: "email",
+          source: session[:signup_source] || "direct"
+        )
+
+        if session[:temp_claim_token].present?
+          # Process the temp claim after successful registration
+          if resource.process_temp_claim!(session[:temp_claim_token])
+            session.delete(:temp_claim_token)
+            # Set a flash message that will be shown after email confirmation
+            session[:post_confirmation_message] = "Your school claim has been submitted for approval!"
+          end
         end
       end
     end

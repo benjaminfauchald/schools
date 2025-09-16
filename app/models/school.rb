@@ -1,6 +1,7 @@
 # School model represents educational institutions with rich metadata and taxonomy support
 # Integrates with Place for location data and supports comprehensive filtering and search
 class School < ApplicationRecord
+  include ActionView::Helpers::NumberHelper
   belongs_to :place, optional: true
 
   # Photos are now managed through MediaItems - remove Active Storage attachment
@@ -172,7 +173,13 @@ class School < ApplicationRecord
   end
 
   def tuition_range
-    current_fee_schedule&.tuition_range_display
+    # Use simple fee range if set, otherwise fall back to fee schedule
+    if min_annual_fee.present? && max_annual_fee.present?
+      currency_symbol = fee_currency == "THB" ? "฿" : fee_currency
+      "#{number_with_delimiter(min_annual_fee.to_i)} #{currency_symbol} - #{number_with_delimiter(max_annual_fee.to_i)} #{currency_symbol}"
+    else
+      current_fee_schedule&.tuition_range_display
+    end
   end
 
   # Grade offering helpers

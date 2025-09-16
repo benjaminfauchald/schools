@@ -270,13 +270,24 @@ RSpec.describe "Authentication", type: :request do
         let!(:email_user) { create(:user, email: 'fb_user@example.com') }
 
         it "prevents automatic linking for security (account takeover protection)" do
+          # Facebook no longer provides email, so we create a new user with placeholder email
+          # This prevents account takeover - existing user remains untouched
           expect {
             get user_facebook_omniauth_callback_path
-          }.not_to change { email_user.reload.provider }
+          }.to change(User, :count).by(1) # Creates new user instead of linking
 
-          expect(email_user.provider).to be_nil
+          # Original user is untouched - this is the security protection
+          expect(email_user.reload.provider).to be_nil
           expect(email_user.uid).to be_nil
-          expect(response).to redirect_to(new_user_registration_url)
+
+          # New user created with placeholder email
+          new_user = User.find_by(uid: '123456')
+          expect(new_user).to be_present
+          expect(new_user.email).to eq('fb_123456@facebook.local')
+          expect(new_user.id).not_to eq(email_user.id)
+
+          # Successfully signs in with new account
+          expect(response).to redirect_to(root_path)
         end
       end
 

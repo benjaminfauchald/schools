@@ -1,0 +1,220 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+    <p class="text-gray-600 mt-2">Product metrics and usage patterns</p>
+  </div>
+
+  <!-- Mixpanel Dashboard Embed -->
+  <% if @mixpanel_token.present? %>
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4">Live Analytics</h2>
+      <p class="text-gray-600 mb-4">
+        View detailed analytics in 
+        <a href="https://mixpanel.com/project/<%= @mixpanel_token %>" target="_blank" class="text-blue-600 hover:underline">
+          Mixpanel Dashboard →
+        </a>
+      </p>
+      
+      <!-- You can embed specific Mixpanel charts here using their embed feature -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="border rounded p-4">
+          <h3 class="font-medium mb-2">Daily Active Users</h3>
+          <p class="text-sm text-gray-500">View in Mixpanel for live data</p>
+        </div>
+        <div class="border rounded p-4">
+          <h3 class="font-medium mb-2">Top Events</h3>
+          <p class="text-sm text-gray-500">View in Mixpanel for live data</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Key Metrics Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Users Card -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-500">Total Users</h3>
+        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+        </svg>
+      </div>
+      <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@stats[:users][:total]) %></div>
+      <p class="text-sm text-gray-600 mt-2">
+        <span class="text-green-600">+<%= @stats[:users][:registered_this_week] %></span> this week
+      </p>
+      <div class="mt-4 text-xs text-gray-500">
+        <div>Facebook: <%= @stats[:users][:facebook_users] %></div>
+        <div>Email: <%= @stats[:users][:email_users] %></div>
+      </div>
+    </div>
+
+    <!-- Schools Card -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-500">Schools</h3>
+        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+      </div>
+      <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@stats[:schools][:total]) %></div>
+      <p class="text-sm text-gray-600 mt-2">
+        <span class="text-blue-600"><%= @stats[:schools][:claimed] %></span> claimed
+      </p>
+      <div class="mt-4 text-xs text-gray-500">
+        <div>With inquiries: <%= @stats[:schools][:with_inquiries] %></div>
+      </div>
+    </div>
+
+    <!-- Inquiries Card -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-500">Inquiries</h3>
+        <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@stats[:inquiries][:total]) %></div>
+      <p class="text-sm text-gray-600 mt-2">
+        <span class="text-green-600">+<%= @stats[:inquiries][:this_week] %></span> this week
+      </p>
+      <div class="mt-4 text-xs text-gray-500">
+        <div>Today: <%= @stats[:inquiries][:today] %></div>
+        <div>Pending: <%= @stats[:inquiries][:pending_response] %></div>
+      </div>
+    </div>
+
+    <!-- Claims Card -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-500">Claims</h3>
+        <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+        </svg>
+      </div>
+      <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@stats[:claims][:total]) %></div>
+      <p class="text-sm text-gray-600 mt-2">
+        <span class="text-yellow-600"><%= @stats[:claims][:pending] %></span> pending
+      </p>
+      <div class="mt-4 text-xs text-gray-500">
+        <div>Approved: <%= @stats[:claims][:approved] %></div>
+        <div>Rejected: <%= @stats[:claims][:rejected] %></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Top Schools -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold mb-4">Top Schools by Inquiries (30 days)</h2>
+      <div class="space-y-3">
+        <% @top_schools_by_inquiries.each_with_index do |(name, count), index| %>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <span class="text-sm font-medium text-gray-500 w-6"><%= index + 1 %>.</span>
+              <span class="text-sm text-gray-900 ml-2"><%= name.truncate(30) %></span>
+            </div>
+            <span class="text-sm font-semibold text-gray-900"><%= count %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Popular Areas -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold mb-4">Popular Areas (30 days)</h2>
+      <div class="space-y-3">
+        <% @user_areas.each_with_index do |(area, count), index| %>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <span class="text-sm font-medium text-gray-500 w-6"><%= index + 1 %>.</span>
+              <span class="text-sm text-gray-900 ml-2"><%= area || "Unknown" %></span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                <div class="bg-blue-600 h-2 rounded-full" style="width: <%= (count.to_f / @user_areas.first[1] * 100).round %>%"></div>
+              </div>
+              <span class="text-sm font-semibold text-gray-900"><%= count %></span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity Tables -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Recent Registrations -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="px-6 py-4 border-b">
+        <h3 class="text-lg font-semibold">Recent Registrations</h3>
+      </div>
+      <div class="p-6">
+        <div class="space-y-3">
+          <% @recent_registrations.each do |user| %>
+            <div class="text-sm">
+              <div class="font-medium text-gray-900"><%= user.email.truncate(25) %></div>
+              <div class="text-gray-500">
+                <%= user.provider ? "Facebook" : "Email" %> • 
+                <%= time_ago_in_words(user.created_at) %> ago
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Inquiries -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="px-6 py-4 border-b">
+        <h3 class="text-lg font-semibold">Recent Inquiries</h3>
+      </div>
+      <div class="p-6">
+        <div class="space-y-3">
+          <% @recent_inquiries.each do |inquiry| %>
+            <div class="text-sm">
+              <div class="font-medium text-gray-900"><%= inquiry.school.name.truncate(25) %></div>
+              <div class="text-gray-500">
+                <%= inquiry.user&.email&.split('@')&.first || "Anonymous" %> • 
+                <%= time_ago_in_words(inquiry.created_at) %> ago
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Claims -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="px-6 py-4 border-b">
+        <h3 class="text-lg font-semibold">Recent Claims</h3>
+      </div>
+      <div class="p-6">
+        <div class="space-y-3">
+          <% @recent_claims.each do |claim| %>
+            <div class="text-sm">
+              <div class="font-medium text-gray-900"><%= claim.school.name.truncate(25) %></div>
+              <div class="text-gray-500">
+                <span class="<%= claim.pending? ? 'text-yellow-600' : claim.approved? ? 'text-green-600' : 'text-red-600' %>">
+                  <%= claim.status.capitalize %>
+                </span> • 
+                <%= time_ago_in_words(claim.created_at) %> ago
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript for Mixpanel Integration -->
+  <script>
+    // Track admin dashboard view
+    if (typeof mixpanel !== 'undefined') {
+      mixpanel.track('Admin Dashboard Viewed', {
+        page: 'analytics'
+      });
+    }
+  </script>
+</div>

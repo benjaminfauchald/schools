@@ -33,5 +33,9 @@ FactoryBot.define do
         create_list(:school_claim, 2, user: user)
       end
     end
+
+    factory :admin_user, parent: :user do
+      role { 'admin' }
+    end
   end
 end

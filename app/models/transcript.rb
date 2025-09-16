@@ -78,7 +78,7 @@ class Transcript < ApplicationRecord
 
   # Check if transcript has been cleaned by AI
   def cleaned?
-    cleaned_transcript.present? && transcript_cleaned_at.present?
+    cleaned_transcript.present? && cleaned_at.present?
   end
 
   # Get the best available transcript content (cleaned first, then raw)

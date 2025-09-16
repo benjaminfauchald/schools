@@ -11,7 +11,7 @@ namespace :admin do
         puts "ℹ️  User is already an admin"
       else
         puts "ℹ️  Updating user role to admin..."
-        user.update!(role: 'admin')
+        user.update!(role: "admin")
         puts "✅ User role updated to admin"
       end
       exit 0
@@ -21,7 +21,7 @@ namespace :admin do
       email: email,
       password: password,
       password_confirmation: password,
-      role: 'admin',
+      role: "admin",
       confirmed_at: Time.current
     )
 
@@ -37,7 +37,7 @@ namespace :admin do
 
   desc "List all admin users"
   task list_admins: :environment do
-    admins = User.where(role: 'admin')
+    admins = User.where(role: "admin")
 
     if admins.empty?
       puts "No admin users found. Run 'rake admin:create_admin' to create one."

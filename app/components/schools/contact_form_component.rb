@@ -16,17 +16,17 @@ class Schools::ContactFormComponent < ViewComponent::Base
   private
 
   attr_reader :school, :contact_info, :user_signed_in, :facebook_authenticated, :debug_mode, :school_inquiry, :current_user
-  
+
   def build_school_inquiry
     inquiry = SchoolInquiry.new
-    
+
     # Pre-fill form fields if user is signed in
     if current_user
-      inquiry.name = current_user.facebook_name || current_user.email.split('@').first.humanize
+      inquiry.name = current_user.facebook_name || current_user.email.split("@").first.humanize
       inquiry.email = current_user.email
       inquiry.phone = current_user.phone if current_user.respond_to?(:phone)
     end
-    
+
     inquiry
   end
 end

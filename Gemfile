@@ -78,6 +78,7 @@ gem "view_component"
 gem "foreman"
 gem "sentry-ruby"
 gem "sentry-rails"
+gem "mixpanel-ruby"
 
 # gem 'iso3166'
 gem "countries"

@@ -224,3 +224,279 @@ trix-toolbar .trix-button-group .trix-button + .trix-button {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
+
+/* Fee Range Slider Styles */
+.slider-thumb-blue {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: all;
+  position: absolute;
+  height: 8px;
+  width: 100%;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* Specific styling for min and max sliders to ensure proper layering */
+.slider-thumb-blue.min-slider {
+  z-index: 1;
+}
+
+.slider-thumb-blue.max-slider {
+  z-index: 1;
+}
+
+/* Ensure green slider has highest z-index */
+.slider-thumb-green {
+  z-index: 1000;
+  pointer-events: all !important;
+}
+
+/* Style the slider track (remove default) */
+.slider-thumb-blue::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 8px;
+  border: none;
+  outline: none;
+}
+
+.slider-thumb-blue::-moz-range-track {
+  background: transparent;
+  height: 8px;
+  border: none;
+  outline: none;
+}
+
+/* Style the slider thumbs */
+.slider-thumb-blue::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  margin-top: -6px; /* Center the thumb on the track */
+  pointer-events: auto;
+}
+
+.slider-thumb-blue::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  border: none; /* Remove Firefox default border */
+  pointer-events: auto;
+}
+
+/* Hover effects */
+.slider-thumb-blue::-webkit-slider-thumb:hover {
+  background: #2563eb;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.slider-thumb-blue::-moz-range-thumb:hover {
+  background: #2563eb;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Active/focus states */
+.slider-thumb-blue:focus {
+  outline: none;
+}
+
+.slider-thumb-blue:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.slider-thumb-blue:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Green Slider Styles for Minimum Fee */
+.slider-thumb-green {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: all !important;
+  position: absolute;
+  height: 8px;
+  width: 100%;
+  cursor: pointer;
+  z-index: 1000 !important;
+}
+
+/* Style the green slider track (remove default) */
+.slider-thumb-green::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 8px;
+  border: none;
+  outline: none;
+}
+
+.slider-thumb-green::-moz-range-track {
+  background: transparent;
+  height: 8px;
+  border: none;
+  outline: none;
+}
+
+/* Style the green slider thumbs */
+.slider-thumb-green::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: #10b981 !important;
+  border: 3px solid white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 200 !important;
+  margin-top: -6px !important; /* Center the thumb on the track */
+  pointer-events: auto !important;
+}
+
+.slider-thumb-green::-moz-range-thumb {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: #10b981 !important;
+  border: 3px solid white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 200 !important;
+  border: none !important; /* Remove Firefox default border */
+  pointer-events: auto !important;
+}
+
+/* Green slider hover effects */
+.slider-thumb-green::-webkit-slider-thumb:hover {
+  background: #059669 !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3) !important;
+}
+
+.slider-thumb-green::-moz-range-thumb:hover {
+  background: #059669 !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3) !important;
+}
+
+/* Green slider active/focus states */
+.slider-thumb-green:focus {
+  outline: none;
+}
+
+.slider-thumb-green:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.slider-thumb-green:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Dual Range Slider Styles */
+.slider-container {
+  width: 100%;
+}
+
+.slider-track {
+  height: 6px;
+  position: relative;
+  background: #e5e7eb;
+  border-radius: 3px;
+  margin: 0;
+}
+
+.slider-range {
+  height: 100%;
+  left: 25%;
+  right: 15%;
+  position: absolute;
+  border-radius: 3px;
+  background: #3b82f6;
+}
+
+.range-input {
+  position: relative;
+}
+
+.range-input input {
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  background: none;
+  top: -5px;
+  pointer-events: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+/* Range input thumbs */
+.range-input input[type="range"]::-webkit-slider-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #374151;
+  border: 2px solid white;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.range-input input[type="range"]::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #374151;
+  border: 2px solid white;
+  pointer-events: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  border: none;
+}
+
+/* Different colors for min and max thumbs */
+.range-input .min-range::-webkit-slider-thumb {
+  background: #10b981;
+}
+
+.range-input .min-range::-moz-range-thumb {
+  background: #10b981;
+}
+
+.range-input .max-range::-webkit-slider-thumb {
+  background: #3b82f6;
+}
+
+.range-input .max-range::-moz-range-thumb {
+  background: #3b82f6;
+}
+
+/* Remove arrows from number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
